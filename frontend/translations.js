@@ -36,7 +36,8 @@ export const translations = {
         deliveringVolume: "Доставляємо вашу книгу...",
         author: "Автор",
         resetFilters: "Скинути фільтри",
-        findByAuthor: "Знайти книгу за автором"
+        findByAuthor: "Фільтрувати за автором",
+        backToLibrary: "← Назад"
     },
     en: {
         appName: "BookShelf",
@@ -52,7 +53,7 @@ export const translations = {
         navFeedback: "Feedback",
         footerAdmin: "Dashboard",
         footerCrafting: "Crafting literary experiences.",
-        backToLibrary: "Back to Library",
+        backToLibrary: "← Back",
         getThisBook: "Get this Book",
         share: "Share",
         summary: "Summary",
@@ -75,6 +76,6 @@ export const translations = {
         deliveringVolume: "Delivering your book...",
         author: "Author",
         resetFilters: "Reset Filters",
-        findByAuthor: "Find book by author"
+        findByAuthor: "Filter books by author"
     }
 };
