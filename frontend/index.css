@@ -159,7 +159,30 @@ header h1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 2.5rem;
-    min-height: 1500px; /* Consistently pushes footer down by ~4 rows */
+    max-height: 1600px; /* Roughly 4 rows (card height is ~380px + gaps) */
+    overflow-y: auto;
+    padding-right: 1rem;
+    padding-bottom: 2rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-primary) rgba(0,0,0,0.2);
+}
+
+.books-grid::-webkit-scrollbar {
+    width: 8px;
+}
+.books-grid::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+.books-grid::-webkit-scrollbar-thumb {
+    background: var(--gold-primary);
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .books-grid {
+        max-height: 1200px; /* Adjust for smaller mobile cards */
+    }
 }
 
 
