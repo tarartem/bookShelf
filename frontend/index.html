@@ -6,49 +6,65 @@
     <title>BookShelf App</title>
     <meta name="description" content="Browse and receive amazing EPUB books straight to your email.">
     <link rel="stylesheet" href="/index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 </head>
-<body class="dark-mode">
+<body class="dark-mode oled-theme">
 
-    <div class="glass-container main-layout">
-        <header>
-            <div class="header-brand">
-                <h1>BookShelf</h1>
-            </div>
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Search by title or author...">
-            </div>
-            <!-- Admin button moved to footer -->
-        </header>
+    <!-- Floating Top Island (Header) -->
+    <header class="top-nav-island">
+        <div class="header-brand">
+            <h1>BookShelf</h1>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Find your next read...">
+        </div>
+    </header>
 
+    <div class="app-container">
         <div class="instructions-panel" id="user-instructions">
-            <p><strong>Welcome to BookShelf!</strong> Browse or search for an EPUB book below and have it securely emailed to you.</p>
+            <p>Welcome to your <strong>Digital Library</strong>. Discovery awaits.</p>
         </div>
 
-        <main id="books-grid" class="books-grid">
+        <main id="books-grid" class="books-grid bento-mode">
             <!-- Books injected via JS -->
-            <div class="loading">Loading books...</div>
+            <div class="loading">Curating your library...</div>
         </main>
 
         <footer class="main-footer">
             <div class="footer-content">
-                <p>&copy; 2026 BookShelf &middot; Dedicated to reading enthusiasts.</p>
+                <p>&copy; 2026 BookShelf &middot; Crafting literary experiences.</p>
                 <div class="footer-links">
-                    <a href="/admin.html" class="footer-admin-link">🛡️ Admin Access</a>
+                    <a href="/admin.html" class="footer-admin-link">🛡️ Dashboard</a>
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- Floating Buttons Container -->
-    <div class="floating-controls">
+    <!-- Mobile Sticky Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="#" class="nav-item active" id="nav-home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item" id="nav-search-trigger">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-label">Search</span>
+        </a>
+        <a href="#" class="nav-item" id="nav-feedback-trigger">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Feedback</span>
+        </a>
+    </nav>
+
+    <!-- Floating Controls (Desktop) -->
+    <div class="floating-controls desktop-only">
         <button id="back-to-top-btn" class="btn-secondary floating-btn" title="Back to Top" style="display:none;">
             ↑
         </button>
-        <button id="open-feedback-btn" class="btn-primary floating-btn">
-            💬 Feedback
-        </button>
     </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Book Details Modal -->
     <div id="email-modal" class="modal-overlay">
@@ -58,9 +74,12 @@
                     <img id="modal-book-cover" src="" alt="Cover" class="modal-large-cover">
                 </div>
                 <div class="modal-book-column-right" style="min-height: 480px;">
-                    <span class="close-btn" id="close-email-modal">&times;</span>
-                    <h2 id="modal-book-title">Book Title</h2>
-                    <p class="modal-author" id="modal-book-author">Author Name</p>
+                    <div class="modal-header-actions">
+                        <button class="icon-btn-circle" id="share-book-btn" title="Share Book">🔗</button>
+                        <span class="close-btn" id="close-email-modal">&times;</span>
+                    </div>
+                    <h2 id="modal-book-title" class="serif-title">Book Title</h2>
+                    <p class="modal-author serif-text" id="modal-book-author">Author Name</p>
                     <div id="modal-stats" class="stat-badge-mini"></div>
                     
                     <div class="description-box" id="description-box">
