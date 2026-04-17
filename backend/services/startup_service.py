@@ -2,6 +2,7 @@ import os
 import shutil
 import hashlib
 import logging
+import json
 from sqlalchemy.orm import Session
 from backend.models import Book
 from backend.services.epub_service import extract_epub_metadata
@@ -9,8 +10,19 @@ from backend.services.epub_service import extract_epub_metadata
 logger = logging.getLogger(__name__)
 
 BOOKS_SOURCE_DIR = "books"
+METADATA_FILE = os.path.join(BOOKS_SOURCE_DIR, "metadata.json")
 BOOKS_UPLOAD_DIR = "uploads/books"
 COVERS_UPLOAD_DIR = "uploads/covers"
+
+def load_metadata():
+    """Load the metadata.json file if it exists."""
+    if os.path.exists(METADATA_FILE):
+        try:
+            with open(METADATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"DEBUG: Failed to load metadata.json: {e}")
+    return {}
 
 def setup_directories():
     """Ensure all required directories exist."""
@@ -28,6 +40,7 @@ def load_books_on_startup(db: Session):
 
     setup_directories()
     
+    metadata = load_metadata()
     epub_files = [f for f in os.listdir(BOOKS_SOURCE_DIR) if f.lower().endswith(".epub")]
     if not epub_files:
         print(f"DEBUG: No EPUB files found in '{BOOKS_SOURCE_DIR}'.")
@@ -35,23 +48,23 @@ def load_books_on_startup(db: Session):
 
     print(f"DEBUG: Found {len(epub_files)} books in '{BOOKS_SOURCE_DIR}'. Starting import...")
 
-    # Fetch all existing titles to avoid redundant processing
+    # Fetch all existing books to check for updates
     try:
-        existing_titles = {b.title for b in db.query(Book.title).all()}
+        existing_books_by_path = {b.epub_filepath: b for b in db.query(Book).all()}
+        existing_titles = {b.title for b in existing_books_by_path.values()}
     except Exception as e:
-        print(f"DEBUG: Failed to fetch existing titles: {e}")
+        print(f"DEBUG: Failed to fetch existing books: {e}")
+        existing_books_by_path = {}
         existing_titles = set()
     
     added_count = 0
+    updated_count = 0
     total_processed = 0
     for filename in epub_files:
         total_processed += 1
         source_path = os.path.join(BOOKS_SOURCE_DIR, filename)
         
         try:
-            # Quick check: if we already have a book whose title matches the filename (fallback title), skip?
-            # Better: use filename as a key for now if we want speed.
-            
             with open(source_path, "rb") as f:
                 content = f.read()
             
@@ -63,44 +76,51 @@ def load_books_on_startup(db: Session):
                 with open(epub_path, "wb") as f:
                     f.write(content)
 
-            # Only extract metadata if not already in DB
-            # This is tricky because we don't know the title yet.
-            # However, we can use the name_hash + safe_name to see if this PATH is in the DB.
+            # Check if already in DB
+            book_entry = existing_books_by_path.get(epub_path)
             
-            existing_path = db.query(Book).filter(Book.epub_filepath == epub_path).first()
-            if existing_path:
+            # Metadata from JSON (if any)
+            file_meta = metadata.get(filename, {})
+            json_title = file_meta.get("title")
+            json_author = file_meta.get("author")
+            json_description = file_meta.get("description")
+
+            if book_entry:
+                # Update description if it's in JSON and different
+                if json_description and book_entry.description != json_description:
+                    book_entry.description = json_description
+                    updated_count += 1
                 continue
 
-            title, author, cover_filepath = extract_epub_metadata(epub_path)
+            # NEW BOOK IMPORT
+            # Extract metadata from EPUB
+            ext_title, ext_author, cover_filepath = extract_epub_metadata(epub_path)
 
-            if not title:
-                title = os.path.splitext(filename)[0].replace("_", " ").replace("-", " ")
-            if not author:
-                author = "Unknown"
+            # Logic: JSON > EPUB Extracted > Filename Fallback
+            final_title = json_title or ext_title or os.path.splitext(filename)[0].replace("_", " ").replace("-", " ")
+            final_author = json_author or ext_author or "Unknown"
+            final_description = json_description or ""
 
-            if title in existing_titles:
+            if final_title in existing_titles:
                 continue
 
             book = Book(
-                title=title,
-                author=author,
+                title=final_title,
+                author=final_author,
+                description=final_description,
                 epub_filepath=epub_path,
                 cover_filepath=cover_filepath
             )
             db.add(book)
-            existing_titles.add(title)
+            existing_titles.add(final_title)
             added_count += 1
             
-            if added_count % 10 == 0:
+            if (added_count + updated_count) % 10 == 0:
                 db.commit()
-                print(f"DEBUG: Progress: {total_processed}/{len(epub_files)} books processed. Added {added_count} so far.")
 
         except Exception as e:
             print(f"DEBUG: Error importing '{filename}': {e}")
             continue
 
-    if added_count > 0:
-        db.commit()
-        print(f"DEBUG: Import complete. Added {added_count} new books.")
-    else:
-        print("DEBUG: Import complete. No new books added.")
+    db.commit()
+    print(f"DEBUG: Import complete. Added {added_count} new books, updated {updated_count} descriptions.")
