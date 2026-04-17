@@ -67,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
         document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
         
-        resetFiltersBtn.innerText = t('resetFilters');
+        // Reset button text
+        document.getElementById('txt-reset-filters').innerText = t('resetFilters');
         searchInput.placeholder = t('placeholderSearch');
 
         backToLibraryBtn.innerText = t('backToLibrary');
@@ -146,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Updated Author Filter Logic (Multi-select)
     function renderAuthorFilters(books) {
         const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
         authorFilterContainer.innerHTML = '';
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBooks(allBooks);
     };
 
-    // Carousel Logic
+    // Updated Carousel rendering (No tiling)
     function renderCarousel(books) {
         if (books.length === 0) return;
         const featured = books.slice(0, 5); 
@@ -183,21 +183,22 @@ document.addEventListener('DOMContentLoaded', () => {
         carouselDots.innerHTML = '';
 
         featured.forEach((book, i) => {
-            const item = document.createElement('a');
-            item.href = '#';
+            const item = document.createElement('div');
             item.className = 'carousel-item';
-            const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
-            item.style.backgroundImage = `linear-gradient(90deg, var(--velvet-deep) 30%, transparent), url(${coverUrl})`;
             
+            const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
+
             item.innerHTML = `
-                <div>
-                    <span class="badge" style="margin-bottom:1rem; display:inline-block;">${t('featuredVolume')}</span>
+                <div class="carousel-info">
+                    <span class="badge">${t('featuredVolume')}</span>
                     <h2>${book.title}</h2>
-                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">${t('author')}: ${book.author || 'Unknown Author'}</p>
+                    <p>${book.author || 'Unknown Author'}</p>
+                </div>
+                <div class="carousel-cover-side">
+                   ${coverUrl ? `<img src="${coverUrl}" alt="${book.title}">` : ''}
                 </div>
             `;
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
+            item.addEventListener('click', () => {
                 navigateToBook(book);
             });
             carouselTrack.appendChild(item);
@@ -418,8 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
-    window.onclick = (e) => { if(e.target === feedbackModal) feedbackModal.classList.remove('active'); };
-
+    
     applyLanguage(); 
     loadBooks();
 });

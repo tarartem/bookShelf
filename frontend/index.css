@@ -301,16 +301,60 @@ body.oled-theme {
     height: 100%;
     position: relative;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 0 4rem;
     text-decoration: none;
+    background: linear-gradient(135deg, var(--velvet-deep), #000);
+}
+
+.carousel-info {
+    flex: 1;
+    max-width: 50%;
+    z-index: 2;
 }
 
 .carousel-item h2 {
     font-family: var(--font-serif);
     font-size: 3rem;
-    max-width: 500px;
     color: white;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.carousel-item p {
+    font-size: 1.25rem;
+    color: var(--emerald-glow);
+}
+
+.carousel-cover-side {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 60%;
+    z-index: 1;
+    mask-image: linear-gradient(to left, black 40%, transparent);
+    -webkit-mask-image: linear-gradient(to left, black 40%, transparent);
+}
+
+.carousel-cover-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+}
+
+.carousel-info .badge {
+    background: var(--emerald-primary);
+    color: black;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: inline-block;
 }
 
 .carousel-dots {
