@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toastContainer = document.getElementById('toast-container');
     const authorFilterContainer = document.getElementById('author-filter-container');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const toggleFiltersBtn = document.getElementById('toggle-author-filters-btn');
     
     // Carousel Elements
     const carouselTrack = document.getElementById('carousel-track');
@@ -67,8 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
         document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
         
-        // Reset button text
         document.getElementById('txt-reset-filters').innerText = t('resetFilters');
+        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('navSearch') + ' (' + t('author') + ')';
+        
         searchInput.placeholder = t('placeholderSearch');
 
         backToLibraryBtn.innerText = t('backToLibrary');
@@ -114,8 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderBooks(books) {
         booksGrid.innerHTML = '';
-        
-        // Filter by authors if any selected
         const filtered = activeAuthorFilters.size > 0 
             ? books.filter(b => activeAuthorFilters.has(b.author))
             : books;
@@ -161,25 +161,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     activeAuthorFilters.add(author);
                 }
-                renderAuthorFilters(books);
-                renderBooks(books);
+                updateFilterUI(books);
             };
             authorFilterContainer.appendChild(pill);
         });
+        
+        updateResetBtn();
+    }
+
+    function updateFilterUI(books) {
+        renderAuthorFilters(books);
+        renderBooks(books);
+    }
+
+    function updateResetBtn() {
+        if (activeAuthorFilters.size > 0 || searchInput.value) {
+            resetFiltersBtn.style.display = 'block';
+        } else {
+            resetFiltersBtn.style.display = 'none';
+        }
     }
 
     resetFiltersBtn.onclick = () => {
         activeAuthorFilters.clear();
         searchInput.value = '';
-        renderAuthorFilters(allBooks);
-        renderBooks(allBooks);
+        updateFilterUI(allBooks);
     };
 
-    // Updated Carousel rendering (No tiling)
+    if (toggleFiltersBtn) {
+        toggleFiltersBtn.onclick = () => {
+            authorFilterContainer.classList.toggle('active');
+        };
+    }
+
     function renderCarousel(books) {
         if (books.length === 0) return;
         
-        // Shuffle for Discovery Effect (Every reload gives a new carousel)
         const shuffled = [...books].sort(() => 0.5 - Math.random());
         const featured = shuffled.slice(0, 5); 
         
@@ -189,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         featured.forEach((book, i) => {
             const item = document.createElement('div');
             item.className = 'carousel-item';
-            
             const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
 
             item.innerHTML = `
@@ -202,9 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                    ${coverUrl ? `<img src="${coverUrl}" alt="${book.title}">` : ''}
                 </div>
             `;
-            item.addEventListener('click', () => {
-                navigateToBook(book);
-            });
+            item.addEventListener('click', () => navigateToBook(book));
             carouselTrack.appendChild(item);
 
             const dot = document.createElement('div');
@@ -227,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dots.forEach((d, i) => d.classList.toggle('active', i === index));
     }
 
-    // Navigation
     function navigateToBook(book) {
         window.history.pushState({ bookId: book.id }, book.title, `#book-${book.id}`);
         openBookPage(book);
@@ -327,14 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Search
-    searchInput.addEventListener('input', (e) => {
-        const val = e.target.value.trim().toLowerCase();
+    searchInput.addEventListener('input', () => {
+        const val = searchInput.value.trim().toLowerCase();
+        updateResetBtn();
         if (!val) {
             renderBooks(allBooks);
             return;
         }
-        
         const filtered = allBooks.filter(b => {
             return b.title.toLowerCase().includes(val) || (b.author || '').toLowerCase().includes(val);
         });
@@ -393,15 +405,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(err) { console.error(err); }
     });
 
-    // Home / Search Triggers
     if (homeTrigger) {
         homeTrigger.onclick = (e) => {
             e.preventDefault();
             activeAuthorFilters.clear();
             searchInput.value = '';
             closeBookPage();
-            renderAuthorFilters(allBooks);
-            renderBooks(allBooks);
+            updateFilterUI(allBooks);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
     }

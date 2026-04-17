@@ -7,43 +7,34 @@ The webapplication where users can forward available books in epub format to the
 i'm a product owner with basic software development skills. I want to create a webapplication. I want app to be simple yet reliable. 
 
 ## Objective
-as a admin I want to be able to add books to the application by uploading them one by one or from the folder.
-As a user I want to browsw all the books and send them to my email address. 
-As a user I want to search by the titile
-As a user I want to see the book Thumbnail, title, Author
-As a user I want to click on book and provide my email where I want to receive the book. 
-As a user I want to see instructions of what I need to do on every step I take.
-As a user I should not log in to use the application, 
-The system should store email provided by user in db.
-The system should send book to only valid email addresses.
-As an Admin I should be able to remove book from the application.
-As a user I should be able to see how many times book has been sent by unique user.
-As an Admin I should be able to see how many times book has been sent.
-As a user I should be able to add a feedback for the application.
+1.  **Immersive Browsing**: User can browse books in a modern, "Bento Box" and "Glassmorphism" styled interface (OLED Black theme).
+2.  **Dedicated Content**: Each book has its own dedicated full-page view (instead of a popup) with immersive background effects.
+3.  **Discovery**: A "Featured Carousel" automatically promotes top volumes at the start of the library.
+4.  **Advanced Filtering**: Users can search by title/author AND filter by multiple authors simultaneously using interactive "pills".
+5.  **Localization**: The interface is multilingual, defaulting to **Ukrainian (UA)** with an English (EN) fallback for the UI.
+6.  **Secure Delivery**: Users receive EPUBs via validated email with unique-send tracking.
+7.  **Admin Control**: Admin managed library (Upload/Delete/Analyze) and feedback review.
 
-## Tech stack
-Use free of charge open source technologies.
-Chise the most appropriate tech stack for the application keeping in mind maintainability and scalability and potential integration in the future with Telegram bot (not in scope for now), but I also thinking to implement the same functionality in Telegram bot. I also have Python skills so it is easier for me understand the code.
-DB your choice.
+## Tech Stack
+-   **Backend**: Python (FastAPI) + SQLite
+-   **Frontend**: Vanilla JS (ES6 Modules) + CSS Custom Properties (No heavy frameworks for speed/reliability).
+-   **Storage**: Local storage for EPUBs/Covers.
 
-## UI 
-single page layout
-
-## Definition of done
-Admin can upload books individually or via folder.
-Admin can remove books from the system.
-Admin can view total book send counts.
-Users can browse the full book catalog.
-Users can search for books by title.
-Users can view book thumbnails, titles, and authors.
-Users can receive books via valid email without logging in.
-Users can see unique user send counts per book.
-Users can submit application feedback.
-System displays step-by-step instructions on every screen.
-System validates all email addresses before sending.
-System stores all user-provided emails in the database.
+## Definition of Done (Updated)
+- [x] Admin: Individual and Bulk folder upload.
+- [x] Admin: Remove books and view send metrics.
+- [x] UI: Modern Bento Grid layout with Glassmorphism effects.
+- [x] UI: Immersive full-page book details with cover-blurred backgrounds.
+- [x] UI: Featured book carousel at the top of the catalog.
+- [x] Search: prioritised title search and multi-author select filters.
+- [x] i18n: Complete Ukrainian interface (Default) + English strings.
+- [x] UX: Perfect scroll persistence when navigating between library and book pages.
+- [x] Delivery: Validated email sending with book attachments.
+- [x] Stats: Visible unique reader counts and share stats per book.
+- [x] Feedback: User submission and storage system.
 
 ## 4. Documentation
 - [Deployment Guide (DEPLOY.md)](file:///Users/tarartem/Documents/Antigravity/BookShelf/DEPLOY.md)
+- [UX Design Notes (UXnotes.md)](file:///Users/tarartem/Documents/Antigravity/BookShelf/books/UI/UXnotes.md)
 
 
