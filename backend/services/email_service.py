@@ -10,10 +10,11 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 SMTP_HOST = os.getenv("SMTP_HOST", "")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+_port_env = os.getenv("SMTP_PORT", "587")
+SMTP_PORT = int(_port_env) if _port_env and _port_env.strip() else 587
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", SMTP_USER)
+SENDER_EMAIL = os.getenv("SENDER_EMAIL") or SMTP_USER
 
 
 def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str) -> bool:
@@ -50,15 +51,23 @@ def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str)
     )
 
     try:
-        logger.info(f"Connecting to SMTP {SMTP_HOST}:{SMTP_PORT} …")
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+        logger.info(f"Attempting to send email to {to_email} via {SMTP_HOST}:{SMTP_PORT}...")
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.set_debuglevel(1)  # Show SMTP conversation in logs
             server.ehlo()
             server.starttls()
             server.ehlo()
+            logger.info(f"Logging in as {SMTP_USER}...")
             server.login(SMTP_USER, SMTP_PASS)
             server.send_message(msg)
-        logger.info(f"✅ Email sent to {to_email}")
+        logger.info(f"✅ Email successfully sent to {to_email}")
         return True
+    except smtplib.SMTPAuthenticationError:
+        logger.error(f"❌ SMTP Authentication failed for {SMTP_USER}. Check SMTP_PASS/App Password.")
+        return False
+    except smtplib.SMTPConnectError:
+        logger.error(f"❌ Failed to connect to SMTP server {SMTP_HOST}:{SMTP_PORT}.")
+        return False
     except Exception as e:
-        logger.error(f"❌ Failed to send email to {to_email}: {e}")
+        logger.error(f"❌ Failed to send email to {to_email}: {type(e).__name__}: {e}")
         return False
