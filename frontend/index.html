@@ -66,45 +66,55 @@
     <!-- Notification Toast -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Book Details Modal -->
-    <div id="email-modal" class="modal-overlay">
-        <div class="modal-content glass-panel" style="max-width:620px; padding:0;">
-            <div class="modal-details-container">
-                <div class="modal-book-column-left">
-                    <img id="modal-book-cover" src="" alt="Cover" class="modal-large-cover">
+    <!-- Dedicated Book Details Page -->
+    <section id="book-details-view" class="details-page-view" style="display:none;">
+        <div class="page-header">
+            <button id="back-to-library" class="back-link">← Back to Library</button>
+            <button class="icon-btn-circle" id="share-book-page-btn" title="Share Book">🔗</button>
+        </div>
+        
+        <div class="details-content-wrapper">
+            <div class="details-hero">
+                <div class="hero-bg-blur" id="hero-bg-blur"></div>
+                <div class="hero-container">
+                    <div class="hero-cover-art">
+                        <img id="page-book-cover" src="" alt="Cover">
+                    </div>
+                    <div class="hero-info">
+                        <h2 id="page-book-title" class="serif-title">Book Title</h2>
+                        <p class="page-author serif-text" id="page-book-author">Author Name</p>
+                        <div id="page-stats" class="stat-badge-mini"></div>
+                        
+                        <div class="page-action-row">
+                            <button id="page-request-trigger-btn" class="btn-primary">Get this Book</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-book-column-right" style="min-height: 480px;">
-                    <div class="modal-header-actions">
-                        <button class="icon-btn-circle" id="share-book-btn" title="Share Book">🔗</button>
-                        <span class="close-btn" id="close-email-modal">&times;</span>
-                    </div>
-                    <h2 id="modal-book-title" class="serif-title">Book Title</h2>
-                    <p class="modal-author serif-text" id="modal-book-author">Author Name</p>
-                    <div id="modal-stats" class="stat-badge-mini"></div>
-                    
-                    <div class="description-box" id="description-box">
-                        <p id="modal-book-description">No description available for this book. Truly a mysterious read!</p>
-                    </div>
+            </div>
 
-                    <div class="action-area" id="action-area">
-                        <button id="request-trigger-btn" class="btn-primary" style="width:100%;">Get this Book</button>
+            <div class="page-body">
+                <div class="page-column-main">
+                    <h3>Summary</h3>
+                    <div class="description-text" id="page-book-description">
+                        No description available for this book.
                     </div>
-
-                    <div id="email-request-form-container" style="display:none; transition: all 0.3s ease;">
-                        <h4 style="margin-bottom:0.75rem; color:var(--text-secondary);">Send to my email:</h4>
-                        <form id="email-form" class="form-group" style="gap:0.75rem; margin-top:0;">
-                            <input type="email" id="user-email" placeholder="your@email.com" required>
-                            <div style="display:flex; gap:0.5rem;">
-                                <button type="submit" class="btn-primary" style="flex:1;">Send Book</button>
-                                <button type="button" id="cancel-email-btn" class="btn-secondary" style="padding:0.75rem 1rem;">Cancel</button>
-                            </div>
+                </div>
+                
+                <div class="page-column-side" id="page-email-container" style="display:none;">
+                    <div class="glass-panel delivery-box">
+                        <h4>Secure Delivery</h4>
+                        <p>We'll send the EPUB version directly to your preferred address.</p>
+                        <form id="page-email-form" class="form-group">
+                            <input type="email" id="page-user-email" placeholder="your@email.com" required>
+                            <button type="submit" class="btn-primary">Deliver Now</button>
+                            <button type="button" id="page-cancel-email-btn" class="btn-secondary">Cancel</button>
                         </form>
+                        <p id="page-send-status" class="status-msg"></p>
                     </div>
-                    <p id="send-status" class="status-msg" style="margin-top:auto; padding-top:1rem;"></p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Feedback Modal -->
     <div id="feedback-modal" class="modal-overlay">
