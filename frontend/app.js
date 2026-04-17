@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const authorFilterContainer = document.getElementById('author-filter-container');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const toggleFiltersBtn = document.getElementById('toggle-author-filters-btn');
+    const headerLogo = document.getElementById('header-logo');
     
     // Carousel Elements
     const carouselTrack = document.getElementById('carousel-track');
@@ -69,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
         
         document.getElementById('txt-reset-filters').innerText = t('resetFilters');
-        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('navSearch') + ' (' + t('author') + ')';
+        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
         
         searchInput.placeholder = t('placeholderSearch');
 
@@ -182,6 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function resetAppView() {
+        activeAuthorFilters.clear();
+        searchInput.value = '';
+        closeBookPage();
+        updateFilterUI(allBooks);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Optional: window.history.pushState(null, '', window.location.pathname);
+    }
+
     resetFiltersBtn.onclick = () => {
         activeAuthorFilters.clear();
         searchInput.value = '';
@@ -192,6 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFiltersBtn.onclick = () => {
             authorFilterContainer.classList.toggle('active');
         };
+    }
+
+    if (headerLogo) {
+        headerLogo.onclick = () => {
+            resetAppView();
+        }
     }
 
     function renderCarousel(books) {
@@ -327,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelPageEmailBtn.addEventListener('click', () => {
         emailPageContainer.style.display = 'none';
         requestPageBtn.style.display = 'block';
+        bookDetailsView.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     function showToast(message) {
@@ -408,11 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (homeTrigger) {
         homeTrigger.onclick = (e) => {
             e.preventDefault();
-            activeAuthorFilters.clear();
-            searchInput.value = '';
-            closeBookPage();
-            updateFilterUI(allBooks);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            resetAppView();
         };
     }
 

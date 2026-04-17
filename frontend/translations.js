@@ -35,7 +35,8 @@ export const translations = {
         sharingThoughts: "Ділимося вашими думками...",
         deliveringVolume: "Доставляємо вашу книгу...",
         author: "Автор",
-        resetFilters: "Скинути фільтри"
+        resetFilters: "Скинути фільтри",
+        findByAuthor: "Знайти книгу за автором"
     },
     en: {
         appName: "BookShelf",
@@ -73,6 +74,7 @@ export const translations = {
         sharingThoughts: "Sharing your thoughts...",
         deliveringVolume: "Delivering your book...",
         author: "Author",
-        resetFilters: "Reset Filters"
+        resetFilters: "Reset Filters",
+        findByAuthor: "Find book by author"
     }
 };

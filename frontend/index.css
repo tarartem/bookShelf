@@ -767,13 +767,14 @@ body.details-active {
     .featured-carousel { height: 160px; margin-bottom: 1.5rem; } /* Rectangular */
     .carousel-item { padding: 0 1rem; }
     .carousel-item h2 { font-size: 1.15rem; line-height: 1.2; margin-bottom: 0.25rem; }
-    .carousel-item p { font-size: 0.85rem; }
+    .carousel-item p { font-size: 0.85rem; margin-bottom: 1rem; } /* Pushed text up slightly */
     .carousel-info .badge { 
         font-size: 0.65rem; 
         padding: 0.2rem 0.6rem; 
         margin-bottom: 0.5rem; 
     }
-    .carousel-cover-side { width: 45%; } /* More room for text */
+    .carousel-cover-side { width: 45%; } 
+    .carousel-dots { bottom: 6px; } /* Lowered dots on mobile */
 }
 
 @media (min-width: 901px) {
