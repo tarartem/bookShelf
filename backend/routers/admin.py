@@ -1,7 +1,9 @@
 import os
 import shutil
 import hashlib
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+import secrets
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
@@ -12,6 +14,23 @@ from backend.schemas import BookResponse, AdminStatsResponse, BookStats
 from backend.services.epub_service import extract_epub_metadata
 
 router = APIRouter()
+security = HTTPBasic()
+
+def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, "bsadmin")
+    correct_password = secrets.compare_digest(credentials.password, "!!BookShelf1099")
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+@router.get("/verify")
+def verify_login(admin: str = Depends(get_current_admin)):
+    """Simple endpoint to verify if the user is an admin."""
+    return {"status": "ok", "user": admin}
 
 
 def _save_epub(epub: UploadFile) -> str:
@@ -31,7 +50,8 @@ def _save_epub(epub: UploadFile) -> str:
 @router.post("/books", response_model=List[BookResponse])
 async def upload_books(
     epubs: List[UploadFile] = File(..., description="One or more EPUB files"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin)
 ):
     """
     Upload one or more EPUB files. Title, author and cover are extracted
@@ -82,7 +102,7 @@ async def upload_books(
 
 
 @router.delete("/books/{book_id}")
-def delete_book(book_id: int, db: Session = Depends(get_db)):
+def delete_book(book_id: int, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
     book = db.query(Book).filter(Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -101,7 +121,7 @@ def delete_book(book_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/stats", response_model=AdminStatsResponse)
-def get_admin_stats(db: Session = Depends(get_db)):
+def get_admin_stats(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
     total_books = db.query(Book).count()
     total_sends = db.query(BookSendLog).count()
 

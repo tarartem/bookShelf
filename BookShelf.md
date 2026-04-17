@@ -43,8 +43,7 @@ System displays step-by-step instructions on every screen.
 System validates all email addresses before sending.
 System stores all user-provided emails in the database.
 
-## Deliverables
-Working web application deployed on cloud platform.
-Graphiccal representation of the app architecture
+## 4. Documentation
+- [Deployment Guide (DEPLOY.md)](file:///Users/tarartem/Documents/Antigravity/BookShelf/DEPLOY.md)
 
 

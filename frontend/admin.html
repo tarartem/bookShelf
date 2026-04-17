@@ -9,8 +9,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="dark-mode">
+    <!-- Login Overlay -->
+    <div id="login-overlay" style="display:flex; justify-content:center; align-items:center; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.8);">
+        <div class="modal-content glass-panel" style="max-width:400px; text-align:center; padding:2rem; width:100%;">
+            <h1 style="color:var(--text-primary); margin-bottom:0.5rem;">Admin Login</h1>
+            <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Access restricted to administrators only.</p>
+            <form id="login-form">
+                <input type="text" id="login-username" placeholder="Username" required style="width:100%; margin-bottom:1rem; padding:0.75rem; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--text-primary);">
+                <input type="password" id="login-password" placeholder="Password" required style="width:100%; margin-bottom:1rem; padding:0.75rem; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--text-primary);">
+                <button type="submit" class="btn-primary" style="width:100%; padding:0.75rem;">Login to Dashboard</button>
+            </form>
+            <p id="login-status" style="color:#ef4444; margin-top:1rem; font-weight:600;"></p>
+        </div>
+    </div>
 
-    <div class="glass-container">
+    <div id="admin-main-container" class="glass-container" style="display:none;">
         <header>
             <div class="header-brand">
                 <h1>BookShelf <span class="admin-badge">Admin Dashboard</span></h1>

@@ -10,8 +10,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalSendsEl = document.getElementById('total-sends-count');
     const booksList = document.getElementById('admin-books-list');
     const feedbackList = document.getElementById('feedback-list');
+    const loginOverlay = document.getElementById('login-overlay');
+    const adminMain = document.getElementById('admin-main-container');
+    const loginForm = document.getElementById('login-form');
+    const loginStatus = document.getElementById('login-status');
 
     let selectedFiles = [];
+    let credentials = sessionStorage.getItem('admin_creds');
+
+    function getAuthHeader() {
+        return credentials ? { 'Authorization': `Basic ${credentials}` } : {};
+    }
+
+    async function checkAuth() {
+        if (!credentials) {
+            loginOverlay.style.display = 'flex';
+            adminMain.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/admin/verify`, { headers: getAuthHeader() });
+            if (res.ok) {
+                loginOverlay.style.display = 'none';
+                adminMain.style.display = 'block';
+                loadStats();
+                loadFeedback();
+            } else {
+                sessionStorage.removeItem('admin_creds');
+                credentials = null;
+                loginOverlay.style.display = 'flex';
+                adminMain.style.display = 'none';
+                loginStatus.textContent = 'Session expired. Please login again.';
+            }
+        } catch (e) {
+            console.error('Auth check failed', e);
+        }
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('login-username').value;
+        const pass = document.getElementById('login-password').value;
+        const creds = btoa(`${user}:${pass}`);
+
+        try {
+            loginStatus.textContent = 'Verifying...';
+            const res = await fetch(`${API_URL}/admin/verify`, {
+                headers: { 'Authorization': `Basic ${creds}` }
+            });
+            if (res.ok) {
+                sessionStorage.setItem('admin_creds', creds);
+                credentials = creds;
+                loginOverlay.style.display = 'none';
+                adminMain.style.display = 'block';
+                loginStatus.textContent = '';
+                loadStats();
+                loadFeedback();
+            } else {
+                loginStatus.textContent = 'Invalid username or password.';
+            }
+        } catch (err) {
+            loginStatus.textContent = 'Network error during login.';
+        }
+    });
+
 
     // ── Drop zone drag events ──────────────────────────────────────────────
     dropZone.addEventListener('dragover', (e) => {
@@ -82,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/admin/books`, {
                 method: 'POST',
+                headers: getAuthHeader(),
                 body: formData
             });
 
@@ -108,8 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Stats & Catalog ────────────────────────────────────────────────────
     async function loadStats() {
+        if (!credentials) return;
         try {
-            const res = await fetch(`${API_URL}/admin/stats`);
+            const res = await fetch(`${API_URL}/admin/stats`, { headers: getAuthHeader() });
             const data = await res.json();
 
             totalBooksEl.textContent = data.total_books;
@@ -140,7 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteBook = async function (id) {
         if (!confirm('Delete this book? This cannot be undone.')) return;
         try {
-            const res = await fetch(`${API_URL}/admin/books/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/admin/books/${id}`, { 
+                method: 'DELETE',
+                headers: getAuthHeader()
+            });
             if (res.ok) loadStats();
             else alert('Failed to delete book.');
         } catch (e) {
@@ -152,8 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalFeedbackEl = document.getElementById('total-feedback-count');
 
     async function loadFeedback() {
+        if (!credentials) return;
         try {
-            const res = await fetch(`${API_URL}/feedback/`);
+            const res = await fetch(`${API_URL}/feedback/`, { headers: getAuthHeader() });
             const data = await res.json();
             
             if (totalFeedbackEl) {
@@ -183,6 +252,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Init ───────────────────────────────────────────────────────────────
-    loadStats();
-    loadFeedback();
+    checkAuth();
 });
