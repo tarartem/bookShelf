@@ -159,7 +159,9 @@ header h1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 2.5rem;
+    min-height: 1500px; /* Consistently pushes footer down by ~4 rows */
 }
+
 
 .book-card {
     background: rgba(0, 0, 0, 0.2);
@@ -238,6 +240,7 @@ header h1 {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
+    padding: 1.5rem;
 }
 
 .modal-overlay.active {
@@ -254,18 +257,25 @@ header h1 {
     transform: translateY(0) scale(1);
 }
 
-.glass-panel {
+.modal-content {
     background: rgba(10, 48, 28, 0.95); /* Deeper velvet emerald */
     border: 1px solid var(--gold-primary);
     border-radius: 20px;
     position: relative;
     box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(212, 175, 55, 0.1);
     overflow: hidden;
+    max-height: 90vh; /* Critical for mobile */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 620px;
 }
 
 .modal-details-container {
     display: flex;
     min-height: 450px;
+    flex: 1;
+    overflow-y: auto; /* Scroll long descriptions or forms on mobile */
 }
 
 .modal-book-column-left {
@@ -287,6 +297,36 @@ header h1 {
     display: flex;
     flex-direction: column;
     position: relative;
+}
+
+@media (max-width: 600px) {
+    .modal-details-container {
+        flex-direction: column;
+    }
+    .modal-book-column-left {
+        height: 220px;
+        flex: 0 0 auto;
+    }
+    .modal-book-column-right {
+        padding: 1.5rem;
+    }
+    .close-btn {
+        background: rgba(10, 48, 28, 0.8);
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+        z-index: 100;
+        backdrop-filter: blur(5px);
+        font-size: 1.8rem !important;
+    }
+    .modal-large-cover {
+        height: 220px;
+    }
 }
 
 .modal-author {
@@ -323,17 +363,7 @@ header h1 {
     margin-top: auto;
 }
 
-@media (max-width: 600px) {
-    .modal-details-container {
-        flex-direction: column;
-    }
-    .modal-book-column-left {
-        height: 300px;
-    }
-    .modal-book-column-right {
-        padding: 1.5rem;
-    }
-}
+
 
 .close-btn {
     position: absolute;
