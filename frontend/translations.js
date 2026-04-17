@@ -34,7 +34,8 @@ export const translations = {
         feedbackSubmitted: "Відгук надіслано!",
         sharingThoughts: "Ділимося вашими думками...",
         deliveringVolume: "Доставляємо вашу книгу...",
-        author: "Автор"
+        author: "Автор",
+        resetFilters: "Скинути фільтри"
     },
     en: {
         appName: "BookShelf",
@@ -71,6 +72,7 @@ export const translations = {
         feedbackSubmitted: "Feedback submitted!",
         sharingThoughts: "Sharing your thoughts...",
         deliveringVolume: "Delivering your book...",
-        author: "Author"
+        author: "Author",
+        resetFilters: "Reset Filters"
     }
 };

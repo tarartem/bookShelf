@@ -1,7 +1,7 @@
 import { translations } from './translations.js';
 
 const API_URL = '/api';
-let currentLang = 'uk'; // Default to Ukrainian
+let currentLang = 'uk'; 
 
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
     const authorFilterContainer = document.getElementById('author-filter-container');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
     
     // Carousel Elements
     const carouselTrack = document.getElementById('carousel-track');
@@ -36,14 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeFeedbackModal = document.getElementById('close-feedback-modal');
     const fbForm = document.getElementById('feedback-form');
     
-    // Controls
+    // Nav Controls
     const searchTrigger = document.getElementById('nav-search-trigger');
     const feedbackTrigger = document.getElementById('nav-feedback-trigger');
+    const homeTrigger = document.getElementById('nav-home');
     
     let currentBookId = null;
     let allBooks = [];
     let carouselIndex = 0;
-    let activeAuthorFilter = null;
+    
+    // Multi-select Author Filter
+    let activeAuthorFilters = new Set();
 
     // --- Localization ---
 
@@ -52,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyLanguage() {
-        // Simple mapping of text content
         document.getElementById('txt-app-name').innerText = t('appName');
         document.getElementById('txt-nav-home').innerText = t('navHome');
         document.getElementById('txt-nav-search').innerText = t('navSearch');
@@ -64,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
         document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
         
+        resetFiltersBtn.innerText = t('resetFilters');
         searchInput.placeholder = t('placeholderSearch');
 
-        // Details components
         backToLibraryBtn.innerText = t('backToLibrary');
         requestPageBtn.innerText = t('getThisBook');
         shareBookBtn.innerText = t('share');
@@ -76,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-deliver-now').innerText = t('deliverNow');
         cancelPageEmailBtn.innerText = t('cancel');
 
-        // Feedback
         document.getElementById('txt-feedback-title').innerText = t('feedbackTitle');
         document.getElementById('txt-feedback-subtitle').innerText = t('feedbackSubtitle');
         document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
@@ -111,8 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderBooks(books) {
         booksGrid.innerHTML = '';
-        const filtered = activeAuthorFilter 
-            ? books.filter(b => b.author === activeAuthorFilter)
+        
+        // Filter by authors if any selected
+        const filtered = activeAuthorFilters.size > 0 
+            ? books.filter(b => activeAuthorFilters.has(b.author))
             : books;
 
         if (filtered.length === 0) {
@@ -142,33 +146,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Author Filter Logic
+    // Updated Author Filter Logic (Multi-select)
     function renderAuthorFilters(books) {
         const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
         authorFilterContainer.innerHTML = '';
         
-        const allPill = document.createElement('div');
-        allPill.className = `author-pill ${!activeAuthorFilter ? 'active' : ''}`;
-        allPill.innerText = currentLang === 'uk' ? 'Всі автори' : 'All Authors';
-        allPill.onclick = () => {
-            activeAuthorFilter = null;
-            renderAuthorFilters(books);
-            renderBooks(books);
-        };
-        authorFilterContainer.appendChild(allPill);
-
         authors.forEach(author => {
             const pill = document.createElement('div');
-            pill.className = `author-pill ${activeAuthorFilter === author ? 'active' : ''}`;
+            pill.className = `author-pill ${activeAuthorFilters.has(author) ? 'active' : ''}`;
             pill.innerText = author;
             pill.onclick = () => {
-                activeAuthorFilter = author;
+                if (activeAuthorFilters.has(author)) {
+                    activeAuthorFilters.delete(author);
+                } else {
+                    activeAuthorFilters.add(author);
+                }
                 renderAuthorFilters(books);
                 renderBooks(books);
             };
             authorFilterContainer.appendChild(pill);
         });
     }
+
+    resetFiltersBtn.onclick = () => {
+        activeAuthorFilters.clear();
+        searchInput.value = '';
+        renderAuthorFilters(allBooks);
+        renderBooks(allBooks);
+    };
 
     // Carousel Logic
     function renderCarousel(books) {
@@ -182,15 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
             item.href = '#';
             item.className = 'carousel-item';
             const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
-            item.style.background = `linear-gradient(90deg, var(--velvet-deep) 30%, transparent), url(${coverUrl})`;
-            item.style.backgroundSize = 'cover';
-            item.style.backgroundPosition = 'center';
+            item.style.backgroundImage = `linear-gradient(90deg, var(--velvet-deep) 30%, transparent), url(${coverUrl})`;
             
             item.innerHTML = `
                 <div>
                     <span class="badge" style="margin-bottom:1rem; display:inline-block;">${t('featuredVolume')}</span>
                     <h2>${book.title}</h2>
-                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">${t('author')}: ${book.author || 'Unknown'}</p>
+                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">${t('author')}: ${book.author || 'Unknown Author'}</p>
                 </div>
             `;
             item.addEventListener('click', (e) => {
@@ -322,10 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Search
     searchInput.addEventListener('input', (e) => {
         const val = e.target.value.trim().toLowerCase();
-        activeAuthorFilter = null; // Clear author pill if searching
         if (!val) {
             renderBooks(allBooks);
-            renderAuthorFilters(allBooks);
             return;
         }
         
@@ -387,19 +388,38 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(err) { console.error(err); }
     });
 
-    searchTrigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        searchInput.focus();
-    });
+    // Home / Search Triggers
+    if (homeTrigger) {
+        homeTrigger.onclick = (e) => {
+            e.preventDefault();
+            activeAuthorFilters.clear();
+            searchInput.value = '';
+            closeBookPage();
+            renderAuthorFilters(allBooks);
+            renderBooks(allBooks);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    }
 
-    feedbackTrigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        feedbackModal.classList.add('active');
-    });
+    if (searchTrigger) {
+        searchTrigger.onclick = (e) => {
+            e.preventDefault();
+            closeBookPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => searchInput.focus(), 100);
+        };
+    }
 
-    closeFeedbackModal.addEventListener('click', () => feedbackModal.classList.remove('active'));
-    
-    applyLanguage(); // Initialize text
+    if (feedbackTrigger) {
+        feedbackTrigger.onclick = (e) => {
+            e.preventDefault();
+            feedbackModal.classList.add('active');
+        };
+    }
+
+    closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
+    window.onclick = (e) => { if(e.target === feedbackModal) feedbackModal.classList.remove('active'); };
+
+    applyLanguage(); 
     loadBooks();
 });
