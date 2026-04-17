@@ -7,3 +7,4 @@ aiosmtplib
 ebooklib
 Pillow
 lxml
+python-dotenv
