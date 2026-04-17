@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const requestTriggerBtn = document.getElementById('request-trigger-btn');
     const emailFormContainer = document.getElementById('email-request-form-container');
     const actionArea = document.getElementById('action-area');
+    const descriptionBox = document.getElementById('description-box');
+    const cancelEmailBtn = document.getElementById('cancel-email-btn');
+    const backToTopBtn = document.getElementById('back-to-top-btn');
     
     let currentBookId = null;
 
@@ -69,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('send-status').innerText = '';
         document.getElementById('user-email').value = '';
         emailFormContainer.style.display = 'none';
+        descriptionBox.style.display = 'block';
         actionArea.style.display = 'block';
 
         if (book.cover_filepath) {
@@ -96,8 +100,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle email form inside modal
     requestTriggerBtn.addEventListener('click', () => {
         actionArea.style.display = 'none';
+        descriptionBox.style.display = 'none';
         emailFormContainer.style.display = 'block';
         document.getElementById('user-email').focus();
+    });
+
+    cancelEmailBtn.addEventListener('click', () => {
+        emailFormContainer.style.display = 'none';
+        descriptionBox.style.display = 'block';
+        actionArea.style.display = 'block';
+        document.getElementById('send-status').innerText = '';
+    });
+
+    // Back to Top Logic
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+            backToTopBtn.style.display = 'flex';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     // Modal Close logic for Email

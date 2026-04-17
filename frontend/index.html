@@ -18,9 +18,7 @@
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Search by title or author...">
             </div>
-            <nav class="header-nav">
-                <a href="/admin.html" class="nav-btn primary-nav-btn">Admin Dashboard</a>
-            </nav>
+            <!-- Admin button moved to footer -->
         </header>
 
         <div class="instructions-panel" id="user-instructions">
@@ -31,44 +29,59 @@
             <!-- Books injected via JS -->
             <div class="loading">Loading books...</div>
         </main>
+
+        <footer class="main-footer">
+            <div class="footer-content">
+                <p>&copy; 2026 BookShelf &middot; Dedicated to reading enthusiasts.</p>
+                <div class="footer-links">
+                    <a href="/admin.html" class="footer-admin-link">🛡️ Admin Access</a>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <!-- Floating Feedback Button -->
-    <div class="floating-feedback">
-        <button id="open-feedback-btn" class="btn-primary">
-            💬 Provide Feedback
+    <!-- Floating Buttons Container -->
+    <div class="floating-controls">
+        <button id="back-to-top-btn" class="btn-secondary floating-btn" title="Back to Top" style="display:none;">
+            ↑
+        </button>
+        <button id="open-feedback-btn" class="btn-primary floating-btn">
+            💬 Feedback
         </button>
     </div>
 
     <!-- Book Details Modal -->
     <div id="email-modal" class="modal-overlay">
-        <div class="modal-content glass-panel" style="max-width:600px; padding:0;">
+        <div class="modal-content glass-panel" style="max-width:620px; padding:0;">
             <div class="modal-details-container">
                 <div class="modal-book-column-left">
                     <img id="modal-book-cover" src="" alt="Cover" class="modal-large-cover">
                 </div>
-                <div class="modal-book-column-right">
+                <div class="modal-book-column-right" style="min-height: 480px;">
                     <span class="close-btn" id="close-email-modal">&times;</span>
                     <h2 id="modal-book-title">Book Title</h2>
                     <p class="modal-author" id="modal-book-author">Author Name</p>
                     <div id="modal-stats" class="stat-badge-mini"></div>
                     
-                    <div class="description-box">
+                    <div class="description-box" id="description-box">
                         <p id="modal-book-description">No description available for this book. Truly a mysterious read!</p>
                     </div>
 
                     <div class="action-area" id="action-area">
-                        <button id="request-trigger-btn" class="btn-primary" style="width:100%;">Request this Book</button>
+                        <button id="request-trigger-btn" class="btn-primary" style="width:100%;">Get this Book</button>
                     </div>
 
-                    <div id="email-request-form-container" style="display:none; margin-top:1.5rem;">
-                        <h4 style="margin-bottom:0.5rem; color:var(--text-secondary);">Send to my email:</h4>
-                        <form id="email-form" class="form-group" style="gap:0.5rem;">
+                    <div id="email-request-form-container" style="display:none; transition: all 0.3s ease;">
+                        <h4 style="margin-bottom:0.75rem; color:var(--text-secondary);">Send to my email:</h4>
+                        <form id="email-form" class="form-group" style="gap:0.75rem; margin-top:0;">
                             <input type="email" id="user-email" placeholder="your@email.com" required>
-                            <button type="submit" class="btn-primary">Send</button>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button type="submit" class="btn-primary" style="flex:1;">Send Book</button>
+                                <button type="button" id="cancel-email-btn" class="btn-secondary" style="padding:0.75rem 1rem;">Cancel</button>
+                            </div>
                         </form>
                     </div>
-                    <p id="send-status" class="status-msg" style="margin-top:0.5rem;"></p>
+                    <p id="send-status" class="status-msg" style="margin-top:auto; padding-top:1rem;"></p>
                 </div>
             </div>
         </div>
