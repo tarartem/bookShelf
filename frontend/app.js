@@ -188,8 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.value = '';
         closeBookPage();
         updateFilterUI(allBooks);
+        if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
+        if (authorFilterContainer) authorFilterContainer.classList.remove('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        // Optional: window.history.pushState(null, '', window.location.pathname);
     }
 
     resetFiltersBtn.onclick = () => {
@@ -200,7 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (toggleFiltersBtn) {
         toggleFiltersBtn.onclick = () => {
-            authorFilterContainer.classList.toggle('active');
+            const isActive = authorFilterContainer.classList.toggle('active');
+            toggleFiltersBtn.classList.toggle('active', isActive);
+            // Optional: change text or icon
         };
     }
 

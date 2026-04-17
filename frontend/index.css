@@ -677,21 +677,29 @@ body.details-active {
 
 @media (max-width: 900px) {
     .top-nav-island {
-        top: 0;
-        left: 0;
-        width: 100%;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        width: auto;
         transform: none;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        border-top: none;
+        border-radius: 20px;
+        border: 1px solid var(--glass-border);
         height: 60px;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
 
     .mobile-only { display: block !important; }
 
     .app-container {
-        padding-top: 80px;
+        padding-top: 90px;
+    }
+
+    #toggle-author-filters-btn.active {
+        background: var(--emerald-primary);
+        color: black;
+        border-color: var(--emerald-primary);
+        box-shadow: 0 0 15px var(--glass-glow);
     }
 
     .instructions-panel {
