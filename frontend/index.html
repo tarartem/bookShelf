@@ -78,7 +78,6 @@
     <section id="book-details-view" class="details-page-view" style="display:none;">
         <div class="page-header">
             <button id="back-to-library" class="back-link">← Back to Library</button>
-            <button class="icon-btn-circle" id="share-book-page-btn" title="Share Book">🔗</button>
         </div>
         
         <div class="details-content-wrapper">
@@ -86,40 +85,38 @@
                 <div class="hero-bg-blur" id="hero-bg-blur"></div>
                 <div class="hero-container">
                     <div class="hero-cover-art">
-                        <img id="page-book-cover" src="" alt="Cover">
+                        <img id="page-book-cover" src="" alt="Cover" loading="lazy">
                     </div>
                     <div class="hero-info">
                         <h2 id="page-book-title" class="serif-title">Book Title</h2>
                         <p class="page-author serif-text" id="page-book-author">Author Name</p>
-                        <div id="page-stats" class="stat-badge-mini"></div>
                         
-                        <div class="page-action-row">
-                            <button id="page-request-trigger-btn" class="btn-primary">Get this Book</button>
+                        <!-- Description moved inside Hero for immediate visibility -->
+                        <div class="hero-description" id="page-book-description">
+                            No description available for this book.
+                        </div>
+
+                        <div id="page-stats" class="stat-badge-mini" style="margin-top:1rem;"></div>
+                        
+                        <div class="page-action-row" style="display:flex; gap:1rem; align-items:center; margin-top:2.5rem;">
+                            <button id="page-request-trigger-btn" class="btn-primary">Get this Book 📖</button>
+                            <button class="icon-btn-circle secondary" id="share-book-page-btn" title="Share Book">🔗</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="page-body">
-                <div class="page-column-main">
-                    <h3>Summary</h3>
-                    <div class="description-text" id="page-book-description">
-                        No description available for this book.
-                    </div>
-                </div>
-                
-                <div class="page-column-side" id="page-email-container" style="display:none;">
-                    <div class="glass-panel delivery-box">
+                <div class="page-column-main" id="page-email-container" style="display:none; max-width:600px;">
+                    <div class="glass-panel delivery-box" style="position:static; width:100%;">
                         <h4>Secure Delivery</h4>
                         <p>We'll send the EPUB version directly to your preferred address.</p>
-                        <form id="page-email-form" class="form-group">
+                        <form id="page-email-form" class="form-group" style="margin-top:1.5rem;">
                             <input type="email" id="page-user-email" placeholder="your@email.com" required>
-                            <button type="submit" class="btn-primary">Deliver Now</button>
-                            <button type="button" id="page-cancel-email-btn" class="btn-secondary">Cancel</button>
+                            <button type="submit" class="btn-primary" style="margin-top:1rem;">Deliver Now 🚀</button>
+                            <button type="button" id="page-cancel-email-btn" class="btn-secondary" style="margin-top:0.5rem;">Cancel ❌</button>
                         </form>
-                        <div id="page-status-card" class="status-card" style="display:none;">
-                            <!-- Success/Error content injected via JS -->
-                        </div>
+                        <div id="page-status-card" class="status-card" style="display:none;"></div>
                     </div>
                 </div>
             </div>

@@ -476,20 +476,43 @@ body.oled-theme {
 
 .hero-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-description {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.2);
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 3px solid var(--emerald-primary);
+    margin-top: 1rem;
+    max-width: 600px;
+}
+
+.icon-btn-circle.secondary {
+    background: rgba(255,255,255,0.05);
+}
+
+.icon-btn-circle.secondary:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: var(--emerald-primary);
 }
 
 .hero-info .serif-title {
-    font-size: 3.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 3rem;
+    margin-bottom: 0.25rem;
 }
 
 .hero-info .page-author {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .page-action-row {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
 }
 
 .page-body {
@@ -674,4 +697,17 @@ input[type="email"]:focus {
     color: var(--emerald-primary);
     text-decoration: none;
     font-weight: 600;
+}
+
+/* Lazy Loading Animations */
+.lazy-load-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), 
+                transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.lazy-load-item.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
