@@ -5,6 +5,7 @@ from datetime import datetime
 class BookBase(BaseModel):
     title: str
     author: Optional[str] = None
+    description: Optional[str] = None
 
 class BookCreate(BookBase):
     pass

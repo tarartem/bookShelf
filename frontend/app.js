@@ -13,6 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeFeedbackModal = document.getElementById('close-feedback-modal');
     const fbForm = document.getElementById('feedback-form');
     
+    // New Modal Elements
+    const modalCover = document.getElementById('modal-book-cover');
+    const modalDescription = document.getElementById('modal-book-description');
+    const requestTriggerBtn = document.getElementById('request-trigger-btn');
+    const emailFormContainer = document.getElementById('email-request-form-container');
+    const actionArea = document.getElementById('action-area');
+    
     let currentBookId = null;
 
     // Fetch and bind books
@@ -56,8 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = book.id;
         document.getElementById('modal-book-title').innerText = book.title;
         document.getElementById('modal-book-author').innerText = book.author || 'Unknown';
+        modalDescription.innerText = book.description || "A captivating tale that will keep you on the edge of your seat. This book is currently in high demand from our library members!";
+        
+        // Reset modal state
         document.getElementById('send-status').innerText = '';
         document.getElementById('user-email').value = '';
+        emailFormContainer.style.display = 'none';
+        actionArea.style.display = 'block';
+
+        if (book.cover_filepath) {
+            modalCover.src = `/api/${book.cover_filepath}`;
+            modalCover.style.display = 'block';
+        } else {
+            modalCover.style.display = 'none';
+        }
         
         emailModal.classList.add('active');
 
@@ -66,13 +85,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${API_URL}/books/${book.id}/stats`);
             const stats = await res.json();
             document.getElementById('modal-stats').innerHTML = `
-                <p>Sent <strong>${stats.total_sends}</strong> times total.</p>
-                <p>Sent to <strong>${stats.unique_users}</strong> unique users.</p>
+                <span>📧 Sent <strong>${stats.total_sends}</strong> times</span>
+                <span>👥 <strong>${stats.unique_users}</strong> readers</span>
             `;
         } catch (e) {
             console.error(e);
         }
     }
+
+    // Toggle email form inside modal
+    requestTriggerBtn.addEventListener('click', () => {
+        actionArea.style.display = 'none';
+        emailFormContainer.style.display = 'block';
+        document.getElementById('user-email').focus();
+    });
 
     // Modal Close logic for Email
     closeEmailModal.addEventListener('click', () => emailModal.classList.remove('active'));

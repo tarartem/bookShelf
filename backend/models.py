@@ -9,6 +9,7 @@ class Book(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
     author = Column(String, index=True, nullable=True)
+    description = Column(Text, nullable=True)
     epub_filepath = Column(String, nullable=False)
     cover_filepath = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())

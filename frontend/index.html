@@ -40,25 +40,36 @@
         </button>
     </div>
 
-    <!-- Email Modal -->
+    <!-- Book Details Modal -->
     <div id="email-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <span class="close-btn" id="close-email-modal">&times;</span>
-            <h2 id="modal-book-title">Book Title</h2>
-            <p class="book-author" id="modal-book-author" style="margin-bottom:1rem;color:var(--gold-hover);">Author</p>
-            
-            <div class="instructions-panel modal-instruction" style="font-size:0.95rem;padding:1rem;">
-                <p>Enter your email address to receive the book securely.</p>
-            </div>
-            
-            <form id="email-form" class="form-group">
-                <input type="email" id="user-email" placeholder="your@email.com" required>
-                <button type="submit" class="btn-primary">Send to Email</button>
-            </form>
-            <p id="send-status" class="status-msg"></p>
+        <div class="modal-content glass-panel" style="max-width:600px; padding:0;">
+            <div class="modal-details-container">
+                <div class="modal-book-column-left">
+                    <img id="modal-book-cover" src="" alt="Cover" class="modal-large-cover">
+                </div>
+                <div class="modal-book-column-right">
+                    <span class="close-btn" id="close-email-modal">&times;</span>
+                    <h2 id="modal-book-title">Book Title</h2>
+                    <p class="modal-author" id="modal-book-author">Author Name</p>
+                    <div id="modal-stats" class="stat-badge-mini"></div>
+                    
+                    <div class="description-box">
+                        <p id="modal-book-description">No description available for this book. Truly a mysterious read!</p>
+                    </div>
 
-            <div class="modal-stats" id="modal-stats">
-                <!-- Stats injected here -->
+                    <div class="action-area" id="action-area">
+                        <button id="request-trigger-btn" class="btn-primary" style="width:100%;">Request this Book</button>
+                    </div>
+
+                    <div id="email-request-form-container" style="display:none; margin-top:1.5rem;">
+                        <h4 style="margin-bottom:0.5rem; color:var(--text-secondary);">Send to my email:</h4>
+                        <form id="email-form" class="form-group" style="gap:0.5rem;">
+                            <input type="email" id="user-email" placeholder="your@email.com" required>
+                            <button type="submit" class="btn-primary">Send</button>
+                        </form>
+                    </div>
+                    <p id="send-status" class="status-msg" style="margin-top:0.5rem;"></p>
+                </div>
             </div>
         </div>
     </div>
