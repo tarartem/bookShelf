@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookShelf App</title>
+    <meta name="description" content="Browse and receive amazing EPUB books straight to your email.">
+    <link rel="stylesheet" href="/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <div class="glass-container main-layout">
+        <header>
+            <div class="header-brand">
+                <h1>BookShelf</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by title or author...">
+            </div>
+            <nav class="header-nav">
+                <a href="/admin.html" class="nav-btn primary-nav-btn">Admin Dashboard</a>
+            </nav>
+        </header>
+
+        <div class="instructions-panel" id="user-instructions">
+            <p><strong>Welcome to BookShelf!</strong> Browse or search for an EPUB book below and have it securely emailed to you.</p>
+        </div>
+
+        <main id="books-grid" class="books-grid">
+            <!-- Books injected via JS -->
+            <div class="loading">Loading books...</div>
+        </main>
+    </div>
+
+    <!-- Floating Feedback Button -->
+    <div class="floating-feedback">
+        <button id="open-feedback-btn" class="btn-primary">
+            💬 Provide Feedback
+        </button>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <span class="close-btn" id="close-email-modal">&times;</span>
+            <h2 id="modal-book-title">Book Title</h2>
+            <p class="book-author" id="modal-book-author" style="margin-bottom:1rem;color:var(--gold-hover);">Author</p>
+            
+            <div class="instructions-panel modal-instruction" style="font-size:0.95rem;padding:1rem;">
+                <p>Enter your email address to receive the book securely.</p>
+            </div>
+            
+            <form id="email-form" class="form-group">
+                <input type="email" id="user-email" placeholder="your@email.com" required>
+                <button type="submit" class="btn-primary">Send to Email</button>
+            </form>
+            <p id="send-status" class="status-msg"></p>
+
+            <div class="modal-stats" id="modal-stats">
+                <!-- Stats injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <span class="close-btn" id="close-feedback-modal">&times;</span>
+            <h2>Send Feedback</h2>
+            <p style="color:var(--text-secondary); margin-bottom: 1.5rem;">We'd love to hear your thoughts and suggestions!</p>
+            
+            <form id="feedback-form" class="form-group">
+                <textarea id="fb-message" placeholder="What do you think about BookShelf? Or maybe report a bug..." required></textarea>
+                <button type="submit" class="btn-primary">Submit Feedback</button>
+            </form>
+            <p id="fb-status" class="status-msg"></p>
+        </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+</body>
+</html>

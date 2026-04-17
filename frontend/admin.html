@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookShelf Admin Dashboard</title>
+    <meta name="description" content="BookShelf Admin Panel — upload, manage books and view stats.">
+    <link rel="stylesheet" href="/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <div class="glass-container">
+        <header>
+            <div class="header-brand">
+                <h1>BookShelf <span class="admin-badge">Admin Dashboard</span></h1>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-btn primary-nav-btn">← Back to App</a>
+            </nav>
+        </header>
+
+        <!-- Stats -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <p class="stat-label">Total Books</p>
+                <h2 id="total-books-count" class="stat-value">…</h2>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Total Sends</p>
+                <h2 id="total-sends-count" class="stat-value">…</h2>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">User Feedback</p>
+                <h2 id="total-feedback-count" class="stat-value">…</h2>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <!-- Upload Section -->
+            <section id="upload-section" class="admin-section">
+                <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">Add Books</h2>
+                <p class="section-hint">Select one or more <code>.epub</code> files. Title, author, and cover will be extracted automatically.</p>
+
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-inner">
+                        <span class="drop-icon">📂</span>
+                        <p style="font-size:1.1rem;">Drag &amp; drop EPUBs here, or <span class="file-label">browse files</span></p>
+                        <input type="file" id="epub-input" accept=".epub" multiple style="display:none">
+                        <p class="drop-hint">Multiple files supported</p>
+                    </div>
+                </div>
+
+                <div id="selected-files" class="selected-files"></div>
+                <button id="upload-btn" class="btn-primary upload-btn" style="display:none">Upload Selected Books</button>
+                <div id="upload-status" class="status-msg" style="text-align:center;"></div>
+            </section>
+
+            <!-- Feedback Section -->
+            <section id="feedback-section" class="admin-section">
+                <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">User Feedback</h2>
+                <p class="section-hint">Recent comments and suggestions from your readers.</p>
+                
+                <div id="feedback-list" class="admin-list" style="max-height: 400px;">
+                    <p class="loading">Loading feedback…</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Book Catalog Management -->
+        <section id="catalog-section" class="admin-section">
+            <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">Catalog Management</h2>
+            <p class="section-hint">Review all books currently available on BookShelf and manage entries.</p>
+            
+            <div id="admin-books-list" class="admin-list" style="max-height: 600px;">
+                <p class="loading">Loading catalog…</p>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="/admin.js"></script>
+</body>
+</html>

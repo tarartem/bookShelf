@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+python-multipart
+email-validator
+aiosmtplib
+ebooklib
+Pillow
+lxml
