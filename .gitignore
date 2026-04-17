@@ -107,6 +107,6 @@ Thumbs.db
 
 # App specific
 bookshelf.db
-books/
+# books/ (removed to allow tracking for deployment)
 uploads/
 data/
