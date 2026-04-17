@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookShelf App</title>
     <meta name="description" content="Browse and receive amazing EPUB books straight to your email.">
+    
+    <!-- Icons & PWA -->
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <link rel="apple-touch-icon" href="/assets/logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+
     <link rel="stylesheet" href="/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 </head>
@@ -12,8 +19,9 @@
 
     <!-- Floating Top Island (Header) -->
     <header class="top-nav-island">
-        <div class="header-brand" id="header-logo" style="cursor: pointer;">
-            <h1>BookShelf</h1>
+        <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+            <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
+            <h1 style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
         </div>
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Find your next read...">
