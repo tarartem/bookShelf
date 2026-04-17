@@ -21,6 +21,14 @@
     </header>
 
     <div class="app-container">
+        <!-- Featured Carousel -->
+        <section id="featured-carousel" class="featured-carousel">
+            <div class="carousel-track" id="carousel-track">
+                <!-- Carousel items injected via JS -->
+            </div>
+            <div class="carousel-dots" id="carousel-dots"></div>
+        </section>
+
         <div class="instructions-panel" id="user-instructions">
             <p>Welcome to your <strong>Digital Library</strong>. Discovery awaits.</p>
         </div>
@@ -109,7 +117,9 @@
                             <button type="submit" class="btn-primary">Deliver Now</button>
                             <button type="button" id="page-cancel-email-btn" class="btn-secondary">Cancel</button>
                         </form>
-                        <p id="page-send-status" class="status-msg"></p>
+                        <div id="page-status-card" class="status-card" style="display:none;">
+                            <!-- Success/Error content injected via JS -->
+                        </div>
                     </div>
                 </div>
             </div>

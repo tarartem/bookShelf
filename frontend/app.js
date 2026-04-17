@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
     
+    // Carousel Elements
+    const carouselTrack = document.getElementById('carousel-track');
+    const carouselDots = document.getElementById('carousel-dots');
+    
     // Page View Elements
     const bookDetailsView = document.getElementById('book-details-view');
     const backToLibraryBtn = document.getElementById('back-to-library');
@@ -22,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailPageContainer = document.getElementById('page-email-container');
     const emailPageForm = document.getElementById('page-email-form');
     const cancelPageEmailBtn = document.getElementById('page-cancel-email-btn');
+    const pageStatusCard = document.getElementById('page-status-card');
     
-    // Feedback Modal (Still a modal as it's a utility)
+    // Feedback Modal
     const feedbackModal = document.getElementById('feedback-modal');
     const closeFeedbackModal = document.getElementById('close-feedback-modal');
     const fbForm = document.getElementById('feedback-form');
@@ -35,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentBookId = null;
     let allBooks = [];
+    let carouselIndex = 0;
 
     // --- Core Functions ---
 
@@ -45,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allBooks = await res.json();
 
             renderBooks(allBooks);
+            if (!query) renderCarousel(allBooks); // Only show carousel on main page
             checkDeepLink(); 
         } catch (e) {
             booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">Failed to load library: ${e.message}</p>`;
@@ -61,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         books.forEach((book, index) => {
             const card = document.createElement('div');
             card.className = 'book-card';
-            if (index === 0) card.classList.add('bento-featured');
+            if (index % 7 === 0) card.classList.add('bento-featured');
             
             card.innerHTML = `
                 <div class="book-cover-wrapper">
@@ -79,6 +86,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Carousel Logic
+    function renderCarousel(books) {
+        if (books.length === 0) return;
+        const featured = books.slice(0, 5); // Promote first 5
+        carouselTrack.innerHTML = '';
+        carouselDots.innerHTML = '';
+
+        featured.forEach((book, i) => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.className = 'carousel-item';
+            // Use cover as background with gradient
+            const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
+            item.style.background = `linear-gradient(90deg, var(--velvet-deep) 30%, transparent), url(${coverUrl})`;
+            item.style.backgroundSize = 'cover';
+            item.style.backgroundPosition = 'center';
+            
+            item.innerHTML = `
+                <div>
+                    <span class="badge" style="margin-bottom:1rem; display:inline-block;">Featured Release</span>
+                    <h2>${book.title}</h2>
+                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">by ${book.author || 'Unknown'}</p>
+                </div>
+            `;
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateToBook(book);
+            });
+            carouselTrack.appendChild(item);
+
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => setCarousel(i));
+            carouselDots.appendChild(dot);
+        });
+
+        // Auto-slide
+        setInterval(() => {
+            carouselIndex = (carouselIndex + 1) % featured.length;
+            setCarousel(carouselIndex);
+        }, 5000);
+    }
+
+    function setCarousel(index) {
+        carouselIndex = index;
+        carouselTrack.style.transform = `translateX(-${index * 100}%)`;
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    }
+
     // Navigation Logic
     function navigateToBook(book) {
         window.history.pushState({ bookId: book.id }, book.title, `#book-${book.id}`);
@@ -89,11 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = book.id;
         pageTitle.innerText = book.title;
         pageAuthor.innerText = book.author || 'Unknown Author';
-        pageDescription.innerText = book.description || "In the quiet corners of this library, a story waits to be discovered. This volume promises a journey beyond the ordinary.";
+        pageDescription.innerText = book.description || "In the quiet corners of this library, a story waits to be discovered.";
         
+        // RESET SCROLL of the details view to top
+        bookDetailsView.scrollTo(0, 0);
+
         // Reset state
-        document.getElementById('page-send-status').innerText = '';
-        document.getElementById('page-user-email').value = '';
+        pageStatusCard.style.display = 'none';
         emailPageContainer.style.display = 'none';
         requestPageBtn.parentElement.style.display = 'block';
 
@@ -106,12 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             heroBgBlur.style.backgroundImage = 'none';
         }
         
-        // Switch Views
         document.body.classList.add('details-active');
         bookDetailsView.style.display = 'flex';
-        window.scrollTo(0, 0);
-
-        // Fetch Stats
         updateStats(book.id);
     }
 
@@ -132,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = null;
     }
 
-    // Deep Linking & History
+    // Deep Linking
     function checkDeepLink() {
         const hash = window.location.hash;
         if (hash.startsWith('#book-')) {
@@ -150,8 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Interactive Events ---
-
+    // Share & Controls
     backToLibraryBtn.addEventListener('click', () => {
         window.history.pushState(null, '', window.location.pathname);
         closeBookPage();
@@ -187,13 +241,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Search & Misc
+    // Forms
+    emailPageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('page-user-email').value;
+        const submitBtn = emailPageForm.querySelector('button[type="submit"]');
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Delivering...';
+
+        try {
+            const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (res.ok) {
+                emailPageContainer.style.display = 'none';
+                pageStatusCard.innerHTML = `
+                    <span class="icon-success">📬</span>
+                    <h4>It's on its way!</h4>
+                    <p>We've dispatched "${pageTitle.innerText}" to <strong>${email}</strong>. Please check your inbox (and spam folder) in a few minutes.</p>
+                `;
+                pageStatusCard.style.display = 'block';
+                showToast('Volume sent successfully! ✨');
+            } else {
+                const data = await res.json();
+                alert(data.detail || 'Failed to deliver.');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Deliver Now';
+            }
+        } catch (err) {
+            alert('Network error.');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Feedback Header Logic
     searchInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
         renderBooks(allBooks.filter(b => 
             b.title.toLowerCase().includes(val.toLowerCase()) || 
             b.author.toLowerCase().includes(val.toLowerCase())
         ));
+    });
+
+    fbForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = document.getElementById('fb-message').value;
+        try {
+            const res = await fetch(`${API_URL}/feedback/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            if (res.ok) {
+                fbForm.reset();
+                showToast('Feedback submitted! Thank you. ✨');
+                feedbackModal.classList.remove('active');
+            }
+        } catch(err) { console.error(err); }
     });
 
     searchTrigger.addEventListener('click', (e) => {
@@ -208,58 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeFeedbackModal.addEventListener('click', () => feedbackModal.classList.remove('active'));
-    
-    window.addEventListener('click', (e) => {
-        if(e.target === feedbackModal) feedbackModal.classList.remove('active');
-    });
-
-    // Forms
-    emailPageForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('page-user-email').value;
-        const msg = document.getElementById('page-send-status');
-
-        msg.innerText = 'Delivering your volume...';
-        try {
-            const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            if (res.ok) {
-                msg.innerText = 'Success! Your book is on its way.';
-                msg.style.color = 'var(--emerald-glow)';
-                showToast('Volume sent successfully! ✨');
-            } else {
-                const data = await res.json();
-                msg.innerText = data.detail || 'Failed to deliver.';
-                msg.style.color = 'var(--danger)';
-            }
-        } catch (err) {
-            msg.innerText = 'Network error.';
-        }
-    });
-
-    fbForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = document.getElementById('fb-message').value;
-        const msgSpan = document.getElementById('fb-status');
-        msgSpan.innerText = 'Submitting...';
-        try {
-            const res = await fetch(`${API_URL}/feedback/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
-            });
-            if (res.ok) {
-                msgSpan.innerText = 'Thank you! Your feedback has been shared.';
-                fbForm.reset();
-                showToast('Feedback submitted! ✨');
-                setTimeout(() => feedbackModal.classList.remove('active'), 2000);
-            }
-        } catch(err) { msgSpan.innerText = 'Error submitting feedback.'; }
-    });
+    window.addEventListener('click', (e) => { if(e.target === feedbackModal) feedbackModal.classList.remove('active'); });
 
     loadBooks();
 });
