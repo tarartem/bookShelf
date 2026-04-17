@@ -178,7 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Updated Carousel rendering (No tiling)
     function renderCarousel(books) {
         if (books.length === 0) return;
-        const featured = books.slice(0, 5); 
+        
+        // Shuffle for Discovery Effect (Every reload gives a new carousel)
+        const shuffled = [...books].sort(() => 0.5 - Math.random());
+        const featured = shuffled.slice(0, 5); 
+        
         carouselTrack.innerHTML = '';
         carouselDots.innerHTML = '';
 
