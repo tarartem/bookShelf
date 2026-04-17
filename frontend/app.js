@@ -1,11 +1,14 @@
+import { translations } from './translations.js';
+
 const API_URL = '/api';
+let currentLang = 'uk'; // Default to Ukrainian
 
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
-    const appContainer = document.querySelector('.app-container');
     const searchInput = document.getElementById('search-input');
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
+    const authorFilterContainer = document.getElementById('author-filter-container');
     
     // Carousel Elements
     const carouselTrack = document.getElementById('carousel-track');
@@ -34,17 +37,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const fbForm = document.getElementById('feedback-form');
     
     // Controls
-    const backToTopBtn = document.getElementById('back-to-top-btn');
     const searchTrigger = document.getElementById('nav-search-trigger');
     const feedbackTrigger = document.getElementById('nav-feedback-trigger');
     
     let currentBookId = null;
     let allBooks = [];
     let carouselIndex = 0;
+    let activeAuthorFilter = null;
+
+    // --- Localization ---
+
+    function t(key) {
+        return translations[currentLang][key] || key;
+    }
+
+    function applyLanguage() {
+        // Simple mapping of text content
+        document.getElementById('txt-app-name').innerText = t('appName');
+        document.getElementById('txt-nav-home').innerText = t('navHome');
+        document.getElementById('txt-nav-search').innerText = t('navSearch');
+        document.getElementById('txt-nav-feedback').innerText = t('navFeedback');
+        document.getElementById('txt-loading').innerText = t('curatingLibrary');
+        document.getElementById('txt-welcome-title').innerText = t('welcomeTitle');
+        document.getElementById('txt-welcome-subtitle').innerText = t('welcomeSubtitle');
+        document.getElementById('txt-welcome-extra').innerText = t('welcomeExtra');
+        document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
+        document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
+        
+        searchInput.placeholder = t('placeholderSearch');
+
+        // Details components
+        backToLibraryBtn.innerText = t('backToLibrary');
+        requestPageBtn.innerText = t('getThisBook');
+        shareBookBtn.innerText = t('share');
+        
+        document.getElementById('txt-secure-delivery').innerText = t('secureDelivery');
+        document.getElementById('txt-delivery-hint').innerText = t('deliveryHint');
+        document.getElementById('txt-deliver-now').innerText = t('deliverNow');
+        cancelPageEmailBtn.innerText = t('cancel');
+
+        // Feedback
+        document.getElementById('txt-feedback-title').innerText = t('feedbackTitle');
+        document.getElementById('txt-feedback-subtitle').innerText = t('feedbackSubtitle');
+        document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
+        document.getElementById('txt-submit-feedback').innerText = t('submitFeedback');
+    }
 
     // --- Core Functions ---
 
-    // Intersection Observer for Lazy Loading Fade-in
     const lazyObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -61,21 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
             allBooks = await res.json();
 
             renderBooks(allBooks);
+            renderAuthorFilters(allBooks);
             if (!query) renderCarousel(allBooks); 
             checkDeepLink(); 
         } catch (e) {
-            booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">Failed to load library: ${e.message}</p>`;
+            booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">${e.message}</p>`;
         }
     }
 
     function renderBooks(books) {
         booksGrid.innerHTML = '';
-        if (books.length === 0) {
-            booksGrid.innerHTML = '<p style="color:var(--text-dim); grid-column: 1/-1; text-align: center; padding: 4rem;">The library is currently silent. Try a different search.</p>';
+        const filtered = activeAuthorFilter 
+            ? books.filter(b => b.author === activeAuthorFilter)
+            : books;
+
+        if (filtered.length === 0) {
+            booksGrid.innerHTML = `<p style="color:var(--text-dim); grid-column: 1/-1; text-align: center; padding: 4rem;">${t('noResults')}</p>`;
             return;
         }
 
-        books.forEach((book, index) => {
+        filtered.forEach((book, index) => {
             const card = document.createElement('div');
             card.className = 'book-card lazy-load-item';
             if (index % 7 === 0) card.classList.add('bento-featured');
@@ -93,7 +138,35 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             card.addEventListener('click', () => navigateToBook(book));
             booksGrid.appendChild(card);
-            lazyObserver.observe(card); // Start observing for lazy fade-in
+            lazyObserver.observe(card);
+        });
+    }
+
+    // Author Filter Logic
+    function renderAuthorFilters(books) {
+        const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
+        authorFilterContainer.innerHTML = '';
+        
+        const allPill = document.createElement('div');
+        allPill.className = `author-pill ${!activeAuthorFilter ? 'active' : ''}`;
+        allPill.innerText = currentLang === 'uk' ? 'Всі автори' : 'All Authors';
+        allPill.onclick = () => {
+            activeAuthorFilter = null;
+            renderAuthorFilters(books);
+            renderBooks(books);
+        };
+        authorFilterContainer.appendChild(allPill);
+
+        authors.forEach(author => {
+            const pill = document.createElement('div');
+            pill.className = `author-pill ${activeAuthorFilter === author ? 'active' : ''}`;
+            pill.innerText = author;
+            pill.onclick = () => {
+                activeAuthorFilter = author;
+                renderAuthorFilters(books);
+                renderBooks(books);
+            };
+            authorFilterContainer.appendChild(pill);
         });
     }
 
@@ -115,9 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             item.innerHTML = `
                 <div>
-                    <span class="badge" style="margin-bottom:1rem; display:inline-block;">Featured Volume</span>
+                    <span class="badge" style="margin-bottom:1rem; display:inline-block;">${t('featuredVolume')}</span>
                     <h2>${book.title}</h2>
-                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">by ${book.author || 'Unknown'}</p>
+                    <p style="color:var(--emerald-glow); font-weight:600; margin-top:0.5rem;">${t('author')}: ${book.author || 'Unknown'}</p>
                 </div>
             `;
             item.addEventListener('click', (e) => {
@@ -132,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
             carouselDots.appendChild(dot);
         });
 
-        // Use a consistent interval
         if (window.carouselTimer) clearInterval(window.carouselTimer);
         window.carouselTimer = setInterval(() => {
             carouselIndex = (carouselIndex + 1) % featured.length;
@@ -147,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dots.forEach((d, i) => d.classList.toggle('active', i === index));
     }
 
-    // Navigation Logic
+    // Navigation
     function navigateToBook(book) {
         window.history.pushState({ bookId: book.id }, book.title, `#book-${book.id}`);
         openBookPage(book);
@@ -157,11 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = book.id;
         pageTitle.innerText = book.title;
         pageAuthor.innerText = book.author || 'Unknown Author';
-        pageDescription.innerText = book.description || "In the quiet corners of this library, a story waits to be discovered.";
+        pageDescription.innerText = book.description || (currentLang === 'uk' ? "Опис відсутній." : "No description available.");
         
         bookDetailsView.scrollTo(0, 0);
-
-        // Reset state
         pageStatusCard.style.display = 'none';
         emailPageContainer.style.display = 'none';
         requestPageBtn.style.display = 'block';
@@ -184,9 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/books/${bookId}/stats`);
             const stats = await res.json();
+            const shareTxt = currentLang === 'uk' ? 'Поділилися' : 'Shared';
+            const readersTxt = currentLang === 'uk' ? 'читачів' : 'readers';
             document.getElementById('page-stats').innerHTML = `
-                <span>⭐ Shared <strong>${stats.total_sends}</strong> times</span>
-                <span style="margin-left: 1rem;">📖 <strong>${stats.unique_users}</strong> readers</span>
+                <span>⭐ ${shareTxt} <strong>${stats.total_sends}</strong></span>
+                <span style="margin-left: 1rem;">📖 <strong>${stats.unique_users}</strong> ${readersTxt}</span>
             `;
         } catch (e) { console.error(e); }
     }
@@ -197,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = null;
     }
 
-    // History & Hash
     function checkDeepLink() {
         const hash = window.location.hash;
         if (hash.startsWith('#book-')) {
@@ -207,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.addEventListener('popstate', (e) => {
+    window.addEventListener('popstate', () => {
         if (window.location.hash.startsWith('#book-')) {
             checkDeepLink();
         } else {
@@ -215,17 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Interactive Events ---
-
     backToLibraryBtn.addEventListener('click', () => {
         window.history.pushState(null, '', window.location.pathname);
         closeBookPage();
     });
 
     shareBookBtn.addEventListener('click', () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-            showToast('Link to this page copied!');
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showToast(t('linkCopied'));
         });
     });
 
@@ -240,7 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
         requestPageBtn.style.display = 'block';
     });
 
-    // Toast Notification
     function showToast(message) {
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -252,39 +319,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Comprehensive Search (Title search prioritized)
+    // Search
     searchInput.addEventListener('input', (e) => {
         const val = e.target.value.trim().toLowerCase();
+        activeAuthorFilter = null; // Clear author pill if searching
         if (!val) {
             renderBooks(allBooks);
+            renderAuthorFilters(allBooks);
             return;
         }
         
-        // Prioritize exact/start title match, then author
         const filtered = allBooks.filter(b => {
-            const t = b.title.toLowerCase();
-            const a = (b.author || '').toLowerCase();
-            return t.includes(val) || a.includes(val);
-        }).sort((x, y) => {
-            // Sort to put title matches first
-            const xTitleMatch = x.title.toLowerCase().startsWith(val);
-            const yTitleMatch = y.title.toLowerCase().startsWith(val);
-            if (xTitleMatch && !yTitleMatch) return -1;
-            if (!xTitleMatch && yTitleMatch) return 1;
-            return 0;
+            return b.title.toLowerCase().includes(val) || (b.author || '').toLowerCase().includes(val);
         });
-
         renderBooks(filtered);
     });
 
-    // Forms
     emailPageForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('page-user-email').value;
         const submitBtn = emailPageForm.querySelector('button[type="submit"]');
 
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Delivering...';
+        submitBtn.innerText = t('deliveringVolume');
 
         try {
             const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
@@ -296,22 +353,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 emailPageContainer.style.display = 'none';
                 pageStatusCard.innerHTML = `
-                    <span class="icon-success">Check Inbox</span>
-                    <h4>Successfully Dispatched!</h4>
-                    <p>"${pageTitle.innerText}" is on its way to <strong>${email}</strong>. Please allow a few minutes for arrival.</p>
+                    <h4>${t('successfullyDispatched')}</h4>
+                    <p>${t('dispatchHint')} <strong>${email}</strong>${t('dispatchHintEnd')}</p>
                 `;
                 pageStatusCard.style.display = 'block';
-                showToast('Volume sent successfully!');
+                showToast(t('bookSent'));
             } else {
                 const data = await res.json();
-                alert(data.detail || 'Failed to deliver.');
+                alert(data.detail || 'Error');
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'Deliver Now 🚀';
+                submitBtn.innerText = t('deliverNow');
             }
         } catch (err) {
-            alert('Network error.');
             submitBtn.disabled = false;
-            submitBtn.innerText = 'Deliver Now 🚀';
+            submitBtn.innerText = t('deliverNow');
         }
     });
 
@@ -326,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (res.ok) {
                 fbForm.reset();
-                showToast('Feedback submitted!');
+                showToast(t('feedbackSubmitted'));
                 feedbackModal.classList.remove('active');
             }
         } catch(err) { console.error(err); }
@@ -344,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeFeedbackModal.addEventListener('click', () => feedbackModal.classList.remove('active'));
-    window.addEventListener('click', (e) => { if(e.target === feedbackModal) feedbackModal.classList.remove('active'); });
-
+    
+    applyLanguage(); // Initialize text
     loadBooks();
 });
