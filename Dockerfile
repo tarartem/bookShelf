@@ -16,11 +16,11 @@ COPY frontend/ ./frontend/
 
 
 # Setup data storage
-RUN mkdir -p uploads/books uploads/covers
-VOLUME [ "/app/uploads", "/app/bookshelf.db" ]
+RUN mkdir -p uploads/books uploads/covers data
+VOLUME [ "/app/uploads", "/app/data" ]
 
 # Expose port
 EXPOSE 8000
 
 # Start FastAPI application
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

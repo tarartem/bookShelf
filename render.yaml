@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: bookshelf
+    env: docker
+    plan: free # Change to starter if you need persistent disk
+    region: oregon # or any other region
+    healthCheckPath: /api/books/categories # A simple GET endpoint to check health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./data/bookshelf.db # Storing in /data for persistence
+      - key: PORT
+        value: 10000
+      # SMTP Settings (Set these in Render Dashboard for security)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+
+    # For persistence, you'd normally use a disk. 
+    # NOTE: Free tier doesn't support disks.
+    # To use a disk, change plan to 'starter' and uncomment below:
+    # disk:
+    #   name: bookshelf-data
+    #   mountPath: /data
+    #   sizeGB: 1
