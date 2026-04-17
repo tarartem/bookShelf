@@ -485,19 +485,22 @@ body.oled-theme {
     line-height: 1.6;
     color: var(--text-muted);
     background: rgba(0,0,0,0.2);
-    padding: 1rem;
+    padding: 1.25rem;
     border-radius: 12px;
-    border-left: 3px solid var(--emerald-primary);
     margin-top: 1rem;
     max-width: 600px;
 }
 
-.icon-btn-circle.secondary {
-    background: rgba(255,255,255,0.05);
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+    font-weight: 500;
 }
 
-.icon-btn-circle.secondary:hover {
-    background: rgba(255,255,255,0.15);
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
     border-color: var(--emerald-primary);
 }
 

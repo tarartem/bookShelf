@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shareBookBtn.addEventListener('click', () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => {
-            showToast('Link to this page copied! ✨');
+            showToast('Link to this page copied!');
         });
     });
 
@@ -296,12 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 emailPageContainer.style.display = 'none';
                 pageStatusCard.innerHTML = `
-                    <span class="icon-success">📬</span>
+                    <span class="icon-success">Check Inbox</span>
                     <h4>Successfully Dispatched!</h4>
                     <p>"${pageTitle.innerText}" is on its way to <strong>${email}</strong>. Please allow a few minutes for arrival.</p>
                 `;
                 pageStatusCard.style.display = 'block';
-                showToast('Volume sent successfully! ✨');
+                showToast('Volume sent successfully!');
             } else {
                 const data = await res.json();
                 alert(data.detail || 'Failed to deliver.');
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (res.ok) {
                 fbForm.reset();
-                showToast('Feedback submitted! ✨');
+                showToast('Feedback submitted!');
                 feedbackModal.classList.remove('active');
             }
         } catch(err) { console.error(err); }
