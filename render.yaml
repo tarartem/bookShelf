@@ -4,7 +4,7 @@ services:
     env: docker
     plan: free # Change to starter if you need persistent disk
     region: oregon # or any other region
-    healthCheckPath: /api/books/categories # A simple GET endpoint to check health
+    healthCheckPath: /api/books # Verifying availability of books list
     envVars:
       - key: DATABASE_URL
         value: sqlite:///./data/bookshelf.db # Storing in /data for persistence
