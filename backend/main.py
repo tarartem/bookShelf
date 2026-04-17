@@ -3,15 +3,28 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.database import engine, Base
+from backend.database import engine, Base, SessionLocal
 from backend.routers import books, admin, feedback
-
-# Create uploaded files directory
-os.makedirs("uploads/books", exist_ok=True)
-os.makedirs("uploads/covers", exist_ok=True)
+from backend.services.startup_service import load_books_on_startup
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+import threading
+
+# Startup task: Load books in a background thread to avoid health check timeouts
+def run_startup_task():
+    print("DEBUG: Starting background startup book loading task...")
+    db = SessionLocal()
+    try:
+        load_books_on_startup(db)
+        print("DEBUG: Background startup book loading task finished.")
+    except Exception as e:
+        print(f"DEBUG: Background startup book loading task failed: {e}")
+    finally:
+        db.close()
+
+threading.Thread(target=run_startup_task, daemon=True).start()
 
 app = FastAPI(title="BookShelf API")
 

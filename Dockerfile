@@ -10,9 +10,10 @@ COPY requirements.txt ./
 # Install any python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend and frontend code to the container
+# Copy the backend, frontend and books code to the container
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY books/ ./books/
 
 
 # Setup data storage
