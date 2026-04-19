@@ -180,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateResetBtn() {
-        // Reset button only appears if authors are selected
         if (activeAuthorFilters.size > 0) {
             resetFiltersBtn.style.display = 'block';
         } else {
@@ -196,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
         if (authorFilterContainer) authorFilterContainer.classList.remove('active');
         mobileSearchOverlay.classList.remove('active');
+        feedbackModal.classList.remove('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -221,11 +221,18 @@ document.addEventListener('DOMContentLoaded', () => {
     searchTrigger.addEventListener('click', (e) => {
         e.preventDefault();
         mobileSearchOverlay.classList.add('active');
-        setTimeout(() => searchInput.focus(), 300);
+        setTimeout(() => searchInput.focus(), 400);
     });
 
     closeSearchOverlay.addEventListener('click', () => {
         mobileSearchOverlay.classList.remove('active');
+    });
+
+    // Close search when clicking outside the input wrapper
+    mobileSearchOverlay.addEventListener('click', (e) => {
+        if (e.target === mobileSearchOverlay) {
+            mobileSearchOverlay.classList.remove('active');
+        }
     });
 
     function renderCarousel(books) {
@@ -456,6 +463,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
     
+    // Also close modal when clicking outside content
+    feedbackModal.addEventListener('click', (e) => {
+        if (e.target === feedbackModal) {
+            feedbackModal.classList.remove('active');
+        }
+    });
+
     applyLanguage(); 
     loadBooks();
 });
