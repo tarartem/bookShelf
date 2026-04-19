@@ -200,8 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInputMobile) searchInputMobile.value = '';
         if (searchInputDesktop) searchInputDesktop.value = '';
         
-        closeBookPage();
-        closeSearchMode();
+        // Inline close search/book modes without circular calling
+        document.body.classList.remove('details-active');
+        document.body.classList.remove('search-active');
+        if (bookDetailsView) bookDetailsView.style.display = 'none';
+        currentBookId = null;
+
         updateFilterUI(allBooks);
         if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
         if (authorFilterContainer) authorFilterContainer.classList.remove('active');

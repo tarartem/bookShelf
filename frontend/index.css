@@ -106,8 +106,9 @@ body.search-active .app-container {
     z-index: 1000;
     display: flex;
     align-items: center;
+    justify-content: center; /* Centered Logo/Brand */
     padding: 0 1.5rem;
-    gap: 1.5rem;
+    gap: 1rem;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
