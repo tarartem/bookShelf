@@ -160,8 +160,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetAppView() {
         activeAuthorFilters.clear();
         if(searchInputDesktop) searchInputDesktop.value = '';
-        closeSearchMode();
-        closeBookPage();
+        
+        // Inline close search mode
+        if(mobileSearchContainer) {
+            mobileSearchContainer.style.display = 'none';
+            mobileSearchContainer.classList.remove('active');
+        }
+        if(headerBrandLogo) headerBrandLogo.style.display = 'flex';
+        if(searchInputMobile) searchInputMobile.value = '';
+
+        // Inline close book page
+        if(bookDetailsView) bookDetailsView.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        currentBookId = null;
+
         renderBooks(allBooks);
         renderAuthorFilters(allBooks);
         if(resetFiltersBtn) resetFiltersBtn.style.display = 'none';
@@ -191,10 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeBookPage() {
-        if(bookDetailsView) bookDetailsView.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        currentBookId = null;
-        // Search session over as per requirement
+        // Reset full app view as per requirement "search session over"
         resetAppView();
     }
 
