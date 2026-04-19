@@ -1,96 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookShelf Admin Dashboard</title>
-    <meta name="description" content="BookShelf Admin Panel — upload, manage books and view stats.">
+    <title>Admin - BookShelf Console</title>
     <link rel="stylesheet" href="/index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 2rem;
+        }
+        .bento-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .bento-stat-card {
+            padding: 2rem;
+            text-align: center;
+        }
+        .bento-stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--emerald-glow);
+            margin: 0.5rem 0;
+            font-family: var(--font-serif);
+        }
+        .admin-nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+        .tab-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--emerald-primary);
+            color: black;
+        }
+        .admin-panel { display: none; }
+        .admin-panel.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Books & Feedback Lists */
+        .admin-card-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .admin-card-item:hover {
+            border-color: var(--emerald-primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .feedback-bubble {
+            background: rgba(255,255,255,0.03);
+            padding: 1.5rem;
+            border-radius: 24px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .feedback-bubble.new { border-left: 4px solid var(--emerald-primary); }
+        
+        @media (max-width: 900px) {
+            .bento-stats { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body class="dark-mode">
-    <!-- Login Overlay -->
-    <div id="login-overlay" style="display:flex; justify-content:center; align-items:center; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.8);">
-        <div class="modal-content glass-panel" style="max-width:400px; text-align:center; padding:2rem; width:100%;">
-            <h1 style="color:var(--text-primary); margin-bottom:0.5rem;">Admin Login</h1>
-            <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Access restricted to administrators only.</p>
-            <form id="login-form">
-                <input type="text" id="login-username" placeholder="Username" required style="width:100%; margin-bottom:1rem; padding:0.75rem; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--text-primary);">
-                <input type="password" id="login-password" placeholder="Password" required style="width:100%; margin-bottom:1rem; padding:0.75rem; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--text-primary);">
-                <button type="submit" class="btn-primary" style="width:100%; padding:0.75rem;">Login to Dashboard</button>
-            </form>
-            <p id="login-status" style="color:#ef4444; margin-top:1rem; font-weight:600;"></p>
+<body class="oled-theme">
+    <div class="top-nav-island" id="site-header" style="justify-content: space-between;">
+        <div class="header-brand" style="cursor: pointer;" onclick="window.location.href='/'">
+            <img src="/assets/logo.png" alt="Logo" style="height: 32px; width: 32px; border-radius: 8px;">
+            <h1 style="font-size: 1.2rem;">BookShelf <span style="font-size: 0.8rem; color: var(--emerald-glow); opacity: 0.8; margin-left: 0.5rem;">Admin</span></h1>
         </div>
+        <button onclick="localStorage.removeItem('admin_auth'); window.location.href='/login.html';" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.8rem;">Log Out</button>
     </div>
 
-    <div id="admin-main-container" class="glass-container" style="display:none;">
-        <header>
-            <div class="header-brand">
-                <h1>BookShelf <span class="admin-badge">Admin Dashboard</span></h1>
+    <div class="admin-container">
+        <!-- Bento Stats -->
+        <section class="bento-stats">
+            <div class="glass-panel bento-stat-card">
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Library Size</p>
+                <div id="total-books-count" class="bento-stat-value">...</div>
+                <p style="font-size: 0.9rem;">Total Volumes</p>
             </div>
-            <nav class="header-nav">
-                <a href="/" class="nav-btn primary-nav-btn">← Back to App</a>
-            </nav>
-        </header>
-
-        <!-- Stats -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <p class="stat-label">Total Books</p>
-                <h2 id="total-books-count" class="stat-value">…</h2>
+            <div class="glass-panel bento-stat-card">
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Readership</p>
+                <div id="total-sends-count" class="bento-stat-value">...</div>
+                <p style="font-size: 0.9rem;">Books Dispatched</p>
             </div>
-            <div class="stat-card">
-                <p class="stat-label">Total Sends</p>
-                <h2 id="total-sends-count" class="stat-value">…</h2>
-            </div>
-            <div class="stat-card">
-                <p class="stat-label">User Feedback</p>
-                <h2 id="total-feedback-count" class="stat-value">…</h2>
+            <div class="glass-panel bento-stat-card">
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">User Pulse</p>
+                <div id="total-feedback-count" class="bento-stat-value">...</div>
+                <p style="font-size: 0.9rem;">Messages Received</p>
             </div>
         </section>
 
-        <div class="dashboard-grid">
-            <!-- Upload Section -->
-            <section id="upload-section" class="admin-section">
-                <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">Add Books</h2>
-                <p class="section-hint">Select one or more <code>.epub</code> files. Title, author, and cover will be extracted automatically.</p>
-
-                <div id="drop-zone" class="drop-zone">
-                    <div class="drop-zone-inner">
-                        <span class="drop-icon">📂</span>
-                        <p style="font-size:1.1rem;">Drag &amp; drop EPUBs here, or <span class="file-label">browse files</span></p>
-                        <input type="file" id="epub-input" accept=".epub" multiple style="display:none">
-                        <p class="drop-hint">Multiple files supported</p>
-                    </div>
-                </div>
-
-                <div id="selected-files" class="selected-files"></div>
-                <button id="upload-btn" class="btn-primary upload-btn" style="display:none">Upload Selected Books</button>
-                <div id="upload-status" class="status-msg" style="text-align:center;"></div>
-            </section>
-
-            <!-- Feedback Section -->
-            <section id="feedback-section" class="admin-section">
-                <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">User Feedback</h2>
-                <p class="section-hint">Recent comments and suggestions from your readers.</p>
-                
-                <div id="feedback-list" class="admin-list" style="max-height: 400px;">
-                    <p class="loading">Loading feedback…</p>
-                </div>
-            </section>
+        <!-- Navigation Tabs -->
+        <div class="admin-nav-tabs">
+            <button class="tab-btn active" onclick="switchPanel('books')">Library Management</button>
+            <button class="tab-btn" onclick="switchPanel('feedback')">User Voices</button>
         </div>
 
-        <!-- Book Catalog Management -->
-        <section id="catalog-section" class="admin-section">
-            <h2 style="margin-bottom:0.5rem; color:var(--text-primary);">Catalog Management</h2>
-            <p class="section-hint">Review all books currently available on BookShelf and manage entries.</p>
-            
-            <div id="admin-books-list" class="admin-list" style="max-height: 600px;">
-                <p class="loading">Loading catalog…</p>
+        <!-- Library Panel -->
+        <section id="panel-books" class="admin-panel active">
+            <div class="glass-panel" style="padding: 2rem; border-radius: 24px; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Import New Books</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="file" id="epub-input" accept=".epub" multiple style="flex: 1; padding: 1rem; background: rgba(0,0,0,0.2); border: 1px dashed var(--glass-border); border-radius: 12px;">
+                    <button id="upload-btn" class="btn-primary">Upload epubs</button>
+                </div>
+                <div id="upload-status" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+            </div>
+
+            <div id="admin-books-list">
+                <!-- Books will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Feedback Panel -->
+        <section id="panel-feedback" class="admin-panel">
+            <div id="feedback-list">
+                <!-- Feedback will be loaded here -->
             </div>
         </section>
     </div>
 
     <script type="module" src="/admin.js"></script>
+    <script>
+        function switchPanel(panelId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+            
+            const btn = document.querySelector(`[onclick="switchPanel('${panelId}')"]`);
+            btn.classList.add('active');
+            document.getElementById(`panel-${panelId}`).classList.add('active');
+        }
+        window.switchPanel = switchPanel;
+    </script>
 </body>
 </html>

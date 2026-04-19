@@ -47,6 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchTrigger = document.getElementById('nav-search-trigger');
     const feedbackTrigger = document.getElementById('nav-feedback-trigger');
     const homeTrigger = document.getElementById('nav-home');
+    const profileTrigger = document.getElementById('profile-trigger');
+    
+    if (profileTrigger) {
+        profileTrigger.onclick = () => {
+            window.location.href = '/login.html';
+        };
+    }
     
     let currentBookId = null;
     let allBooks = [];

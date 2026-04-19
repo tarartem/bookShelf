@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookShelf - Login</title>
+    <link rel="stylesheet" href="/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="oled-theme">
+    <div class="login-card glass-panel" style="padding: 3rem; border-radius: 32px; text-align: center;">
+        <div onclick="window.location.href='/'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+            <img src="/assets/logo.png" alt="Logo" style="height: 48px; width: 48px; border-radius: 12px;">
+            <h1 style="font-family: var(--font-serif); font-size: 2rem; background: linear-gradient(135deg, #fff, var(--emerald-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BookShelf</h1>
+        </div>
+
+        <h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Welcome Back</h2>
+        <p style="color: var(--text-dim); margin-bottom: 2rem;">Access your library dashboard</p>
+
+        <form id="login-form" class="form-group" style="text-align: left;">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--emerald-glow); margin-bottom: 0.5rem;">Username</label>
+                <input type="text" id="username" placeholder="e.g. bsadmin" required style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--emerald-glow); margin-bottom: 0.5rem;">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required style="width: 100%;">
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; height: 56px; font-size: 1.1rem;">Sign In</button>
+        </form>
+
+        <button onclick="window.location.href='/'" class="btn-secondary" style="margin-top: 1rem; width: 100%; border: none; background: none; font-size: 0.9rem;">← Back to Library</button>
+        
+        <div id="login-error" style="color: var(--danger); margin-top: 1.5rem; display: none; font-size: 0.9rem;"></div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            errorEl.style.display = 'none';
+
+            // We use Basic Auth for the current API
+            const authHeader = 'Basic ' + btoa(user + ':' + pass);
+
+            try {
+                const res = await fetch('/api/admin/verify', {
+                    headers: { 'Authorization': authHeader }
+                });
+
+                if (res.ok) {
+                    // Success! Store credentials and redirect to dashboard
+                    localStorage.setItem('admin_auth', authHeader);
+                    window.location.href = '/admin.html';
+                } else {
+                    errorEl.innerText = 'Invalid username or password. Check your credentials.';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                errorEl.innerText = 'Network error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

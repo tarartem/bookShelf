@@ -1,256 +1,169 @@
 const API_URL = '/api';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const dropZone = document.getElementById('drop-zone');
-    const epubInput = document.getElementById('epub-input');
-    const selectedFilesDiv = document.getElementById('selected-files');
-    const uploadBtn = document.getElementById('upload-btn');
-    const uploadStatus = document.getElementById('upload-status');
     const totalBooksEl = document.getElementById('total-books-count');
     const totalSendsEl = document.getElementById('total-sends-count');
+    const totalFeedbackEl = document.getElementById('total-feedback-count');
+    
+    const epubInput = document.getElementById('epub-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadStatus = document.getElementById('upload-status');
     const booksList = document.getElementById('admin-books-list');
     const feedbackList = document.getElementById('feedback-list');
-    const loginOverlay = document.getElementById('login-overlay');
-    const adminMain = document.getElementById('admin-main-container');
-    const loginForm = document.getElementById('login-form');
-    const loginStatus = document.getElementById('login-status');
 
-    let selectedFiles = [];
-    let credentials = sessionStorage.getItem('admin_creds');
+    // Get Auth from localStorage (stored by login.html)
+    let authHeader = localStorage.getItem('admin_auth');
 
-    function getAuthHeader() {
-        return credentials ? { 'Authorization': `Basic ${credentials}` } : {};
+    function getHeaders() {
+        return { 'Authorization': authHeader };
     }
 
     async function checkAuth() {
-        if (!credentials) {
-            loginOverlay.style.display = 'flex';
-            adminMain.style.display = 'none';
+        if (!authHeader) {
+            window.location.href = '/login.html';
             return;
         }
 
         try {
-            const res = await fetch(`${API_URL}/admin/verify`, { headers: getAuthHeader() });
-            if (res.ok) {
-                loginOverlay.style.display = 'none';
-                adminMain.style.display = 'block';
-                loadStats();
-                loadFeedback();
+            const res = await fetch(`${API_URL}/admin/verify`, { headers: getHeaders() });
+            if (!res.ok) {
+                localStorage.removeItem('admin_auth');
+                window.location.href = '/login.html';
             } else {
-                sessionStorage.removeItem('admin_creds');
-                credentials = null;
-                loginOverlay.style.display = 'flex';
-                adminMain.style.display = 'none';
-                loginStatus.textContent = 'Session expired. Please login again.';
+                // Auth OK, load data
+                initDashboard();
             }
         } catch (e) {
             console.error('Auth check failed', e);
         }
     }
 
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const user = document.getElementById('login-username').value;
-        const pass = document.getElementById('login-password').value;
-        const creds = btoa(`${user}:${pass}`);
-
-        try {
-            loginStatus.textContent = 'Verifying...';
-            const res = await fetch(`${API_URL}/admin/verify`, {
-                headers: { 'Authorization': `Basic ${creds}` }
-            });
-            if (res.ok) {
-                sessionStorage.setItem('admin_creds', creds);
-                credentials = creds;
-                loginOverlay.style.display = 'none';
-                adminMain.style.display = 'block';
-                loginStatus.textContent = '';
-                loadStats();
-                loadFeedback();
-            } else {
-                loginStatus.textContent = 'Invalid username or password.';
-            }
-        } catch (err) {
-            loginStatus.textContent = 'Network error during login.';
-        }
-    });
-
-
-    // ── Drop zone drag events ──────────────────────────────────────────────
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        addFiles([...e.dataTransfer.files]);
-    });
-    dropZone.addEventListener('click', () => epubInput.click());
-    epubInput.addEventListener('change', () => addFiles([...epubInput.files]));
-
-    function addFiles(files) {
-        const epubs = files.filter(f => f.name.toLowerCase().endsWith('.epub'));
-        if (epubs.length < files.length) {
-            uploadStatus.textContent = `⚠️ ${files.length - epubs.length} non-EPUB file(s) were ignored.`;
-            uploadStatus.style.color = '#f59e0b';
-        }
-        selectedFiles = [...selectedFiles, ...epubs];
-        renderFileList();
+    function initDashboard() {
+        loadStats();
+        loadFeedback();
     }
 
-    function renderFileList() {
-        selectedFilesDiv.innerHTML = '';
-        if (selectedFiles.length === 0) {
-            uploadBtn.style.display = 'none';
-            return;
-        }
-        uploadBtn.style.display = 'block';
-        const ul = document.createElement('ul');
-        ul.className = 'file-list';
-        selectedFiles.forEach((f, i) => {
-            const li = document.createElement('li');
-            li.className = 'file-list-item';
-            li.innerHTML = `
-                <span>📄 ${f.name} <small>(${(f.size / 1024 / 1024).toFixed(1)} MB)</small></span>
-                <button class="btn-icon" data-idx="${i}" title="Remove">✕</button>
-            `;
-            ul.appendChild(li);
-        });
-        selectedFilesDiv.appendChild(ul);
+    // --- Stats & Library ---
 
-        // Remove individual files
-        selectedFilesDiv.querySelectorAll('.btn-icon').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const idx = parseInt(btn.dataset.idx);
-                selectedFiles.splice(idx, 1);
-                renderFileList();
-            });
-        });
-    }
-
-    // ── Upload ─────────────────────────────────────────────────────────────
-    uploadBtn.addEventListener('click', async () => {
-        if (selectedFiles.length === 0) return;
-
-        uploadBtn.disabled = true;
-        uploadStatus.textContent = `⏳ Uploading ${selectedFiles.length} file(s)…`;
-        uploadStatus.style.color = '#fff';
-
-        const formData = new FormData();
-        selectedFiles.forEach(f => formData.append('epubs', f));
-
-        try {
-            const res = await fetch(`${API_URL}/admin/books`, {
-                method: 'POST',
-                headers: getAuthHeader(),
-                body: formData
-            });
-
-            if (res.ok) {
-                const added = await res.json();
-                uploadStatus.textContent = `✅ Successfully added ${added.length} book(s)!`;
-                uploadStatus.style.color = '#4ade80';
-                selectedFiles = [];
-                renderFileList();
-                epubInput.value = '';
-                loadStats();
-            } else {
-                const data = await res.json();
-                uploadStatus.textContent = `❌ ${data.detail || 'Upload failed.'}`;
-                uploadStatus.style.color = '#ef4444';
-            }
-        } catch (err) {
-            uploadStatus.textContent = `❌ Network error: ${err.message}`;
-            uploadStatus.style.color = '#ef4444';
-        } finally {
-            uploadBtn.disabled = false;
-        }
-    });
-
-    // ── Stats & Catalog ────────────────────────────────────────────────────
     async function loadStats() {
-        if (!credentials) return;
         try {
-            const res = await fetch(`${API_URL}/admin/stats`, { headers: getAuthHeader() });
+            const res = await fetch(`${API_URL}/admin/stats`, { headers: getHeaders() });
             const data = await res.json();
 
             totalBooksEl.textContent = data.total_books;
             totalSendsEl.textContent = data.total_sends;
 
-            booksList.innerHTML = '';
-            if (data.books_stats.length === 0) {
-                booksList.innerHTML = '<p>No books yet.</p>';
-                return;
-            }
-            data.books_stats.forEach(bs => {
-                const item = document.createElement('div');
-                item.className = 'list-item';
-                item.innerHTML = `
-                    <div class="list-item-info">
-                        <strong>${bs.title}</strong>
-                        <span class="badge">Sends: ${bs.total_sends} | Unique: ${bs.unique_users}</span>
-                    </div>
-                    <button class="btn-danger btn-sm" onclick="deleteBook(${bs.book_id})">Delete</button>
-                `;
-                booksList.appendChild(item);
-            });
+            renderLibrary(data.books_stats);
         } catch (e) {
-            booksList.innerHTML = '<p>Failed to load stats.</p>';
+            console.error(e);
         }
     }
 
-    window.deleteBook = async function (id) {
-        if (!confirm('Delete this book? This cannot be undone.')) return;
+    function renderLibrary(books) {
+        booksList.innerHTML = '';
+        if (!books || books.length === 0) {
+            booksList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">No books in library yet.</p>';
+            return;
+        }
+
+        books.forEach(b => {
+            const div = document.createElement('div');
+            div.className = 'admin-card-item';
+            div.innerHTML = `
+                <div style="flex:1;">
+                    <h4 style="margin:0;">${b.title}</h4>
+                    <p style="font-size:0.8rem; color:var(--text-dim); margin:0.25rem 0 0;">Sends: <strong>${b.total_sends}</strong> | Readers: <strong>${b.unique_users}</strong></p>
+                </div>
+                <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); font-size:0.7rem; padding:0.5rem 1rem;" onclick="deleteBook(${b.book_id})">Delete</button>
+            `;
+            booksList.appendChild(div);
+        });
+    }
+
+    window.deleteBook = async function(id) {
+        if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) return;
         try {
             const res = await fetch(`${API_URL}/admin/books/${id}`, { 
                 method: 'DELETE',
-                headers: getAuthHeader()
+                headers: getHeaders()
             });
-            if (res.ok) loadStats();
-            else alert('Failed to delete book.');
+            if (res.ok) {
+                loadStats();
+            } else {
+                alert('Delete failed.');
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    // --- Upload ---
+
+    uploadBtn.onclick = async () => {
+        if (!epubInput.files.length) return;
+        
+        uploadBtn.disabled = true;
+        uploadStatus.textContent = 'Uploading...';
+        
+        const formData = new FormData();
+        [...epubInput.files].forEach(file => formData.append('epubs', file));
+
+        try {
+            const res = await fetch(`${API_URL}/admin/books`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: formData
+            });
+
+            if (res.ok) {
+                uploadStatus.textContent = 'Successfully uploaded!';
+                uploadStatus.style.color = '#4ade80';
+                epubInput.value = '';
+                setTimeout(() => uploadStatus.textContent = '', 3000);
+                loadStats();
+            } else {
+                const err = await res.json();
+                uploadStatus.textContent = err.detail || 'Upload failed.';
+                uploadStatus.style.color = 'var(--danger)';
+            }
         } catch (e) {
-            alert('Error: ' + e.message);
+            uploadStatus.textContent = 'Network error.';
+        } finally {
+            uploadBtn.disabled = false;
         }
     };
 
-    // ── Feedback ───────────────────────────────────────────────────────────
-    const totalFeedbackEl = document.getElementById('total-feedback-count');
+    // --- Feedback ---
 
     async function loadFeedback() {
-        if (!credentials) return;
         try {
-            const res = await fetch(`${API_URL}/feedback/`, { headers: getAuthHeader() });
+            const res = await fetch(`${API_URL}/feedback/`, { headers: getHeaders() });
             const data = await res.json();
             
-            if (totalFeedbackEl) {
-                totalFeedbackEl.textContent = data.length || 0;
-            }
+            totalFeedbackEl.textContent = data.length;
 
             feedbackList.innerHTML = '';
-            if (data.length === 0) {
-                feedbackList.innerHTML = '<p style="color:var(--text-secondary);">No feedback yet.</p>';
+            if (!data || data.length === 0) {
+                feedbackList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">No feedback received yet.</p>';
                 return;
             }
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'list-item feedback-item';
-                div.innerHTML = `
-                    <div class="feedback-text">${item.message}</div>
-                    <div class="feedback-meta">
-                        <span>User Feedback</span>
-                        <span>${new Date(item.created_at).toLocaleString()}</span>
+
+            data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'feedback-bubble new';
+                const dateStr = new Date(item.created_at).toLocaleString();
+                card.innerHTML = `
+                    <p style="margin-bottom:0.75rem; line-height:1.5;">${item.message}</p>
+                    <div style="font-size:0.75rem; color:var(--text-dim); display:flex; justify-content:space-between;">
+                        <span>Received at ${dateStr}</span>
+                        <span style="color:var(--emerald-glow);">New</span>
                     </div>
                 `;
-                feedbackList.appendChild(div);
+                feedbackList.appendChild(card);
             });
         } catch (e) {
-            feedbackList.innerHTML = '<p style="color:var(--danger);">Failed to load feedback.</p>';
+            console.error(e);
         }
     }
 
-    // ── Init ───────────────────────────────────────────────────────────────
+    // Start
     checkAuth();
 });

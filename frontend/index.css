@@ -53,12 +53,19 @@ body.oled-theme {
 
 /* --- Search Mode Toggle Logic --- */
 body.search-active #header-logo,
+body.search-active #profile-trigger,
 body.search-active #featured-carousel,
 body.search-active #user-instructions,
 body.search-active .filter-controls-container,
 body.search-active .mobile-bottom-nav,
 body.search-active .main-footer {
     display: none !important;
+}
+
+#profile-trigger:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+    text-shadow: 0 0 10px var(--emerald-glow);
 }
 
 body.search-active #mobile-search-controls {
