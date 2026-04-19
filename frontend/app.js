@@ -62,8 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyLanguage() {
+        console.log("Applying translations...");
         const idsAndKeys = {
             'brand-title': 'appName',
+            'txt-app-name': 'appName',
             'txt-nav-home': 'navHome',
             'txt-nav-search': 'navSearch',
             'txt-nav-feedback': 'navFeedback',
@@ -91,12 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
         if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
 
-        backToLibraryBtn.innerText = t('backToLibrary');
-        requestPageBtn.innerText = t('getThisBook');
-        shareBookBtn.innerText = t('share');
+        if (backToLibraryBtn) backToLibraryBtn.innerText = t('backToLibrary');
+        if (requestPageBtn) requestPageBtn.innerText = t('getThisBook');
+        if (shareBookBtn) shareBookBtn.innerText = t('share');
         
-        cancelPageEmailBtn.innerText = t('cancel');
-        document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
+        if (cancelPageEmailBtn) cancelPageEmailBtn.innerText = t('cancel');
+
+        const fbMsg = document.getElementById('fb-message');
+        if (fbMsg) fbMsg.placeholder = t('feedbackPlaceholder');
+        console.log("Translations applied successfully.");
     }
 
     // --- Core Functions ---
@@ -111,16 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.1 });
 
     async function loadBooks(query = '') {
+        console.log(`Fetching books with query: "${query}"...`);
         try {
             const res = await fetch(`${API_URL}/books?search=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error(`Server error: ${res.status}`);
             allBooks = await res.json();
+            console.log(`Successfully loaded ${allBooks.length} books.`);
 
             renderBooks(allBooks);
             renderAuthorFilters(allBooks);
             if (!query) renderCarousel(allBooks); 
             checkDeepLink(); 
         } catch (e) {
+            console.error("Failed to load books:", e);
             booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">${e.message}</p>`;
         }
     }
