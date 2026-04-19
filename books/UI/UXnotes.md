@@ -5,6 +5,13 @@ Book tiles ate smaller optimised for mobile app
 As a user i want to share a particular book (on click link should be coppied to buffer)
 Suggest if the separate page for book will be better than pop up. 
 
+**Mobile First Principles:**
+- **Thumb-Zone Navigation**: Keep primary triggers (Search, Home, Feedback) in a sticky bottom navigation bar or floating "islands" within easy reach of the thumb.
+- **Stacked Layouts**: Bento grid and authorship filters must collapse into intuitive, single-column rows or horizontally scrollable containers on small screens to avoid vertical clutter.
+- **Optimized Assets**: Prioritize lightweight book covers and minimalist CSS/JS to ensure instant loading on cellular networks.
+- **Gesture & Touch**: Use generous touch targets (min 44px) and fluid transitions that respond naturally to touch inputs.
+- **No Hover Dependencies**: All functionality must be accessible via tap; avoid UI elements that rely on mouse hover to reveal critical information.
+
 Ui/UX suggestions:
 
 To make your book app look super modern, you should focus on a "Digital Library" aesthetic that balances clean minimalism with cozy, tactile elements.
@@ -33,4 +40,3 @@ While flat design was popular for a decade, "Neumorphism" and "Tactile UI" are r
  * **Corners:** Ensure all cards and buttons have a generous border-radius (between 12px and 24px) for a friendly, modern look.
  * **Cards:** Avoid thin black borders. Use soft shadows or a slightly different background shade to define areas.
 By combining the **Bento Grid** for your library and **Dynamic Theming** for your book pages, your app will immediately feel like a top-tier, modern product.
-

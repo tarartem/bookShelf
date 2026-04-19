@@ -1,7 +1,7 @@
 # BookShelf App
 
 ## 1. Project Overview
-The webapplication where users can forward available books in epub format to their email address. The application will be used by me and my friends.    
+The webapplication where users can forward available books in epub format to their email address. The application is built with a **Mobile First** philosophy, ensuring a premium, app-like experience on smartphones, while maintaining a clean adaptive view for desktop browsers. The application will be used by me and my friends.    
 
 ## Persona
 i'm a product owner with basic software development skills. I want to create a webapplication. I want app to be simple yet reliable. 
@@ -14,6 +14,7 @@ i'm a product owner with basic software development skills. I want to create a w
 5.  **Localization**: The interface is multilingual, defaulting to **Ukrainian (UA)** with an English (EN) fallback for the UI.
 6.  **Secure Delivery**: Users receive EPUBs via validated email with unique-send tracking.
 7.  **Admin Control**: Admin managed library (Upload/Delete/Analyze) and feedback review.
+8.  **Mobile First Architecture**: All UI elements, layouts (Bento), and interactions are designed primarily for touch-screen mobile devices (sticky bottoms, thumb-friendly targets) before being adapted for desktop.
 
 ## Tech Stack
 -   **Backend**: Python (FastAPI) + SQLite
@@ -36,5 +37,3 @@ i'm a product owner with basic software development skills. I want to create a w
 ## 4. Documentation
 - [Deployment Guide (DEPLOY.md)](file:///Users/tarartem/Documents/Antigravity/BookShelf/DEPLOY.md)
 - [UX Design Notes (UXnotes.md)](file:///Users/tarartem/Documents/Antigravity/BookShelf/books/UI/UXnotes.md)
-
-

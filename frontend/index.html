@@ -18,28 +18,26 @@
 <body class="dark-mode oled-theme">
 
     <!-- Floating Top Island (Header) -->
-    <header class="top-nav-island" id="main-header">
-        <!-- Brand View (Default) -->
+    <header class="top-nav-island" id="site-header">
+        <!-- Default State: Brand Logo -->
         <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
             <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
-            <h1 id="brand-name-text" style="font-size: 1.4rem; letter-spacing: -0.5px;">BookShelf</h1>
+            <h1 id="brand-title" style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
+        </div>
+
+        <!-- Search Mode State: Full-width search bar with Cancel button (Mobile Only) -->
+        <div id="mobile-search-controls" class="mobile-search-controls" style="display: none; width: 100%; align-items: center; gap: 1rem;">
+            <div class="search-pill" style="flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.4rem 1rem;">
+                <span style="font-size: 1.2rem; margin-right: 0.5rem;">🔍</span>
+                <input type="text" id="search-input-mobile" placeholder="Search by title or author..." style="background: none; border: none; color: white; width: 100%; outline: none; font-size: 1rem;">
+            </div>
+            <button id="cancel-search-btn" style="background: none; border: none; color: var(--emerald-primary); font-weight: 600; cursor: pointer; white-space: nowrap;">Cancel</button>
         </div>
         
-        <!-- Mobile Search Mode Header (Hidden by default) -->
-        <div id="mobile-search-mode-header" class="mobile-search-mode-header" style="display: none; width: 100%; align-items: center; gap: 1rem;">
-            <div class="search-input-pill" style="flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.4rem 1rem;">
-                <span style="font-size: 1.1rem; margin-right: 0.5rem;">🔍</span>
-                <input type="text" id="search-input-mobile" placeholder="Search library..." style="background: none; border: none; color: white; width: 100%; outline: none; font-size: 1rem;">
-            </div>
-            <button id="cancel-search-btn" style="background: none; border: none; color: var(--emerald-primary); font-weight: 600; font-size: 1rem; cursor: pointer; white-space: nowrap;">Cancel</button>
+        <!-- Desktop Search (Optional: Keep it if needed for PC UX, or remove if user meant ALL headers) -->
+        <div class="desktop-header-search desktop-only" style="flex: 0 0 320px; display: none;">
+             <input type="text" id="search-input-desktop" placeholder="Quick search..." style="width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.6rem 1.2rem; color: white; outline: none;">
         </div>
-
-        <!-- Desktop Search (Visible on PC) -->
-        <div id="desktop-search-container" class="desktop-only" style="flex: 1; max-width: 400px; margin: 0 2rem;">
-            <input type="text" id="search-input-desktop" placeholder="Search library..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.6rem 1.5rem; color: white; outline: none;">
-        </div>
-
-        <div class="header-spacer-desktop desktop-only" style="width: 32px;"></div>
     </header>
 
     <div class="app-container">
@@ -55,13 +53,11 @@
 
         <!-- Filter by Author Pills -->
         <div class="filter-controls-container">
-            <button id="toggle-author-filters-btn" class="btn-secondary btn-mini mobile-only-toggle" style="margin-bottom: 0.5rem; width: 100%;">Filter by Author</button>
+            <button id="toggle-author-filters-btn" class="btn-secondary btn-mini mobile-only" style="margin-bottom: 0.5rem; width: 100%;">Filter by Author</button>
             <div class="author-filter-row" id="author-filter-container">
                 <!-- Author pills injected via JS -->
             </div>
-            <div class="reset-container">
-                <button id="reset-filters-btn" class="btn-secondary reset-btn-styled" style="display: none;">✕ <span id="txt-reset-filters"></span></button>
-            </div>
+            <button id="reset-filters-btn" class="btn-secondary btn-mini" style="display: none; margin-bottom: 2rem;">🔄 <span id="txt-reset-filters"></span></button>
         </div>
 
         <main id="books-grid" class="books-grid bento-mode">
@@ -78,9 +74,6 @@
         </footer>
     </div>
 
-    <!-- Floating Feedback (Desktop) -->
-    <button id="floating-feedback-btn" class="floating-feedback-btn">💬</button>
-
     <!-- Mobile Sticky Navigation -->
     <nav class="mobile-bottom-nav">
         <a href="#" class="nav-item active" id="nav-home">
@@ -96,6 +89,11 @@
             <span class="nav-label" id="txt-nav-feedback">Feedback</span>
         </a>
     </nav>
+
+    <!-- Floating Controls (Desktop) -->
+    <div class="floating-controls desktop-only">
+        <button id="back-to-top-btn" class="btn-secondary floating-btn" title="Back to Top" style="display:none;">↑</button>
+    </div>
 
     <div id="toast-container" class="toast-container"></div>
 
@@ -156,6 +154,7 @@
                 <textarea id="fb-message" required></textarea>
                 <button type="submit" class="btn-primary" id="txt-submit-feedback"></button>
             </form>
+            <p id="fb-status" class="status-msg"></p>
         </div>
     </div>
 
