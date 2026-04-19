@@ -525,13 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    if (feedbackTriggerFloating) {
-        feedbackTriggerFloating.onclick = (e) => {
-            e.preventDefault();
-            if (feedbackModal) feedbackModal.classList.add('active');
-        };
-    }
-
     if (closeFeedbackModal) closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
     
     // Close on click outside
