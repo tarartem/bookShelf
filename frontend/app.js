@@ -279,10 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function navigateToBook(book) {
-        // Exit search mode silently when a book is clicked
-        if (document.body.classList.contains('search-active')) {
-            document.body.classList.remove('search-active');
-        }
         window.history.pushState({ bookId: book.id }, book.title, `#book-${book.id}`);
         openBookPage(book);
     }
@@ -329,8 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('details-active');
         bookDetailsView.style.display = 'none';
         currentBookId = null;
-        // As per requirement: Returning from book page resets to Home
-        resetAppView();
+        
+        // If we came from search, stay in search. Otherwise reset.
+        if (!document.body.classList.contains('search-active')) {
+            resetAppView();
+        }
     }
 
     function checkDeepLink() {
@@ -409,6 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const performSearch = (val) => {
         const query = val.trim().toLowerCase();
         updateResetBtn();
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        
+        if (clearSearchBtn) {
+            clearSearchBtn.style.display = query ? 'block' : 'none';
+        }
+
         if (!query) {
             renderBooks(allBooks);
             return;
@@ -422,6 +427,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInputMobile) searchInputMobile.addEventListener('input', (e) => performSearch(e.target.value));
     if (searchInputDesktop) searchInputDesktop.addEventListener('input', (e) => performSearch(e.target.value));
     
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    if (clearSearchBtn) {
+        clearSearchBtn.onclick = () => {
+            if (searchInputMobile) {
+                searchInputMobile.value = '';
+                searchInputMobile.focus();
+                performSearch('');
+            }
+        };
+    }
+
     if (cancelSearchBtn) cancelSearchBtn.onclick = () => closeSearchMode();
 
     emailPageForm.addEventListener('submit', async (e) => {

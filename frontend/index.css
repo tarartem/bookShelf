@@ -56,6 +56,7 @@ body.search-active #header-logo,
 body.search-active #featured-carousel,
 body.search-active #user-instructions,
 body.search-active .filter-controls-container,
+body.search-active .mobile-bottom-nav,
 body.search-active .main-footer {
     display: none !important;
 }
