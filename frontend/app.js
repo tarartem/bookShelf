@@ -63,36 +63,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyLanguage() {
-        document.getElementById('txt-app-name').innerText = t('appName');
-        document.getElementById('txt-nav-home').innerText = t('navHome');
-        document.getElementById('txt-nav-search').innerText = t('navSearch');
-        document.getElementById('txt-nav-feedback').innerText = t('navFeedback');
-        document.getElementById('txt-loading').innerText = t('curatingLibrary');
-        document.getElementById('txt-welcome-title').innerText = t('welcomeTitle');
-        document.getElementById('txt-welcome-subtitle').innerText = t('welcomeSubtitle');
-        document.getElementById('txt-welcome-extra').innerText = t('welcomeExtra');
-        document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
-        document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
+        if(document.getElementById('txt-app-name')) document.getElementById('txt-app-name').innerText = t('appName');
+        if(document.getElementById('txt-nav-home')) document.getElementById('txt-nav-home').innerText = t('navHome');
+        if(document.getElementById('txt-nav-search')) document.getElementById('txt-nav-search').innerText = t('navSearch');
+        if(document.getElementById('txt-nav-feedback')) document.getElementById('txt-nav-feedback').innerText = t('navFeedback');
+        if(document.getElementById('txt-loading')) document.getElementById('txt-loading').innerText = t('curatingLibrary');
+        if(document.getElementById('txt-welcome-title')) document.getElementById('txt-welcome-title').innerText = t('welcomeTitle');
+        if(document.getElementById('txt-welcome-subtitle')) document.getElementById('txt-welcome-subtitle').innerText = t('welcomeSubtitle');
+        if(document.getElementById('txt-welcome-extra')) document.getElementById('txt-welcome-extra').innerText = t('welcomeExtra');
+        if(document.getElementById('txt-footer-crafting')) document.getElementById('txt-footer-crafting').innerText = t('footerCrafting');
+        if(document.getElementById('txt-footer-admin')) document.getElementById('txt-footer-admin').innerText = t('footerAdmin');
         
-        document.getElementById('txt-reset-filters').innerText = t('resetFilters');
+        if(document.getElementById('txt-reset-filters')) document.getElementById('txt-reset-filters').innerText = t('resetFilters');
         if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
         
         if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
         if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
 
-        backToLibraryBtn.innerText = t('backToLibrary');
-        requestPageBtn.innerText = t('getThisBook');
-        shareBookBtn.innerText = t('share');
+        if(backToLibraryBtn) backToLibraryBtn.innerText = t('backToLibrary');
+        if(requestPageBtn) requestPageBtn.innerText = t('getThisBook');
+        if(shareBookBtn) shareBookBtn.innerText = t('share');
         
-        document.getElementById('txt-secure-delivery').innerText = t('secureDelivery');
-        document.getElementById('txt-delivery-hint').innerText = t('deliveryHint');
-        document.getElementById('txt-deliver-now').innerText = t('deliverNow');
-        cancelPageEmailBtn.innerText = t('cancel');
+        if(document.getElementById('txt-secure-delivery')) document.getElementById('txt-secure-delivery').innerText = t('secureDelivery');
+        if(document.getElementById('txt-delivery-hint')) document.getElementById('txt-delivery-hint').innerText = t('deliveryHint');
+        if(document.getElementById('txt-deliver-now')) document.getElementById('txt-deliver-now').innerText = t('deliverNow');
+        if(cancelPageEmailBtn) cancelPageEmailBtn.innerText = t('cancel');
 
-        document.getElementById('txt-feedback-title').innerText = t('feedbackTitle');
-        document.getElementById('txt-feedback-subtitle').innerText = t('feedbackSubtitle');
-        document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
-        document.getElementById('txt-submit-feedback').innerText = t('submitFeedback');
+        if(document.getElementById('txt-feedback-title')) document.getElementById('txt-feedback-title').innerText = t('feedbackTitle');
+        if(document.getElementById('txt-feedback-subtitle')) document.getElementById('txt-feedback-subtitle').innerText = t('feedbackSubtitle');
+        if(document.getElementById('fb-message')) document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
+        if(document.getElementById('txt-submit-feedback')) document.getElementById('txt-submit-feedback').innerText = t('submitFeedback');
     }
 
     // --- Core Functions ---
@@ -182,10 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateResetBtn() {
-        if (activeAuthorFilters.size > 0) {
-            resetFiltersBtn.style.display = 'block';
-        } else {
-            resetFiltersBtn.style.display = 'none';
+        if (resetFiltersBtn) {
+            if (activeAuthorFilters.size > 0) {
+                resetFiltersBtn.style.display = 'block';
+            } else {
+                resetFiltersBtn.style.display = 'none';
+            }
         }
     }
 
@@ -197,15 +199,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFilterUI(allBooks);
         if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
         if (authorFilterContainer) authorFilterContainer.classList.remove('active');
-        mobileSearchOverlay.classList.remove('active');
-        feedbackModal.classList.remove('active');
+        if (mobileSearchOverlay) mobileSearchOverlay.classList.remove('active');
+        if (feedbackModal) feedbackModal.classList.remove('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    resetFiltersBtn.onclick = () => {
-        activeAuthorFilters.clear();
-        updateFilterUI(allBooks);
-    };
+    if (resetFiltersBtn) {
+        resetFiltersBtn.onclick = () => {
+            activeAuthorFilters.clear();
+            updateFilterUI(allBooks);
+        };
+    }
 
     if (toggleFiltersBtn) {
         toggleFiltersBtn.onclick = () => {
@@ -240,25 +244,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchTrigger) {
         searchTrigger.addEventListener('click', (e) => {
             e.preventDefault();
-            mobileSearchOverlay.classList.add('active');
-            setTimeout(() => searchInputMobile.focus(), 400);
+            if(mobileSearchOverlay) {
+                mobileSearchOverlay.classList.add('active');
+                setTimeout(() => { if(searchInputMobile) searchInputMobile.focus(); }, 400);
+            }
         });
     }
 
     if (closeSearchOverlay) {
         closeSearchOverlay.addEventListener('click', () => {
-            mobileSearchOverlay.classList.remove('active');
+            if(mobileSearchOverlay) mobileSearchOverlay.classList.remove('active');
         });
     }
 
-    mobileSearchOverlay.addEventListener('click', (e) => {
-        if (e.target === mobileSearchOverlay) {
-            mobileSearchOverlay.classList.remove('active');
-        }
-    });
+    if (mobileSearchOverlay) {
+        mobileSearchOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileSearchOverlay) {
+                mobileSearchOverlay.classList.remove('active');
+            }
+        });
+    }
 
     function renderCarousel(books) {
-        if (books.length === 0) return;
+        if (!carouselTrack || books.length === 0) return;
         
         const shuffled = [...books].sort(() => 0.5 - Math.random());
         const featured = shuffled.slice(0, 5); 
@@ -275,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="carousel-info">
                     <span class="badge">${t('featuredVolume')}</span>
                     <h2>${book.title}</h2>
-                    <p>${book.author || 'Unknown Author'}</p>
+                    <p class="book-author">${book.author || 'Unknown Author'}</p>
                 </div>
                 <div class="carousel-cover-side">
                    ${coverUrl ? `<img src="${coverUrl}" alt="${book.title}">` : ''}
@@ -298,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setCarousel(index) {
+        if(!carouselTrack) return;
         carouselIndex = index;
         carouselTrack.style.transform = `translateX(-${index * 100}%)`;
         const dots = document.querySelectorAll('.dot');
@@ -348,8 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeBookPage() {
-        document.body.classList.remove('details-active');
-        bookDetailsView.style.display = 'none';
+        if(bookDetailsView) {
+            document.body.classList.remove('details-active');
+            bookDetailsView.style.display = 'none';
+        }
         currentBookId = null;
     }
 
@@ -370,30 +381,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    backToLibraryBtn.addEventListener('click', () => {
-        window.history.pushState(null, '', window.location.pathname);
-        closeBookPage();
-    });
-
-    shareBookBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showToast(t('linkCopied'));
+    if(backToLibraryBtn) {
+        backToLibraryBtn.addEventListener('click', () => {
+            window.history.pushState(null, '', window.location.pathname);
+            closeBookPage();
         });
-    });
+    }
 
-    requestPageBtn.addEventListener('click', () => {
-        requestPageBtn.style.display = 'none';
-        emailPageContainer.style.display = 'block';
-        document.getElementById('page-user-email').focus();
-    });
+    if(shareBookBtn) {
+        shareBookBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast(t('linkCopied'));
+            });
+        });
+    }
 
-    cancelPageEmailBtn.addEventListener('click', () => {
-        emailPageContainer.style.display = 'none';
-        requestPageBtn.style.display = 'block';
-        bookDetailsView.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    if(requestPageBtn) {
+        requestPageBtn.addEventListener('click', () => {
+            requestPageBtn.style.display = 'none';
+            emailPageContainer.style.display = 'block';
+            if(document.getElementById('page-user-email')) document.getElementById('page-user-email').focus();
+        });
+    }
+
+    if(cancelPageEmailBtn) {
+        cancelPageEmailBtn.addEventListener('click', () => {
+            emailPageContainer.style.display = 'none';
+            requestPageBtn.style.display = 'block';
+            bookDetailsView.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 
     function showToast(message) {
+        if(!toastContainer) return;
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.innerText = message;
@@ -404,57 +424,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    emailPageForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('page-user-email').value;
-        const submitBtn = emailPageForm.querySelector('button[type="submit"]');
+    if(emailPageForm) {
+        emailPageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailField = document.getElementById('page-user-email');
+            if(!emailField) return;
+            const email = emailField.value;
+            const submitBtn = emailPageForm.querySelector('button[type="submit"]');
 
-        submitBtn.disabled = true;
-        submitBtn.innerText = t('deliveringVolume');
-
-        try {
-            const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            if (res.ok) {
-                emailPageContainer.style.display = 'none';
-                pageStatusCard.innerHTML = `
-                    <h4>${t('successfullyDispatched')}</h4>
-                    <p>${t('dispatchHint')} <strong>${email}</strong>${t('dispatchHintEnd')}</p>
-                `;
-                pageStatusCard.style.display = 'block';
-                showToast(t('bookSent'));
-            } else {
-                const data = await res.json();
-                alert(data.detail || 'Error');
-                submitBtn.disabled = false;
-                submitBtn.innerText = t('deliverNow');
+            if(submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = t('deliveringVolume');
             }
-        } catch (err) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = t('deliverNow');
-        }
-    });
 
-    fbForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = document.getElementById('fb-message').value;
-        try {
-            const res = await fetch(`${API_URL}/feedback/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
-            });
-            if (res.ok) {
-                fbForm.reset();
-                showToast(t('feedbackSubmitted'));
-                feedbackModal.classList.remove('active');
+            try {
+                const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                if (res.ok) {
+                    emailPageContainer.style.display = 'none';
+                    pageStatusCard.innerHTML = `
+                        <h4>${t('successfullyDispatched')}</h4>
+                        <p>${t('dispatchHint')} <strong>${email}</strong>${t('dispatchHintEnd')}</p>
+                    `;
+                    pageStatusCard.style.display = 'block';
+                    showToast(t('bookSent'));
+                } else {
+                    const data = await res.json();
+                    alert(data.detail || 'Error');
+                    if(submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = t('deliverNow');
+                    }
+                }
+            } catch (err) {
+                if(submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = t('deliverNow');
+                }
             }
-        } catch(err) { console.error(err); }
-    });
+        });
+    }
+
+    if(fbForm) {
+        fbForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgField = document.getElementById('fb-message');
+            if(!msgField) return;
+            const message = msgField.value;
+            try {
+                const res = await fetch(`${API_URL}/feedback/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    fbForm.reset();
+                    showToast(t('feedbackSubmitted'));
+                    if(feedbackModal) feedbackModal.classList.remove('active');
+                }
+            } catch(err) { console.error(err); }
+        });
+    }
 
     if (homeTrigger) {
         homeTrigger.onclick = (e) => {
@@ -465,19 +499,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openFeedback = (e) => {
         e.preventDefault();
-        feedbackModal.classList.add('active');
+        if(feedbackModal) feedbackModal.classList.add('active');
     };
 
     if (feedbackTriggerMobile) feedbackTriggerMobile.onclick = openFeedback;
     if (feedbackTriggerFloating) feedbackTriggerFloating.onclick = openFeedback;
 
-    closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
+    if(closeFeedbackModal) closeFeedbackModal.onclick = () => { if(feedbackModal) feedbackModal.classList.remove('active'); };
     
-    feedbackModal.addEventListener('click', (e) => {
-        if (e.target === feedbackModal) {
-            feedbackModal.classList.remove('active');
-        }
-    });
+    if(feedbackModal) {
+        feedbackModal.addEventListener('click', (e) => {
+            if (e.target === feedbackModal) {
+                feedbackModal.classList.remove('active');
+            }
+        });
+    }
 
     applyLanguage(); 
     loadBooks();
