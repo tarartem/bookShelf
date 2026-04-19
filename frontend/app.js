@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleFiltersBtn = document.getElementById('toggle-author-filters-btn');
     const headerLogo = document.getElementById('header-logo');
     
+    const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
+    const closeSearchOverlay = document.getElementById('close-search-overlay');
+    
     // Carousel Elements
     const carouselTrack = document.getElementById('carousel-track');
     const carouselDots = document.getElementById('carousel-dots');
@@ -41,7 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Nav Controls
     const searchTrigger = document.getElementById('nav-search-trigger');
-    const feedbackTrigger = document.getElementById('nav-feedback-trigger');
+    const feedbackTriggerMobile = document.getElementById('nav-feedback-trigger');
+    const feedbackTriggerHeader = document.getElementById('header-feedback-trigger');
     const homeTrigger = document.getElementById('nav-home');
     
     let currentBookId = null;
@@ -176,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateResetBtn() {
-        if (activeAuthorFilters.size > 0 || searchInput.value) {
+        // Reset button only appears if authors are selected
+        if (activeAuthorFilters.size > 0) {
             resetFiltersBtn.style.display = 'block';
         } else {
             resetFiltersBtn.style.display = 'none';
@@ -190,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFilterUI(allBooks);
         if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
         if (authorFilterContainer) authorFilterContainer.classList.remove('active');
+        mobileSearchOverlay.classList.remove('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     resetFiltersBtn.onclick = () => {
         activeAuthorFilters.clear();
-        searchInput.value = '';
         updateFilterUI(allBooks);
     };
 
@@ -203,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFiltersBtn.onclick = () => {
             const isActive = authorFilterContainer.classList.toggle('active');
             toggleFiltersBtn.classList.toggle('active', isActive);
-            // Optional: change text or icon
         };
     }
 
@@ -212,6 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
             resetAppView();
         }
     }
+
+    // Mobile Search Overlay Logic
+    searchTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        mobileSearchOverlay.classList.add('active');
+        setTimeout(() => searchInput.focus(), 300);
+    });
+
+    closeSearchOverlay.addEventListener('click', () => {
+        mobileSearchOverlay.classList.remove('active');
+    });
 
     function renderCarousel(books) {
         if (books.length === 0) return;
@@ -362,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', () => {
         const val = searchInput.value.trim().toLowerCase();
-        updateResetBtn();
         if (!val) {
             renderBooks(allBooks);
             return;
@@ -432,21 +446,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    if (searchTrigger) {
-        searchTrigger.onclick = (e) => {
-            e.preventDefault();
-            closeBookPage();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(() => searchInput.focus(), 100);
-        };
-    }
+    const openFeedback = (e) => {
+        e.preventDefault();
+        feedbackModal.classList.add('active');
+    };
 
-    if (feedbackTrigger) {
-        feedbackTrigger.onclick = (e) => {
-            e.preventDefault();
-            feedbackModal.classList.add('active');
-        };
-    }
+    if (feedbackTriggerMobile) feedbackTriggerMobile.onclick = openFeedback;
+    if (feedbackTriggerHeader) feedbackTriggerHeader.onclick = openFeedback;
 
     closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
     
