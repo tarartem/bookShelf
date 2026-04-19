@@ -513,11 +513,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (feedbackTrigger) {
         feedbackTrigger.onclick = (e) => {
             e.preventDefault();
-            feedbackModal.classList.add('active');
+            if (feedbackModal) feedbackModal.classList.add('active');
         };
     }
 
-    closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
+    if (feedbackTriggerFloating) {
+        feedbackTriggerFloating.onclick = (e) => {
+            e.preventDefault();
+            if (feedbackModal) feedbackModal.classList.add('active');
+        };
+    }
+
+    if (closeFeedbackModal) closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
+    
+    // Close on click outside
+    window.onclick = (e) => {
+        if (e.target === feedbackModal) feedbackModal.classList.remove('active');
+    };
     
     applyLanguage(); 
     loadBooks();
