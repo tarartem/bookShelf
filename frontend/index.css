@@ -925,19 +925,26 @@ body.details-active {
     transform: translateY(-2px);
 }
 
-input[type="email"] {
+input[type="email"],
+input[type="text"],
+input[type="password"] {
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--glass-border);
     padding: 1rem;
     border-radius: 16px;
     color: white;
     transition: 0.3s;
+    font-family: var(--font-sans);
+    width: 100%;
 }
 
-input[type="email"]:focus {
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
     border-color: var(--emerald-primary);
     outline: none;
     background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
 }
 
 .instructions-panel {
