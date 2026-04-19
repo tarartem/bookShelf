@@ -7,15 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const searchInputDesktop = document.getElementById('search-input-desktop');
     const searchInputMobile = document.getElementById('search-input-mobile');
+    const mobileSearchContainer = document.getElementById('mobile-header-search');
+    const headerBrandLogo = document.getElementById('header-logo');
+    const closeMobileSearchBtn = document.getElementById('close-mobile-search');
+
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
     const authorFilterContainer = document.getElementById('author-filter-container');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const toggleFiltersBtn = document.getElementById('toggle-author-filters-btn');
-    const headerLogo = document.getElementById('header-logo');
-    
-    const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
-    const closeSearchOverlay = document.getElementById('close-search-overlay');
     
     // Feedback Modal
     const feedbackModal = document.getElementById('feedback-modal');
@@ -51,13 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById(id);
             if (el) el.innerText = t(id.replace('txt-', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase()));
         });
-
-        // Special mappings for non-standard txt IDs
         if(document.getElementById('txt-reset-filters')) document.getElementById('txt-reset-filters').innerText = t('resetFilters');
-        if(toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
-        if(searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
-        if(searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
-        if(document.getElementById('fb-message')) document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
+        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
+        if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
+        if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
+        if (document.getElementById('fb-message')) document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
     }
 
     // --- Core Data Logic ---
@@ -68,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allBooks = await res.json();
             renderBooks(allBooks);
             renderAuthorFilters(allBooks);
-            renderCarousel(allBooks);
+            renderCarousel();
             checkDeepLink();
         } catch (e) {
             if(booksGrid) booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">${e.message}</p>`;
@@ -94,10 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="book-cover-wrapper">
                     ${book.cover_filepath ? `<img src="/api/${book.cover_filepath}" alt="${book.title}" loading="lazy">` : `<div style="height:100%; display:flex; align-items:center; justify-content:center; background:#000;">📖</div>`}
                 </div>
-                <h3 class="book-title">${book.title}</h3>
-                <p class="book-author">${book.author || 'Unknown'}</p>
+                <h3 class="book-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${book.title}</h3>
+                <p class="book-author" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-size: 0.85rem;">${book.author || 'Unknown'}</p>
             `;
-            card.onclick = () => openBookPage(book);
+            card.onclick = () => {
+                closeSearchMode(); // Close search if open
+                openBookPage(book);
+            };
             booksGrid.appendChild(card);
         });
     }
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else activeAuthorFilters.add(author);
                 renderAuthorFilters(books);
                 renderBooks(books);
-                if(resetFiltersBtn) resetFiltersBtn.style.display = activeAuthorFilters.size > 0 ? 'block' : 'none';
+                if(resetFiltersBtn) resetFiltersBtn.style.display = activeAuthorFilters.size > 0 ? 'flex' : 'none';
             };
             authorFilterContainer.appendChild(pill);
         });
@@ -131,34 +132,43 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInputDesktop) searchInputDesktop.addEventListener('input', handleSearch);
     if (searchInputMobile) searchInputMobile.addEventListener('input', handleSearch);
 
-    if (searchTrigger) {
-        searchTrigger.onclick = (e) => {
-            e.preventDefault();
-            if(mobileSearchOverlay) {
-                mobileSearchOverlay.classList.add('active');
-                setTimeout(() => { if(searchInputMobile) searchInputMobile.focus(); }, 300);
-            }
-        };
+    function openSearchMode() {
+        if(headerBrandLogo) headerBrandLogo.style.display = 'none';
+        if(mobileSearchContainer) {
+            mobileSearchContainer.style.display = 'flex';
+            mobileSearchContainer.classList.add('active');
+            setTimeout(() => { if(searchInputMobile) searchInputMobile.focus(); }, 100);
+        }
     }
 
-    if(closeSearchOverlay) closeSearchOverlay.onclick = () => mobileSearchOverlay.classList.remove('active');
-    if(mobileSearchOverlay) mobileSearchOverlay.onclick = (e) => { if(e.target === mobileSearchOverlay) mobileSearchOverlay.classList.remove('active'); };
+    function closeSearchMode() {
+        if(mobileSearchContainer) {
+            mobileSearchContainer.style.display = 'none';
+            mobileSearchContainer.classList.remove('active');
+        }
+        if(headerBrandLogo) headerBrandLogo.style.display = 'flex';
+        if(searchInputMobile) {
+            searchInputMobile.value = '';
+            renderBooks(allBooks);
+        }
+    }
+
+    if(searchTrigger) searchTrigger.onclick = (e) => { e.preventDefault(); openSearchMode(); };
+    if(closeMobileSearchBtn) closeMobileSearchBtn.onclick = closeSearchMode;
 
     // --- Navigation & Clicks ---
     function resetAppView() {
         activeAuthorFilters.clear();
         if(searchInputDesktop) searchInputDesktop.value = '';
-        if(searchInputMobile) searchInputMobile.value = '';
-        if(mobileSearchOverlay) mobileSearchOverlay.classList.remove('active');
-        if(feedbackModal) feedbackModal.classList.remove('active');
-        if(resetFiltersBtn) resetFiltersBtn.style.display = 'none';
+        closeSearchMode();
         closeBookPage();
         renderBooks(allBooks);
         renderAuthorFilters(allBooks);
+        if(resetFiltersBtn) resetFiltersBtn.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    if(headerLogo) headerLogo.onclick = resetAppView;
+    if(headerBrandLogo) headerBrandLogo.onclick = resetAppView;
     if(homeTrigger) homeTrigger.onclick = (e) => { e.preventDefault(); resetAppView(); };
     if(resetFiltersBtn) resetFiltersBtn.onclick = () => { activeAuthorFilters.clear(); resetFiltersBtn.style.display = 'none'; renderAuthorFilters(allBooks); renderBooks(allBooks); };
 
@@ -173,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookId = book.id;
         document.getElementById('page-book-title').innerText = book.title;
         document.getElementById('page-book-author').innerText = book.author || 'Unknown';
-        document.getElementById('page-book-description').innerText = book.description || 'No description.';
+        document.getElementById('page-book-description').innerText = book.description || 'No description available.';
         if(book.cover_filepath) document.getElementById('page-book-cover').src = `/api/${book.cover_filepath}`;
         
         bookDetailsView.style.display = 'flex';
@@ -184,11 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if(bookDetailsView) bookDetailsView.style.display = 'none';
         document.body.style.overflow = 'auto';
         currentBookId = null;
+        // Search session over as per requirement
+        resetAppView();
     }
 
     if(backToLibraryBtn) backToLibraryBtn.onclick = closeBookPage;
 
-    // --- Feedback ---
+    // --- Feedback Submit ---
     if(fbForm) {
         fbForm.onsubmit = async (e) => {
             e.preventDefault();
@@ -206,13 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showToast(msg) {
         if(!toastContainer) return;
-        const t = document.createElement('div');
-        t.innerText = msg; t.className = 'toast';
-        toastContainer.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
+        const tt = document.createElement('div');
+        tt.innerText = msg; tt.className = 'toast';
+        toastContainer.appendChild(tt);
+        setTimeout(() => tt.remove(), 3000);
     }
 
-    // Carousel Dummy
     function renderCarousel() {
         const track = document.getElementById('carousel-track');
         if(track) track.innerHTML = '<div class="carousel-item" style="justify-content:center;"><h2>Explore our curated collection</h2></div>';
@@ -222,8 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const hash = window.location.hash;
         if (hash.startsWith('#book-')) {
             const id = parseInt(hash.replace('#book-', ''));
-            const book = allBooks.find(b => b.id === id);
-            if (book) openBookPage(book);
+            const b = allBooks.find(book => book.id === id);
+            if (b) openBookPage(b);
         }
     }
 

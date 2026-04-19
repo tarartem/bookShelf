@@ -18,18 +18,26 @@
 <body class="dark-mode oled-theme">
 
     <!-- Floating Top Island (Header) -->
-    <header class="top-nav-island">
+    <header class="top-nav-island" id="main-header">
+        <!-- Default Brand (Visible by default) -->
         <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
             <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
-            <h1 style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
+            <h1 style="font-size: 1.4rem; letter-spacing: -0.5px;">BookShelf</h1>
         </div>
         
+        <!-- Mobile Search (Hidden by default) -->
+        <div id="mobile-header-search" class="mobile-search-container" style="display: none; width: 100%; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 1.2rem;">🔍</span>
+            <input type="text" id="search-input-mobile" placeholder="Search books..." style="flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 1rem;">
+            <button id="close-mobile-search" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+        </div>
+
         <!-- Desktop Central Search -->
         <div id="desktop-header-search" class="header-search-container">
             <input type="text" id="search-input-desktop" placeholder="Find your next read...">
         </div>
 
-        <!-- Optional placeholder -->
+        <!-- Optional placeholder/Feedback trigger for desktop -->
         <div class="header-spacer-desktop" style="width: 32px;"></div>
     </header>
 
@@ -71,14 +79,6 @@
 
     <!-- Floating Feedback (Desktop) -->
     <button id="floating-feedback-btn" class="floating-feedback-btn">💬</button>
-
-    <!-- Mobile Search Overlay -->
-    <div id="mobile-search-overlay" class="mobile-search-overlay">
-        <div class="search-input-wrapper">
-            <input type="text" id="search-input-mobile" placeholder="Find your next read...">
-            <button id="close-search-overlay">✕</button>
-        </div>
-    </div>
 
     <!-- Mobile Sticky Navigation -->
     <nav class="mobile-bottom-nav">
