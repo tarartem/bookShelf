@@ -19,26 +19,27 @@
 
     <!-- Floating Top Island (Header) -->
     <header class="top-nav-island" id="main-header">
-        <!-- Default Brand (Visible by default) -->
+        <!-- Brand View (Default) -->
         <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
             <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
-            <h1 style="font-size: 1.4rem; letter-spacing: -0.5px;">BookShelf</h1>
+            <h1 id="brand-name-text" style="font-size: 1.4rem; letter-spacing: -0.5px;">BookShelf</h1>
         </div>
         
-        <!-- Mobile Search (Hidden by default) -->
-        <div id="mobile-header-search" class="mobile-search-container" style="display: none; width: 100%; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 1.2rem;">🔍</span>
-            <input type="text" id="search-input-mobile" placeholder="Search books..." style="flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 1rem;">
-            <button id="close-mobile-search" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+        <!-- Mobile Search Mode Header (Hidden by default) -->
+        <div id="mobile-search-mode-header" class="mobile-search-mode-header" style="display: none; width: 100%; align-items: center; gap: 1rem;">
+            <div class="search-input-pill" style="flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.4rem 1rem;">
+                <span style="font-size: 1.1rem; margin-right: 0.5rem;">🔍</span>
+                <input type="text" id="search-input-mobile" placeholder="Search library..." style="background: none; border: none; color: white; width: 100%; outline: none; font-size: 1rem;">
+            </div>
+            <button id="cancel-search-btn" style="background: none; border: none; color: var(--emerald-primary); font-weight: 600; font-size: 1rem; cursor: pointer; white-space: nowrap;">Cancel</button>
         </div>
 
-        <!-- Desktop Central Search -->
-        <div id="desktop-header-search" class="header-search-container">
-            <input type="text" id="search-input-desktop" placeholder="Find your next read...">
+        <!-- Desktop Search (Visible on PC) -->
+        <div id="desktop-search-container" class="desktop-only" style="flex: 1; max-width: 400px; margin: 0 2rem;">
+            <input type="text" id="search-input-desktop" placeholder="Search library..." style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.6rem 1.5rem; color: white; outline: none;">
         </div>
 
-        <!-- Optional placeholder/Feedback trigger for desktop -->
-        <div class="header-spacer-desktop" style="width: 32px;"></div>
+        <div class="header-spacer-desktop desktop-only" style="width: 32px;"></div>
     </header>
 
     <div class="app-container">
@@ -95,11 +96,6 @@
             <span class="nav-label" id="txt-nav-feedback">Feedback</span>
         </a>
     </nav>
-
-    <!-- Floating Controls (Desktop) -->
-    <div class="floating-controls desktop-only">
-        <button id="back-to-top-btn" class="btn-secondary floating-btn" title="Back to Top" style="display:none;">↑</button>
-    </div>
 
     <div id="toast-container" class="toast-container"></div>
 
@@ -160,7 +156,6 @@
                 <textarea id="fb-message" required></textarea>
                 <button type="submit" class="btn-primary" id="txt-submit-feedback"></button>
             </form>
-            <p id="fb-status" class="status-msg"></p>
         </div>
     </div>
 

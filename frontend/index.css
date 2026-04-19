@@ -251,18 +251,33 @@ h1, h2, .serif-title { font-family: 'Lora', serif; }
     cursor: pointer;
 }
 
-/* Mobile Header Search Container */
-.mobile-search-container {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 100px;
-    padding: 0.5rem 1rem;
-    width: 0;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* New Mobile Search Mode Header */
+.mobile-search-mode-header {
+    display: none; /* JS toggled */
+    width: 100%;
 }
 
-.mobile-search-container.active {
-    width: 100%;
+.search-input-pill input::placeholder {
+    color: var(--text-muted);
+}
+
+/* --- Search Mode Logic (When body has .search-mode-active) --- */
+@media (max-width: 900px) {
+    body.search-mode-active #header-logo,
+    body.search-mode-active #featured-carousel,
+    body.search-mode-active #user-instructions,
+    body.search-mode-active .filter-controls-container,
+    body.search-mode-active .main-footer {
+        display: none !important;
+    }
+
+    body.search-mode-active #mobile-search-mode-header {
+        display: flex !important;
+    }
+    
+    body.search-mode-active .app-container {
+        padding-top: 100px;
+    }
 }
 
 /* --- 5. Desktop Extras --- */

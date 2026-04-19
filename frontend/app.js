@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const searchInputDesktop = document.getElementById('search-input-desktop');
     const searchInputMobile = document.getElementById('search-input-mobile');
-    const mobileSearchContainer = document.getElementById('mobile-header-search');
+    const mobileSearchModeHeader = document.getElementById('mobile-search-mode-header');
     const headerBrandLogo = document.getElementById('header-logo');
-    const closeMobileSearchBtn = document.getElementById('close-mobile-search');
+    const cancelSearchBtn = document.getElementById('cancel-search-btn');
 
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
@@ -51,11 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById(id);
             if (el) el.innerText = t(id.replace('txt-', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase()));
         });
-        if(document.getElementById('txt-reset-filters')) document.getElementById('txt-reset-filters').innerText = t('resetFilters');
-        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
-        if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
-        if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
-        if (document.getElementById('fb-message')) document.getElementById('fb-message').placeholder = t('feedbackPlaceholder');
+        if(searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
+        if(searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
     }
 
     // --- Core Data Logic ---
@@ -96,7 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="book-author" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-size: 0.85rem;">${book.author || 'Unknown'}</p>
             `;
             card.onclick = () => {
-                closeSearchMode(); // Close search if open
+                if(document.body.classList.contains('search-mode-active')) {
+                    // Silently clear search mode when navigating to book
+                    document.body.classList.remove('search-mode-active');
+                }
                 openBookPage(book);
             };
             booksGrid.appendChild(card);
@@ -133,43 +133,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInputMobile) searchInputMobile.addEventListener('input', handleSearch);
 
     function openSearchMode() {
-        if(headerBrandLogo) headerBrandLogo.style.display = 'none';
-        if(mobileSearchContainer) {
-            mobileSearchContainer.style.display = 'flex';
-            mobileSearchContainer.classList.add('active');
-            setTimeout(() => { if(searchInputMobile) searchInputMobile.focus(); }, 100);
+        document.body.classList.add('search-mode-active');
+        if(searchInputMobile) {
+            searchInputMobile.value = '';
+            setTimeout(() => searchInputMobile.focus(), 150);
         }
+        renderBooks(allBooks); // Refresh results on open
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function closeSearchMode() {
-        if(mobileSearchContainer) {
-            mobileSearchContainer.style.display = 'none';
-            mobileSearchContainer.classList.remove('active');
-        }
-        if(headerBrandLogo) headerBrandLogo.style.display = 'flex';
-        if(searchInputMobile) {
-            searchInputMobile.value = '';
-            renderBooks(allBooks);
-        }
+        document.body.classList.remove('search-mode-active');
+        if(searchInputMobile) searchInputMobile.value = '';
+        renderBooks(allBooks);
     }
 
     if(searchTrigger) searchTrigger.onclick = (e) => { e.preventDefault(); openSearchMode(); };
-    if(closeMobileSearchBtn) closeMobileSearchBtn.onclick = closeSearchMode;
+    if(cancelSearchBtn) cancelSearchBtn.onclick = closeSearchMode;
 
     // --- Navigation & Clicks ---
     function resetAppView() {
         activeAuthorFilters.clear();
         if(searchInputDesktop) searchInputDesktop.value = '';
         
-        // Inline close search mode
-        if(mobileSearchContainer) {
-            mobileSearchContainer.style.display = 'none';
-            mobileSearchContainer.classList.remove('active');
-        }
-        if(headerBrandLogo) headerBrandLogo.style.display = 'flex';
+        // Reset Search Mode
+        document.body.classList.remove('search-mode-active');
         if(searchInputMobile) searchInputMobile.value = '';
 
-        // Inline close book page
+        // Close book page
         if(bookDetailsView) bookDetailsView.style.display = 'none';
         document.body.style.overflow = 'auto';
         currentBookId = null;
@@ -183,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(headerBrandLogo) headerBrandLogo.onclick = resetAppView;
     if(homeTrigger) homeTrigger.onclick = (e) => { e.preventDefault(); resetAppView(); };
     if(resetFiltersBtn) resetFiltersBtn.onclick = () => { activeAuthorFilters.clear(); resetFiltersBtn.style.display = 'none'; renderAuthorFilters(allBooks); renderBooks(allBooks); };
+    if(toggleFiltersBtn) toggleFiltersBtn.onclick = () => authorFilterContainer.classList.toggle('active');
 
     const toggleFB = (e) => { e.preventDefault(); if(feedbackModal) feedbackModal.classList.add('active'); };
     if(feedbackTriggerMobile) feedbackTriggerMobile.onclick = toggleFB;
@@ -202,12 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'hidden';
     }
 
-    function closeBookPage() {
-        // Reset full app view as per requirement "search session over"
-        resetAppView();
-    }
-
-    if(backToLibraryBtn) backToLibraryBtn.onclick = closeBookPage;
+    if(backToLibraryBtn) backToLibraryBtn.onclick = resetAppView; // Return to Home and Reset search as requested
 
     // --- Feedback Submit ---
     if(fbForm) {
@@ -235,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCarousel() {
         const track = document.getElementById('carousel-track');
-        if(track) track.innerHTML = '<div class="carousel-item" style="justify-content:center;"><h2>Explore our curated collection</h2></div>';
+        if(track) track.innerHTML = '<div class="carousel-item" style="justify-content:center;"><h2>Browse authors or search titles. Use Home to reset.</h2></div>';
     }
 
     function checkDeepLink() {
