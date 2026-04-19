@@ -25,12 +25,12 @@
         </div>
         
         <!-- Desktop Central Search -->
-        <div class="header-search-container desktop-only">
+        <div id="desktop-header-search" class="header-search-container">
             <input type="text" id="search-input-desktop" placeholder="Find your next read...">
         </div>
 
-        <!-- Optional placeholder to keep layout balanced or for desktop feedback if needed -->
-        <div class="desktop-only" style="width: 32px;"></div>
+        <!-- Optional placeholder -->
+        <div class="header-spacer-desktop" style="width: 32px;"></div>
     </header>
 
     <div class="app-container">
@@ -46,7 +46,7 @@
 
         <!-- Filter by Author Pills -->
         <div class="filter-controls-container">
-            <button id="toggle-author-filters-btn" class="btn-secondary btn-mini mobile-only" style="margin-bottom: 0.5rem; width: 100%;">Filter by Author</button>
+            <button id="toggle-author-filters-btn" class="btn-secondary btn-mini mobile-only-toggle" style="margin-bottom: 0.5rem; width: 100%;">Filter by Author</button>
             <div class="author-filter-row" id="author-filter-container">
                 <!-- Author pills injected via JS -->
             </div>
@@ -70,10 +70,10 @@
     </div>
 
     <!-- Floating Feedback (Desktop) -->
-    <button id="floating-feedback-btn" class="floating-feedback-btn desktop-only">💬</button>
+    <button id="floating-feedback-btn" class="floating-feedback-btn">💬</button>
 
     <!-- Mobile Search Overlay -->
-    <div id="mobile-search-overlay" class="mobile-search-overlay mobile-only">
+    <div id="mobile-search-overlay" class="mobile-search-overlay">
         <div class="search-input-wrapper">
             <input type="text" id="search-input-mobile" placeholder="Find your next read...">
             <button id="close-search-overlay">✕</button>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- Mobile Sticky Navigation -->
-    <nav class="mobile-bottom-nav mobile-only">
+    <nav class="mobile-bottom-nav">
         <a href="#" class="nav-item active" id="nav-home">
             <span class="nav-icon">🏠</span>
             <span class="nav-label" id="txt-nav-home">Home</span>

@@ -4,23 +4,18 @@
 */
 
 :root {
-    --velvet-deep: #0a0e0c;   /* Almost black with a green tint */
+    --velvet-deep: #0a0e0c;
     --emerald-primary: #10b981;
     --emerald-glow: #34d399;
     --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-glow: rgba(16, 185, 129, 0.15);
     --text-primary: #f3f4f6;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
     --danger: #ef4444;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: 'Inter', sans-serif;
@@ -30,36 +25,60 @@ body {
     overflow-x: hidden;
 }
 
-.serif-title {
-    font-family: 'Lora', serif;
-    font-weight: 700;
-}
+h1, h2, .serif-title { font-family: 'Lora', serif; }
 
-.serif-text {
-    font-family: 'Lora', serif;
-}
+/* --- 1. Platform Core Visibility (CRITICAL) --- */
 
-/* Platform Safety Classes */
-.desktop-only { display: none !important; }
-.mobile-only { display: none !important; }
-
-@media (min-width: 901px) {
-    .desktop-only { display: block !important; }
-    button.desktop-only { display: inline-block !important; }
-    header.desktop-only, div.desktop-only { display: flex !important; }
-    
-    .mobile-only { display: none !important; }
+/* Desktop Only Elements */
+#desktop-header-search, 
+.header-spacer-desktop,
+#floating-feedback-btn {
+    display: flex;
 }
 
 @media (max-width: 900px) {
-    .mobile-only { display: block !important; }
-    button.mobile-only { display: inline-block !important; }
-    nav.mobile-only, div.mobile-only { display: flex !important; }
-    
-    .desktop-only { display: none !important; }
+    #desktop-header-search, 
+    .header-spacer-desktop,
+    #floating-feedback-btn {
+        display: none !important;
+    }
 }
 
-/* Header - Top Island */
+/* Mobile Only Elements */
+.mobile-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        height: 70px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 100px;
+        align-items: center;
+        justify-content: space-around;
+        z-index: 2500;
+    }
+    
+    .mobile-only-toggle {
+        display: block !important;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (min-width: 901px) {
+    .mobile-only-toggle { display: none !important; }
+}
+
+/* --- 2. Header & Navigation --- */
+
 .top-nav-island {
     position: fixed;
     top: 20px;
@@ -77,7 +96,6 @@ body {
     justify-content: space-between;
     padding: 0 1.5rem;
     z-index: 2000;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .header-brand {
@@ -86,140 +104,40 @@ body {
     gap: 0.75rem;
 }
 
-.header-brand h1 {
-    font-size: 1.4rem;
-    letter-spacing: -0.5px;
-    background: linear-gradient(to bottom, #fff, #9ca3af);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+@media (max-width: 900px) {
+    .top-nav-island {
+        top: 12px;
+        justify-content: center;
+    }
+    .header-brand { width: 100%; justify-content: center; }
 }
 
-/* Header Search (Desktop) */
 .header-search-container {
     flex: 1;
-    max-width: 480px;
+    max-width: 500px;
     margin: 0 2rem;
 }
 
 .header-search-container input {
     width: 100%;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
     border: 1px solid var(--glass-border);
     border-radius: 100px;
     padding: 0.6rem 1.5rem;
     color: white;
     outline: none;
-    transition: all 0.3s;
 }
 
-.header-search-container input:focus {
-    border-color: var(--emerald-primary);
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-}
+/* --- 3. Content Layout --- */
 
-/* Main Container */
 .app-container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 120px 2rem 100px;
 }
 
-/* Carousel */
-.featured-carousel {
-    height: 480px;
-    border-radius: 30px;
-    overflow: hidden;
-    margin-bottom: 4rem;
-    position: relative;
-    background: #000;
-}
-
-.carousel-track {
-    display: flex;
-    height: 100%;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.carousel-item {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    padding: 0 5rem;
-    position: relative;
-    cursor: pointer;
-}
-
-.carousel-info {
-    flex: 1;
-    z-index: 2;
-}
-
-.carousel-info h2 {
-    font-size: 3.5rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.1;
-}
-
-.carousel-info .badge {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    background: var(--emerald-primary);
-    color: #000;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 800;
-    border-radius: 4px;
-    margin-bottom: 1.5rem;
-}
-
-.carousel-cover-side {
-    flex: 0 0 400px;
-    height: 100%;
-    padding: 4rem 0;
-    filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5));
-}
-
-.carousel-cover-side img {
-    height: 100%;
-    border-radius: 12px;
-    object-fit: cover;
-}
-
-.carousel-dots {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.75rem;
-    z-index: 10;
-}
-
-.dot {
-    width: 8px;
-    height: 8px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.dot.active {
-    background: var(--emerald-primary);
-    transform: scale(1.5);
-    box-shadow: 0 0 10px var(--emerald-primary);
-}
-
-/* Instructions Panel */
-.instructions-panel {
-    background: rgba(16, 185, 129, 0.05);
-    border: 1px solid var(--glass-border);
-    padding: 1.5rem 2rem;
-    border-radius: 20px;
-    margin-bottom: 3rem;
-    text-align: center;
-    color: var(--text-secondary);
+@media (max-width: 900px) {
+    .app-container { padding-top: 100px; padding-bottom: 120px; }
 }
 
 /* Filter Controls */
@@ -227,15 +145,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 4rem;
+    gap: 1rem;
+    margin-bottom: 3rem;
 }
 
 .author-filter-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .author-pill {
@@ -245,20 +163,12 @@ body {
     border-radius: 100px;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s;
     color: var(--text-secondary);
-}
-
-.author-pill:hover {
-    border-color: var(--emerald-primary);
-    color: white;
 }
 
 .author-pill.active {
     background: var(--emerald-primary);
     color: #000;
-    border-color: var(--emerald-primary);
-    font-weight: 600;
 }
 
 .reset-container {
@@ -275,184 +185,27 @@ body {
     border-radius: 100px;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.3s;
 }
 
-.reset-btn-styled:hover {
-    background: #ef4444;
-    color: white;
-    border-color: #ef4444;
-}
-
-/* Books Grid */
+/* Grid */
 .books-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
 }
 
-/* Bento Mode Extensions */
-.books-grid.bento-mode {
-    grid-auto-rows: 320px;
-}
-
-.book-card.bento-featured {
-    grid-column: span 2;
-    grid-row: span 1;
-}
-
-/* Book Card */
 .book-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: 20px;
-    overflow: hidden;
-    padding: 1.25rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100%;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
 }
 
-.book-cover-wrapper {
-    width: 100%;
-    height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-    background: #000;
-}
+/* --- 4. Modals & Overlays --- */
 
-.book-cover-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.book-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
-    color: white;
-}
-
-.book-author {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-/* Toasts */
-.toast-container {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 5000;
-}
-
-.toast {
-    background: var(--emerald-primary);
-    color: black;
-    padding: 0.75rem 1.5rem;
-    border-radius: 100px;
-    margin-top: 10px;
-    font-weight: 600;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    transition: opacity 0.4s;
-}
-
-/* Page View Overlay */
-.book-details-view {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--velvet-deep);
-    z-index: 3000;
-    display: none;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.details-hero {
-    position: relative;
-    padding: 8rem 4rem 100px;
-    overflow: hidden;
-}
-
-.hero-bg-blur {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    filter: blur(80px) saturate(2);
-    opacity: 0.3;
-}
-
-.hero-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    gap: 4rem;
-    position: relative;
-    z-index: 10;
-}
-
-.hero-cover-art {
-    flex: 0 0 320px;
-    height: 480px;
-    filter: drop-shadow(0 30px 60px rgba(0,0,0,0.8));
-}
-
-.hero-cover-art img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 15px;
-}
-
-.hero-description {
-    background: rgba(0,0,0,0.4);
-    padding: 2rem;
-    border-radius: 20px;
-    margin-top: 2rem;
-    color: var(--text-secondary);
-}
-
-.btn-primary {
-    background: var(--emerald-primary);
-    color: black;
-    padding: 0.8rem 2rem;
-    border-radius: 100px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* Floating Feedback (Desktop) */
-.floating-feedback-btn {
-    position: fixed;
-    bottom: 2rem;
-    left: 2rem;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(10px);
-    color: var(--emerald-primary);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2500;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-}
-
-/* Modal Overlay (Feedback) */
+/* Feedback Modal (Global) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -461,8 +214,8 @@ body {
     height: 100%;
     background: rgba(0,0,0,0.8);
     backdrop-filter: blur(10px);
-    z-index: 4000;
-    display: none;
+    z-index: 5000;
+    display: none; /* JS toggled with .active */
     align-items: center;
     justify-content: center;
 }
@@ -472,10 +225,19 @@ body {
 .modal-content {
     background: var(--velvet-deep);
     border: 1px solid var(--glass-border);
-    padding: 3rem;
-    border-radius: 30px;
+    padding: 2.5rem;
+    border-radius: 25px;
     width: 90%;
-    max-width: 500px;
+    max-width: 450px;
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
 /* Mobile Search Overlay */
@@ -487,10 +249,10 @@ body {
     height: 100%;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(4px);
-    display: none;
+    display: none; /* JS toggled with .active */
     flex-direction: column;
     justify-content: flex-end;
-    z-index: 4000;
+    z-index: 4500;
 }
 
 .mobile-search-overlay.active { display: flex; }
@@ -501,53 +263,61 @@ body {
     border-radius: 30px 30px 0 0;
     display: flex;
     gap: 1rem;
-    align-items: center;
 }
 
 .search-input-wrapper input {
     flex: 1;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
+    border-radius: 15px;
     padding: 1rem;
     color: white;
 }
 
-/* Mobile Bottom Nav */
-.mobile-bottom-nav {
+/* --- 5. Desktop Extras --- */
+
+.floating-feedback-btn {
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    height: 70px;
+    bottom: 2rem;
+    left: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 100px;
-    display: none; /* Desktop hidden */
+    color: var(--emerald-primary);
+    font-size: 1.5rem;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
+    cursor: pointer;
     z-index: 2500;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-/* Media Queries */
-@media (max-width: 900px) {
-    .top-nav-island {
-        top: 12px;
-        width: 92%;
-        justify-content: center;
-    }
-    .header-brand { width: 100%; justify-content: center; }
-    .header-search-container { display: none !important; }
-
-    .app-container { padding-top: 100px; padding-bottom: 120px; }
-    
-    .featured-carousel { height: 300px; border-radius: 20px; }
-    .carousel-item { padding: 0 2rem; }
-    .carousel-info h2 { font-size: 1.8rem; }
-    .carousel-cover-side { flex: 0 0 140px; }
-
-    .hero-container { flex-direction: column; align-items: center; text-align: center; }
-    .hero-cover-art { flex: 0 0 240px; height: 360px; }
+/* Form Styles */
+.form-group textarea {
+    width: 100%;
+    min-height: 120px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    margin-bottom: 1rem;
 }
+
+.btn-primary {
+    width: 100%;
+    background: var(--emerald-primary);
+    color: black;
+    padding: 0.8rem;
+    border-radius: 100px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Utility */
+.nav-item { text-decoration: none; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; }
+.nav-label { font-size: 0.7rem; margin-top: 2px; }
+.nav-icon { font-size: 1.2rem; }
