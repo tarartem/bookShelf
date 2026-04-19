@@ -19,12 +19,18 @@
 
     <!-- Floating Top Island (Header) -->
     <header class="top-nav-island">
-        <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem; width: 100%; justify-content: center;">
+        <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
             <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
             <h1 style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
         </div>
-        <!-- Desktop Feedback (to be styled in CSS) -->
-        <button id="header-feedback-trigger" class="btn-secondary header-feedback-btn desktop-only">💬</button>
+        
+        <!-- Desktop Central Search -->
+        <div class="header-search-container desktop-only">
+            <input type="text" id="search-input-desktop" placeholder="Find your next read...">
+        </div>
+
+        <!-- Optional placeholder to keep layout balanced or for desktop feedback if needed -->
+        <div class="desktop-only" style="width: 32px;"></div>
     </header>
 
     <div class="app-container">
@@ -44,7 +50,6 @@
             <div class="author-filter-row" id="author-filter-container">
                 <!-- Author pills injected via JS -->
             </div>
-            <!-- Reset button moved under/after the pills in CSS/Layout -->
             <div class="reset-container">
                 <button id="reset-filters-btn" class="btn-secondary reset-btn-styled" style="display: none;">✕ <span id="txt-reset-filters"></span></button>
             </div>
@@ -64,16 +69,19 @@
         </footer>
     </div>
 
-    <!-- Mobile Search Overlay (Fancy Expansion) -->
-    <div id="mobile-search-overlay" class="mobile-search-overlay">
+    <!-- Floating Feedback (Desktop) -->
+    <button id="floating-feedback-btn" class="floating-feedback-btn desktop-only">💬</button>
+
+    <!-- Mobile Search Overlay -->
+    <div id="mobile-search-overlay" class="mobile-search-overlay mobile-only">
         <div class="search-input-wrapper">
-            <input type="text" id="search-input" placeholder="Find your next read...">
+            <input type="text" id="search-input-mobile" placeholder="Find your next read...">
             <button id="close-search-overlay">✕</button>
         </div>
     </div>
 
     <!-- Mobile Sticky Navigation -->
-    <nav class="mobile-bottom-nav">
+    <nav class="mobile-bottom-nav mobile-only">
         <a href="#" class="nav-item active" id="nav-home">
             <span class="nav-icon">🏠</span>
             <span class="nav-label" id="txt-nav-home">Home</span>

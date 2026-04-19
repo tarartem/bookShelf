@@ -797,6 +797,81 @@ body.details-active {
     cursor: pointer;
 }
 
+/* Header Search (Desktop) */
+.header-search-container {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 2rem;
+}
+
+.header-search-container input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    padding: 0.6rem 1.5rem;
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.header-search-container input:focus {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--emerald-primary);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    outline: none;
+}
+
+/* Floating Feedback Button */
+.floating-feedback-btn {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--emerald-glow);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.floating-feedback-btn:hover {
+    background: var(--emerald-primary);
+    color: black;
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Reset Button Container */
+.filter-controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.author-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.reset-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 /* Mobile Search Overlay */
 .mobile-search-overlay {
     position: fixed;
@@ -888,11 +963,13 @@ body.details-active {
         width: auto;
         transform: none;
         border-radius: 20px;
-        border: 1px solid var(--glass-border);
+        justify-content: center;
         height: 60px;
-        z-index: 1000;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
+
+    .header-brand { width: 100%; justify-content: center; }
+
+    .app-container { padding-top: 90px; }
     
     .author-filter-row {
         flex-direction: column;

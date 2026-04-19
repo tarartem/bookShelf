@@ -5,7 +5,8 @@ let currentLang = 'uk';
 
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
-    const searchInput = document.getElementById('search-input');
+    const searchInputDesktop = document.getElementById('search-input-desktop');
+    const searchInputMobile = document.getElementById('search-input-mobile');
     const booksGrid = document.getElementById('books-grid');
     const toastContainer = document.getElementById('toast-container');
     const authorFilterContainer = document.getElementById('author-filter-container');
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Nav Controls
     const searchTrigger = document.getElementById('nav-search-trigger');
     const feedbackTriggerMobile = document.getElementById('nav-feedback-trigger');
-    const feedbackTriggerHeader = document.getElementById('header-feedback-trigger');
+    const feedbackTriggerFloating = document.getElementById('floating-feedback-btn');
     const homeTrigger = document.getElementById('nav-home');
     
     let currentBookId = null;
@@ -76,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txt-reset-filters').innerText = t('resetFilters');
         if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
         
-        searchInput.placeholder = t('placeholderSearch');
+        if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
+        if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
 
         backToLibraryBtn.innerText = t('backToLibrary');
         requestPageBtn.innerText = t('getThisBook');
@@ -189,7 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetAppView() {
         activeAuthorFilters.clear();
-        searchInput.value = '';
+        if (searchInputDesktop) searchInputDesktop.value = '';
+        if (searchInputMobile) searchInputMobile.value = '';
         closeBookPage();
         updateFilterUI(allBooks);
         if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
@@ -217,18 +220,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Search Logic
+    const handleSearch = (e) => {
+        const val = e.target.value.trim().toLowerCase();
+        if (!val) {
+            renderBooks(allBooks);
+            return;
+        }
+        const filtered = allBooks.filter(b => {
+            return b.title.toLowerCase().includes(val) || (b.author || '').toLowerCase().includes(val);
+        });
+        renderBooks(filtered);
+    };
+
+    if (searchInputDesktop) searchInputDesktop.addEventListener('input', handleSearch);
+    if (searchInputMobile) searchInputMobile.addEventListener('input', handleSearch);
+
     // Mobile Search Overlay Logic
-    searchTrigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        mobileSearchOverlay.classList.add('active');
-        setTimeout(() => searchInput.focus(), 400);
-    });
+    if (searchTrigger) {
+        searchTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileSearchOverlay.classList.add('active');
+            setTimeout(() => searchInputMobile.focus(), 400);
+        });
+    }
 
-    closeSearchOverlay.addEventListener('click', () => {
-        mobileSearchOverlay.classList.remove('active');
-    });
+    if (closeSearchOverlay) {
+        closeSearchOverlay.addEventListener('click', () => {
+            mobileSearchOverlay.classList.remove('active');
+        });
+    }
 
-    // Close search when clicking outside the input wrapper
     mobileSearchOverlay.addEventListener('click', (e) => {
         if (e.target === mobileSearchOverlay) {
             mobileSearchOverlay.classList.remove('active');
@@ -382,18 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    searchInput.addEventListener('input', () => {
-        const val = searchInput.value.trim().toLowerCase();
-        if (!val) {
-            renderBooks(allBooks);
-            return;
-        }
-        const filtered = allBooks.filter(b => {
-            return b.title.toLowerCase().includes(val) || (b.author || '').toLowerCase().includes(val);
-        });
-        renderBooks(filtered);
-    });
-
     emailPageForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('page-user-email').value;
@@ -459,11 +469,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (feedbackTriggerMobile) feedbackTriggerMobile.onclick = openFeedback;
-    if (feedbackTriggerHeader) feedbackTriggerHeader.onclick = openFeedback;
+    if (feedbackTriggerFloating) feedbackTriggerFloating.onclick = openFeedback;
 
     closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
     
-    // Also close modal when clicking outside content
     feedbackModal.addEventListener('click', (e) => {
         if (e.target === feedbackModal) {
             feedbackModal.classList.remove('active');
