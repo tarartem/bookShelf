@@ -122,12 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.1 });
 
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
     async function loadBooks(query = '') {
         console.log(`Fetching books with query: "${query}"...`);
         try {
             const res = await fetch(`${API_URL}/books?search=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error(`Server error: ${res.status}`);
             allBooks = await res.json();
+            
+            // Randomize order for discovery (only if not searching)
+            if (!query) {
+                shuffleArray(allBooks);
+                console.log("Library randomized for discovery.");
+            }
+
             console.log(`Successfully loaded ${allBooks.length} books.`);
 
             renderBooks(allBooks);
