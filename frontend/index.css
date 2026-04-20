@@ -62,22 +62,30 @@ body.search-active .main-footer {
     display: none !important;
 }
 
-#profile-trigger:hover {
-    opacity: 1 !important;
-    transform: scale(1.1);
-    text-shadow: 0 0 10px var(--emerald-glow);
+body.search-active .top-nav-island {
+    justify-content: stretch;
+    padding: 0 0.75rem; 
+    max-width: 1000px;
+    width: 95%;
+    gap: 0;
+    transition: all 0.3s ease;
 }
 
 body.search-active #mobile-search-controls {
     display: flex !important;
+    width: 100%;
+    animation: searchBarReveal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Adjust Header for Search Mode */
-body.search-active .top-nav-island {
-    max-width: 1000px;
-    width: 95%;
-    gap: 0;
-    padding: 0 1rem;
+@keyframes searchBarReveal {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+#profile-trigger:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+    text-shadow: 0 0 10px var(--emerald-glow);
 }
 
 /* Ensure app-container adjusts padding if header expands */
