@@ -44,10 +44,11 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     try:
         send_verification_email(new_user.email, token)
     except Exception as e:
+        base = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
         print(f"\n\n==========================================================")
         print(f"📧 [DEV MODE] EMAIL SIMULATION FOR: {new_user.email}")
         print(f"Here is your Account Verification Link to continue testing:")
-        print(f"http://localhost:8000/verify.html?token={token}")
+        print(f"{base}/verify.html?token={token}")
         print(f"==========================================================\n\n")
     
     return new_user
@@ -85,12 +86,13 @@ async def forgot_password(request: PasswordResetRequest, db: Session = Depends(g
         try:
             send_reset_email(user.email, token)
         except Exception as e:
+            base = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
             import os
             print(f"\n\n==========================================================")
             print(f"📧 [DEV MODE] EMAIL SIMULATION FOR: {user.email}")
             print(f"Could not send real email because SMTP is not configured.")
             print(f"Here is your Password Reset Link to continue testing:")
-            print(f"http://localhost:8000/reset-password.html?token={token}")
+            print(f"{base}/reset-password.html?token={token}")
             print(f"==========================================================\n\n")
     
     # Always return 200 for security
