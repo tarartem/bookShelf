@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.database import get_db
@@ -87,7 +88,6 @@ async def forgot_password(request: PasswordResetRequest, db: Session = Depends(g
             send_reset_email(user.email, token)
         except Exception as e:
             base = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
-            import os
             print(f"\n\n==========================================================")
             print(f"📧 [DEV MODE] EMAIL SIMULATION FOR: {user.email}")
             print(f"Could not send real email because SMTP is not configured.")
