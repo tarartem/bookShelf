@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - BookShelf Console</title>
+    <title>Адмін - Консоль BookShelf</title>
     <link rel="stylesheet" href="/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -97,47 +97,47 @@
             </button>
             <div class="header-brand" style="cursor: pointer;" onclick="window.location.href='/'">
                 <img src="/assets/logo.png" alt="Logo" style="height: 32px; width: 32px; border-radius: 8px;">
-                <h1 style="font-size: 1.2rem;">BookShelf <span style="font-size: 0.8rem; color: var(--emerald-glow); opacity: 0.8; margin-left: 0.5rem;">Admin</span></h1>
+                <h1 style="font-size: 1.2rem;">BookShelf <span style="font-size: 0.8rem; color: var(--emerald-glow); opacity: 0.8; margin-left: 0.5rem;">Адмін</span></h1>
             </div>
         </div>
-        <button onclick="localStorage.removeItem('admin_auth'); window.location.href='/login.html';" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.8rem;">Log Out</button>
+        <button onclick="localStorage.removeItem('admin_auth'); window.location.href='/login.html';" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.8rem;">Вийти</button>
     </div>
 
     <div class="admin-container">
         <!-- Bento Stats -->
         <section class="bento-stats">
             <div class="glass-panel bento-stat-card">
-                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Library Size</p>
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Розмір бібліотеки</p>
                 <div id="total-books-count" class="bento-stat-value">...</div>
-                <p style="font-size: 0.9rem;">Total Volumes</p>
+                <p style="font-size: 0.9rem;">Всього томів</p>
             </div>
             <div class="glass-panel bento-stat-card">
-                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Readership</p>
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Читацька аудиторія</p>
                 <div id="total-sends-count" class="bento-stat-value">...</div>
-                <p style="font-size: 0.9rem;">Books Dispatched</p>
+                <p style="font-size: 0.9rem;">Відправлено книг</p>
             </div>
             <div class="glass-panel bento-stat-card">
-                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">User Pulse</p>
+                <p style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Пульс користувачів</p>
                 <div id="total-feedback-count" class="bento-stat-value">...</div>
-                <p style="font-size: 0.9rem;">Messages Received</p>
+                <p style="font-size: 0.9rem;">Отримано повідомлень</p>
             </div>
         </section>
 
         <!-- Navigation Tabs -->
         <div class="admin-nav-tabs">
-            <button class="tab-btn active" onclick="switchPanel('books')">Library Management</button>
-            <button class="tab-btn" onclick="switchPanel('contributions')">Contribution Review <span id="contributions-badge" style="background: var(--danger); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px; display:none;">0</span></button>
-            <button class="tab-btn" onclick="switchPanel('history')">Upload History</button>
-            <button class="tab-btn" onclick="switchPanel('feedback')">User Voices</button>
+            <button class="tab-btn active" onclick="switchPanel('books')">Керування бібліотекою</button>
+            <button class="tab-btn" onclick="switchPanel('contributions')">Перевірка внесків <span id="contributions-badge" style="background: var(--danger); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px; display:none;">0</span></button>
+            <button class="tab-btn" onclick="switchPanel('history')">Історія завантажень</button>
+            <button class="tab-btn" onclick="switchPanel('feedback')">Голоси користувачів</button>
         </div>
 
         <!-- Library Panel -->
         <section id="panel-books" class="admin-panel active">
             <div class="glass-panel" style="padding: 2rem; border-radius: 24px; margin-bottom: 2rem;">
-                <h3 style="margin-bottom: 1rem;">Import New Books</h3>
+                <h3 style="margin-bottom: 1rem;">Імпорт нових книг</h3>
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <input type="file" id="epub-input" accept=".epub" multiple style="flex: 1; padding: 1rem; background: rgba(0,0,0,0.2); border: 1px dashed var(--glass-border); border-radius: 12px;">
-                    <button id="upload-btn" class="btn-primary">Upload epubs</button>
+                    <button id="upload-btn" class="btn-primary">Завантажити epub</button>
                 </div>
                 <div id="upload-status" style="margin-top: 1rem; font-size: 0.9rem;"></div>
             </div>
@@ -172,11 +172,11 @@
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="modal-title" id="modal-title">Confirm</h3>
-            <p class="modal-text" id="modal-text">Are you sure?</p>
+            <h3 class="modal-title" id="modal-title">Підтвердження</h3>
+            <p class="modal-text" id="modal-text">Ви впевнені?</p>
             <div class="modal-actions">
-                <button class="btn-secondary" id="modal-cancel" style="padding: 0.8rem 1.5rem; border-radius: 12px; cursor:pointer;">Cancel</button>
-                <button class="btn-primary" id="modal-confirm" style="padding: 0.8rem 1.5rem; border-radius: 12px; background: var(--emerald-primary); color: black; cursor:pointer;">Confirm</button>
+                <button class="btn-secondary" id="modal-cancel" style="padding: 0.8rem 1.5rem; border-radius: 12px; cursor:pointer;">Скасувати</button>
+                <button class="btn-primary" id="modal-confirm" style="padding: 0.8rem 1.5rem; border-radius: 12px; background: var(--emerald-primary); color: black; cursor:pointer;">Підтвердити</button>
             </div>
         </div>
     </div>

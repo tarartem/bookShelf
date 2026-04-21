@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - BookShelf</title>
+    <title>Мій профіль - BookShelf</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -147,32 +147,32 @@
             <div class="profile-card">
                 <div class="user-avatar" id="avatar-initials">?</div>
                 <div class="user-info">
-                    <h1 id="user-email">Loading...</h1>
-                    <p id="user-status">Status: Checking...</p>
-                    <span id="member-id" style="font-size: 0.75rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 100px;">Member ID: #000</span>
+                    <h1 id="user-email">Завантаження...</h1>
+                    <p id="user-status">Статус: Перевірка...</p>
+                    <span id="member-id" style="font-size: 0.75rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 100px;">ID учасника: #000</span>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:2rem;">
-                    <button class="btn-logout" id="logout-btn">Sign Out</button>
-                    <button id="delete-btn" style="background:none; border:none; color:rgba(239, 68, 68, 0.4); font-size:0.75rem; cursor:pointer;">Delete Account</button>
+                    <button class="btn-logout" id="logout-btn">Вийти</button>
+                    <button id="delete-btn" style="background:none; border:none; color:rgba(239, 68, 68, 0.4); font-size:0.75rem; cursor:pointer;">Видалити акаунт</button>
                 </div>
             </div>
             
             <div class="stat-item" style="text-align: center; background: var(--glass-bg); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--glass-border);">
-                <span style="display:block; font-size: 0.8rem; color: var(--text-dim); text-transform:uppercase; margin-bottom:0.5rem;">Join Date</span>
+                <span style="display:block; font-size: 0.8rem; color: var(--text-dim); text-transform:uppercase; margin-bottom:0.5rem;">Дата реєстрації</span>
                 <span id="join-date" style="font-weight: 700; color: var(--emerald-glow);">---</span>
             </div>
         </aside>
 
         <main class="contribution-section">
             <div class="section-header">
-                <h2 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem;">My Contributions</h2>
-                <p style="color: var(--text-muted);">Share your EPUB files with the community.</p>
+                <h2 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem;">Мої внески</h2>
+                <p style="color: var(--text-muted);">Поділіться своїми EPUB файлами зі спільнотою.</p>
             </div>
 
             <div class="upload-box" onclick="document.getElementById('file-input').click()">
                 <span class="icon">📤</span>
-                <h3>Upload New Book</h3>
-                <p>Drag and drop or click to select EPUB</p>
+                <h3>Завантажити нову книгу</h3>
+                <p>Перетягніть або натисніть, щоб вибрати EPUB</p>
                 <input type="file" id="file-input" accept=".epub">
             </div>
 
@@ -186,11 +186,11 @@
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="modal-title" id="modal-title">Confirm</h3>
-            <p class="modal-text" id="modal-text">Are you sure?</p>
+            <h3 class="modal-title" id="modal-title">Підтвердження</h3>
+            <p class="modal-text" id="modal-text">Ви впевнені?</p>
             <div class="modal-actions">
-                <button class="btn-secondary" id="modal-cancel" style="padding: 0.8rem 1.5rem; border-radius: 12px; cursor:pointer;">Cancel</button>
-                <button class="btn-primary" id="modal-confirm" style="padding: 0.8rem 1.5rem; border-radius: 12px; background: var(--danger); color: white; cursor:pointer;">Confirm</button>
+                <button class="btn-secondary" id="modal-cancel" style="padding: 0.8rem 1.5rem; border-radius: 12px; cursor:pointer;">Скасувати</button>
+                <button class="btn-primary" id="modal-confirm" style="padding: 0.8rem 1.5rem; border-radius: 12px; background: var(--danger); color: white; cursor:pointer;">Підтвердити</button>
             </div>
         </div>
     </div>
@@ -217,10 +217,10 @@
 
                 const user = await userRes.json();
                 document.getElementById('user-email').textContent = user.email;
-                document.getElementById('user-status').textContent = user.is_verified ? 'Verified Member' : 'Pending Verification';
+                document.getElementById('user-status').textContent = user.is_verified ? 'Перевірений учасник' : 'Очікує підтвердження';
                 document.getElementById('avatar-initials').textContent = user.email[0].toUpperCase();
                 document.getElementById('join-date').textContent = new Date(user.created_at).toLocaleDateString();
-                document.getElementById('member-id').textContent = `Member ID: #${user.id.toString().padStart(3, '0')}`;
+                document.getElementById('member-id').textContent = `ID учасника: #${user.id.toString().padStart(3, '0')}`;
 
                 // Load My Books
                 loadMyBooks();
@@ -241,7 +241,7 @@
             grid.innerHTML = '';
             
             if (books.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">You haven\'t uploaded any books yet.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">Ви ще не завантажили жодної книги.</p>';
                 return;
             }
 
@@ -267,7 +267,7 @@
 
             const status = document.getElementById('upload-status');
             status.style.display = 'block';
-            status.innerHTML = `<span style="color: var(--emerald-glow);">Preparing upload: ${file.name}...</span>`;
+            status.innerHTML = `<span style="color: var(--emerald-glow);">Підготовка до завантаження: ${file.name}...</span>`;
 
             const formData = new FormData();
             formData.append('file', file);
@@ -283,17 +283,17 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    status.innerHTML = `<span style="color: var(--emerald-primary);">✅ Successfully uploaded! Pending review.</span>`;
+                    status.innerHTML = `<span style="color: var(--emerald-primary);">✅ Успішно завантажено! Очікує перевірки.</span>`;
                     console.log("Upload success, refreshing grid...");
                     await loadMyBooks(); // Force refresh
                     setTimeout(() => {
                         status.style.display = 'none';
                     }, 3000);
                 } else {
-                    status.innerHTML = `<span style="color: var(--danger);">❌ ${data.detail || 'Upload failed.'}</span>`;
+                    status.innerHTML = `<span style="color: var(--danger);">❌ ${data.detail || 'Помилка завантаження.'}</span>`;
                 }
             } catch (err) {
-                status.innerHTML = `<span style="color: var(--danger);">❌ Connection error.</span>`;
+                status.innerHTML = `<span style="color: var(--danger);">❌ Помилка з'єднання.</span>`;
             }
         });
 
@@ -302,7 +302,7 @@
             window.location.href = 'index.html';
         });
 
-        async function showConfirm(title, text, confirmText = "Confirm", isDanger = false) {
+        async function showConfirm(title, text, confirmText = "Підтвердити", isDanger = false) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirm-modal');
                 const titleEl = document.getElementById('modal-title');
@@ -334,18 +334,18 @@
             e.preventDefault();
             
             const confirmed = await showConfirm(
-                "Delete Account?", 
-                "This will permanently delete your account and all your contributions. This cannot be undone.",
-                "Delete Forever",
+                "Видалити акаунт?", 
+                "Це назавжди видалить ваш акаунт та всі ваші внески. Цю дію неможливо скасувати.",
+                "Видалити назавжди",
                 true
             );
 
             if (!confirmed) return;
 
             const secondConfirm = await showConfirm(
-                "Final Warning",
-                "Are you absolutely sure? Click below to vanish from BookShelf.",
-                "Yes, Delete",
+                "Останнє попередження",
+                "Ви абсолютно впевнені? Натисніть нижче, щоб зникнути з BookShelf.",
+                "Так, видалити",
                 true
             );
 

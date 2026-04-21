@@ -24,7 +24,7 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists."
+            detail="Користувач з такою електронною поштою вже існує."
         )
     
     # Create new user
@@ -60,7 +60,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     if not payload or payload.get("type") != "verification":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired token."
+            detail="Недійсний або застарілий токен."
         )
     
     email = payload.get("sub")
@@ -68,7 +68,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found."
+            detail="Користувача не знайдено."
         )
     
     if user.is_verified:
@@ -102,12 +102,12 @@ async def forgot_password(request: PasswordResetRequest, db: Session = Depends(g
 async def reset_password(request: PasswordResetConfirm, db: Session = Depends(get_db)):
     payload = decode_token(request.token)
     if not payload or payload.get("type") != "reset":
-        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+        raise HTTPException(status_code=400, detail="Недійсний або застарілий токен відновлення.")
     
     email = payload.get("sub")
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
+        raise HTTPException(status_code=404, detail="Користувача не знайдено.")
     
     user.hashed_password = hash_password(request.new_password)
     db.commit()
@@ -119,14 +119,14 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
     if not user or not verify_password(user_in.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password.",
+            detail="Невірна електронна пошта або пароль.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
     if not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please verify your email before logging in."
+            detail="Будь ласка, підтвердіть електронну пошту перед входом."
         )
     
     access_token = create_access_token(data={"sub": user.email})

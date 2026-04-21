@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Verification - BookShelf</title>
+    <title>Підтвердження акаунта - BookShelf</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -64,22 +64,22 @@
         <div class="status-card" id="status-card">
             <div id="loading">
                 <div class="spinner"></div>
-                <h2>Verifying your account...</h2>
-                <p>Please wait while we confirm your credentials.</p>
+                <h2>Перевірка вашого акаунта...</h2>
+                <p>Будь ласка, зачекайте, поки ми перевіряємо ваші дані.</p>
             </div>
 
             <div id="success" style="display: none;">
                 <span class="status-icon">✅</span>
-                <h2>Verification Successful!</h2>
-                <p>Your account is now active. You can sign in and start building your personal library.</p>
-                <a href="login.html" class="btn-auth">Sign In Now</a>
+                <h2>Успішне підтвердження!</h2>
+                <p>Ваш акаунт тепер активний. Ви можете увійти та почати створювати свою особисту бібліотеку.</p>
+                <a href="login.html" class="btn-auth">Увійти зараз</a>
             </div>
 
             <div id="error" style="display: none;">
                 <span class="status-icon">❌</span>
-                <h2>Link Expired or Invalid</h2>
-                <p id="error-text">The verification link is either invalid or has expired. Please try signing up again or contact support.</p>
-                <a href="signup.html" class="btn-auth">Back to Signup</a>
+                <h2>Посилання недійсне або закінчився термін дії</h2>
+                <p id="error-text">Посилання для підтвердження недійсне або закінчився термін його дії. Будь ласка, спробуйте зареєструватися знову або зверніться до підтримки.</p>
+                <a href="signup.html" class="btn-auth">Повернутися до реєстрації</a>
             </div>
         </div>
     </div>
@@ -92,7 +92,7 @@
             if (!token) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
-                document.getElementById('error-text').textContent = "No verification token found.";
+                document.getElementById('error-text').textContent = "Токен підтвердження не знайдено.";
                 return;
             }
 
@@ -105,12 +105,12 @@
                     document.getElementById('success').style.display = 'block';
                 } else {
                     document.getElementById('error').style.display = 'block';
-                    document.getElementById('error-text').textContent = data.detail || "Verification failed.";
+                    document.getElementById('error-text').textContent = data.detail || "Не вдалося підтвердити акаунт.";
                 }
             } catch (err) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
-                document.getElementById('error-text').textContent = "Server connection error.";
+                document.getElementById('error-text').textContent = "Помилка з'єднання з сервером.";
             }
         });
     </script>

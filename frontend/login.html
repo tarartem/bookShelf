@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Back - Login to BookShelf</title>
+    <title>З поверненням - Вхід до BookShelf</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -122,35 +122,35 @@
 </head>
 <body class="oled-theme">
     <div class="auth-container">
-        <div style="position: absolute; top: 2rem; left: 2rem;">
+        <div style="position: absolute; top: 2rem; left: 2rem; z-index: 10;">
             <button onclick="window.location.href='index.html'" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; display:flex; align-items:center; gap:0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-dim); cursor: pointer;">
                 <span>←</span> Назад
             </button>
         </div>
         <div class="auth-card">
             <div class="auth-header">
-                <h1>Welcome Back</h1>
-                <p>Sign in to your library</p>
+                <h1>З поверненням</h1>
+                <p>Увійдіть до своєї бібліотеки</p>
             </div>
 
             <div id="error-box" class="error-message"></div>
 
             <form id="login-form">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                    <label for="email">Електронна пошта</label>
+                    <input type="email" id="email" class="form-control" placeholder="ваша@пошта.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Пароль</label>
                     <input type="password" id="password" class="form-control" placeholder="••••••••" required>
                 </div>
                 
-                <button type="submit" class="btn-auth">Sign In</button>
+                <button type="submit" class="btn-auth">Увійти</button>
             </form>
 
             <div class="auth-footer">
-                New to BookShelf? <a href="signup.html">Create Account</a><br><br>
-                <a href="forgot-password.html" style="font-size: 0.8rem; opacity: 0.8;">Forgot Password?</a><br><br>
+                Вперше у BookShelf? <a href="signup.html">Створити акаунт</a><br><br>
+                <a href="forgot-password.html" style="font-size: 0.8rem; opacity: 0.8;">Забули пароль?</a><br><br>
                 <a href="index.html" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">Повернутися до каталогу</a>
             </div>
         </div>
@@ -185,11 +185,11 @@
                         window.location.href = 'index.html';
                     }
                 } else {
-                    errorBox.textContent = data.detail || "Login failed. Check your credentials.";
+                    errorBox.textContent = data.detail || "Помилка входу. Перевірте свої дані.";
                     errorBox.style.display = 'block';
                 }
             } catch (err) {
-                errorBox.textContent = "Connection error.";
+                errorBox.textContent = "Помилка з'єднання.";
                 errorBox.style.display = 'block';
             }
         });

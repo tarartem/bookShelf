@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderLibrary(books) {
         booksList.innerHTML = '';
         if (!books || books.length === 0) {
-            booksList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">No books in library yet.</p>';
+            booksList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">Бібліотека ще порожня.</p>';
             return;
         }
 
@@ -77,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
             div.innerHTML = `
                 <div style="flex:1;">
                     <h4 style="margin:0;">${b.title}</h4>
-                    <p style="font-size:0.8rem; color:var(--text-dim); margin:0.25rem 0 0;">Sends: <strong>${b.total_sends}</strong> | Readers: <strong>${b.unique_users}</strong></p>
+                    <p style="font-size:0.8rem; color:var(--text-dim); margin:0.25rem 0 0;">Відправлень: <strong>${b.total_sends}</strong> | Читачів: <strong>${b.unique_users}</strong></p>
                 </div>
-                <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); font-size:0.7rem; padding:0.5rem 1rem;" onclick="deleteBook(${b.book_id})">Delete</button>
+                <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); font-size:0.7rem; padding:0.5rem 1rem;" onclick="deleteBook(${b.book_id})">Видалити</button>
             `;
             booksList.appendChild(div);
         });
@@ -87,9 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.deleteBook = async function(id) {
         const confirmed = await showConfirm(
-            "Delete Book?",
-            "Are you sure you want to delete this book? This action cannot be undone.",
-            "Delete",
+            "Видалити книгу?",
+            "Ви впевнені, що хочете видалити цю книгу? Цю дію неможливо скасувати.",
+            "Видалити",
             true
         );
         if (!confirmed) return;
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 loadStats();
             } else {
-                alert('Delete failed.');
+                alert('Помилка видалення.');
             }
         } catch (e) { console.error(e); }
     };
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!epubInput.files.length) return;
         
         uploadBtn.disabled = true;
-        uploadStatus.textContent = 'Uploading...';
+        uploadStatus.textContent = 'Завантаження...';
         
         const formData = new FormData();
         [...epubInput.files].forEach(file => formData.append('epubs', file));
@@ -125,18 +125,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (res.ok) {
-                uploadStatus.textContent = 'Successfully uploaded!';
+                uploadStatus.textContent = 'Успішно завантажено!';
                 uploadStatus.style.color = '#4ade80';
                 epubInput.value = '';
                 setTimeout(() => uploadStatus.textContent = '', 3000);
                 loadStats();
             } else {
                 const err = await res.json();
-                uploadStatus.textContent = err.detail || 'Upload failed.';
+                uploadStatus.textContent = err.detail || 'Помилка завантаження.';
                 uploadStatus.style.color = 'var(--danger)';
             }
         } catch (e) {
-            uploadStatus.textContent = 'Network error.';
+            uploadStatus.textContent = 'Помилка мережі.';
         } finally {
             uploadBtn.disabled = false;
         }
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             feedbackList.innerHTML = '';
             if (!data || data.length === 0) {
-                feedbackList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">No feedback received yet.</p>';
+                feedbackList.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:2rem;">Відгуків ще немає.</p>';
                 return;
             }
 
@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <p style="margin-bottom:0.75rem; line-height:1.5;">${item.message}</p>
                     <div style="font-size:0.75rem; color:var(--text-dim); display:flex; justify-content:space-between;">
-                        <span>Received at ${dateStr}</span>
-                        <span style="color:var(--emerald-glow);">New</span>
+                        <span>Отримано ${dateStr}</span>
+                        <span style="color:var(--emerald-glow);">Новий</span>
                     </div>
                 `;
                 feedbackList.appendChild(card);
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contributionsList.innerHTML = '';
             if (!data || data.length === 0) {
-                contributionsList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">No pending contributions to review.</p>';
+                contributionsList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">Немає внесків для перевірки.</p>';
                 return;
             }
 
@@ -202,12 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div style="flex:1;">
                         <h4 style="margin:0;">${book.title}</h4>
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">${book.author} | Owner ID: ${book.owner_id}</p>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">${book.author} | ID власника: ${book.owner_id}</p>
                     </div>
                     <div style="display:flex; gap:0.5rem;">
-                        <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Review EPUB</button>
-                        <button class="btn-primary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="approveContribution(${book.id})">Approve</button>
-                        <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="rejectContribution(event, ${book.id})">Reject</button>
+                        <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Переглянути EPUB</button>
+                        <button class="btn-primary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="approveContribution(${book.id})">Схвалити</button>
+                        <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="rejectContribution(event, ${book.id})">Відхилити</button>
                     </div>
                 `;
                 contributionsList.appendChild(div);
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             a.remove();
         } else {
-            alert("Failed to download book for review.");
+            alert("Не вдалося завантажити книгу для перегляду.");
         }
     };
 
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             historyList.innerHTML = '';
             if (!userBooks || userBooks.length === 0) {
-                historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">No user contributions yet.</p>';
+                historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">Внесків від користувачів ще немає.</p>';
                 return;
             }
 
@@ -250,10 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="flex:1;">
                         <h4 style="margin:0;">${book.title}</h4>
                         <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">
-                            Uploaded by User #${book.owner_id} | Status: <span style="color:${statusColor}; text-transform:capitalize;">${book.status}</span>
+                            Завантажено користувачем #${book.owner_id} | Статус: <span style="color:${statusColor}; text-transform:capitalize;">${book.status}</span>
                         </p>
                     </div>
-                    <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Download</button>
+                    <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Завантажити</button>
                 `;
                 historyList.appendChild(div);
             });
@@ -279,9 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
             event.stopPropagation();
         }
         const confirmed = await showConfirm(
-            "Reject Contribution?",
-            "This will mark the book as rejected and hide it from the library. You can still see it in History.",
-            "Reject",
+            "Відхилити внесок?",
+            "Це позначить книгу як відхилену і приховає її з бібліотеки. Ви все ще зможете бачити її в Історії.",
+            "Відхилити",
             true
         );
         if (!confirmed) return;
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error(e); }
     };
 
-    async function showConfirm(title, text, confirmText = "Confirm", isDanger = false) {
+    async function showConfirm(title, text, confirmText = "Підтвердити", isDanger = false) {
         return new Promise((resolve) => {
             const modal = document.getElementById('confirm-modal');
             const titleEl = document.getElementById('modal-title');

@@ -35,9 +35,9 @@ def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str)
     msg["From"] = SENDER_EMAIL
     msg["To"] = to_email
     msg["Date"] = formatdate(localtime=True)
-    msg["Subject"] = f"📚 Your book: {book_title} - {author}"
+    msg["Subject"] = f"📚 Ваша книга: {book_title} - {author}"
     msg.set_content(
-        f"Hello,\n\nYour requested book «{book_title}» by {author} is attached.\n\nEnjoy reading!\n\nBookShelf App"
+        f"Добрий день!\n\nВаша замовлена книга «{book_title}» автора {author} додана як вкладення.\n\nПриємного читання!\n\nBookShelf App"
     )
 
     with open(epub_path, "rb") as f:
@@ -78,18 +78,18 @@ def send_verification_email(to_email: str, token: str) -> bool:
         logger.error("SMTP not configured. Verification email NOT sent.")
         return False
 
-    base_url = os.getenv("BASE_URL", "http://localhost:8000")
+    base_url = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
     verification_url = f"{base_url}/verify.html?token={token}"
 
     msg = EmailMessage()
     msg["From"] = SENDER_EMAIL
     msg["To"] = to_email
     msg["Date"] = formatdate(localtime=True)
-    msg["Subject"] = "🔐 Verify your BookShelf account"
+    msg["Subject"] = "🔐 Підтвердите ваш акаунт BookShelf"
     msg.set_content(
-        f"Hi there,\n\nWelcome to BookShelf! Please verify your account by clicking the link below:\n\n"
+        f"Добрий день!\n\nДякуємо вас у BookShelf! Будь ласка, підтвердіть свій акаунт, натиснувши на посилання нижче:\n\n"
         f"{verification_url}\n\n"
-        f"This link will expire in 24 hours.\n\nHappy reading!\nBookShelf Team"
+        f"Це посилання дійсне протягом 24 годин.\n\nПриємного читання!\nКоманда BookShelf"
     )
 
     try:
@@ -104,18 +104,19 @@ def send_verification_email(to_email: str, token: str) -> bool:
         return False
 
 def send_reset_email(email: str, token: str):
-    reset_url = f"{BASE_URL}/reset-password.html?token={token}"
-    subject = "Reset your BookShelf Password"
+    base_url = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
+    reset_url = f"{base_url}/reset-password.html?token={token}"
+    subject = "🔑 Скидання пароля BookShelf"
     body = f"""
-    Hello,
+    Добрий день!
     
-    You requested to reset your password. Please click the link below to set a new password:
+    Ви запитали зміну пароля. Будь ласка, натисніть на посилання нижче, щоб встановити новий пароль:
     {reset_url}
     
-    This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
+    Це посилання дійсне протягом 1 години. Якщо ви не запитували цього, ви можете ігнорувати цей лист.
     
-    Regards,
-    BookShelf Team
+    З повагою,
+    Команда BookShelf
     """
     try:
         msg = EmailMessage()

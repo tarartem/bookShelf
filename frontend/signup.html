@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join BookShelf - Create Account</title>
+    <title>Приєднатися до BookShelf - Створити акаунт</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -128,7 +128,7 @@
 </head>
 <body class="oled-theme">
     <div class="auth-container">
-        <div style="position: absolute; top: 2rem; left: 2rem;">
+        <div style="position: absolute; top: 2rem; left: 2rem; z-index: 10;">
             <button onclick="window.location.href='index.html'" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; display:flex; align-items:center; gap:0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-dim); cursor: pointer;">
                 <span>←</span> Назад
             </button>
@@ -136,43 +136,43 @@
         <div class="auth-card">
             <div id="signup-form-container">
                 <div class="auth-header">
-                    <h1>Join the Club</h1>
-                    <p>Create your personal library account</p>
+                    <h1>Приєднуйтесь до нас</h1>
+                    <p>Створіть свій особистий обліковий запис у бібліотеці</p>
                 </div>
 
                 <div id="error-box" class="error-message"></div>
 
                 <form id="signup-form">
                     <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                        <label for="email">Електронна пошта</label>
+                        <input type="email" id="email" class="form-control" placeholder="ваша@пошта.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="password">Password</label>
+                        <label for="password">Пароль</label>
                         <input type="password" id="password" class="form-control" placeholder="••••••••" required minlength="8">
                     </div>
                     <div class="form-group">
-                        <label for="confirm-password">Confirm Password</label>
+                        <label for="confirm-password">Підтвердіть пароль</label>
                         <input type="password" id="confirm-password" class="form-control" placeholder="••••••••" required>
                     </div>
                     
-                    <button type="submit" class="btn-auth">Create Account</button>
+                    <button type="submit" class="btn-auth">Створити акаунт</button>
                 </form>
 
                 <div class="auth-footer">
-                    Already have an account? <a href="login.html">Sign In</a><br><br>
+                    Вже є акаунт? <a href="login.html">Увійти</a><br><br>
                     <a href="index.html" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">Повернутися до каталогу</a>
                 </div>
             </div>
 
             <div id="success-container" class="success-message">
                 <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">✉️</span>
-                <h3>Check your email!</h3>
+                <h3>Перевірте свою пошту!</h3>
                 <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--text-muted);">
-                    We've sent a verification link to your inbox. <br>Please verify your account to start reading.
+                    Ми надіслали посилання для підтвердження на вашу пошту. <br>Будь ласка, підтвердіть свій акаунт, щоб почати читати.
                 </p>
                 <div style="margin-top: 2rem;">
-                    <a href="index.html" class="btn-auth" style="display: block; text-decoration: none;">Back to Library</a>
+                    <a href="index.html" class="btn-auth" style="display: block; text-decoration: none;">Повернутися до каталогу</a>
                 </div>
             </div>
         </div>
@@ -187,7 +187,7 @@
             const errorBox = document.getElementById('error-box');
 
             if (password !== confirm) {
-                errorBox.textContent = "Passwords do not match.";
+                errorBox.textContent = "Паролі не співпадають.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -205,11 +205,11 @@
                     document.getElementById('signup-form-container').style.display = 'none';
                     document.getElementById('success-container').style.display = 'block';
                 } else {
-                    errorBox.textContent = data.detail || "Signup failed. Please try again.";
+                    errorBox.textContent = data.detail || "Помилка реєстрації. Будь ласка, спробуйте ще раз.";
                     errorBox.style.display = 'block';
                 }
             } catch (err) {
-                errorBox.textContent = "Connection error. Is the server running?";
+                errorBox.textContent = "Помилка з'єднання. Чи працює сервер?";
                 errorBox.style.display = 'block';
             }
         });

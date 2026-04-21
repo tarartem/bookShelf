@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="book-info">
                     <h3 class="book-title">${book.title}</h3>
-                    <p class="book-author">${book.author || 'Unknown Author'}</p>
+                    <p class="book-author">${book.author || 'Невідомий автор'}</p>
                 </div>
             `;
             card.addEventListener('click', () => navigateToBook(book));
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="carousel-info">
                     <span class="badge">${t('featuredVolume')}</span>
                     <h2>${book.title}</h2>
-                    <p>${book.author || 'Unknown Author'}</p>
+                    <p>${book.author || 'Невідомий автор'}</p>
                 </div>
                 <div class="carousel-cover-side">
                    ${coverUrl ? `<img src="${coverUrl}" alt="${book.title}">` : ''}
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openBookPage(book) {
         currentBookId = book.id;
         pageTitle.innerText = book.title;
-        pageAuthor.innerText = book.author || 'Unknown Author';
+        pageAuthor.innerText = book.author || 'Невідомий автор';
         pageDescription.innerText = book.description || (currentLang === 'uk' ? "Опис відсутній." : "No description available.");
         
         // Pre-fill email if logged in
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast(t('bookSent'));
             } else {
                 const data = await res.json();
-                alert(data.detail || 'Error');
+                alert(data.detail || 'Помилка. Спробуйте пізніше.');
                 submitBtn.disabled = false;
                 submitBtn.innerText = t('deliverNow');
             }
