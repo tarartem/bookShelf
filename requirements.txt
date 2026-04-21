@@ -8,5 +8,5 @@ ebooklib
 Pillow
 lxml
 python-dotenv
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]

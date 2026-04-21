@@ -1,4 +1,4 @@
-from passlib.context import CryptContext
+import bcrypt
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 import os
@@ -6,23 +6,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # JWT Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-goes-here-change-in-prod")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-def _truncate_password(pwd: str) -> str:
-    # bcrypt has a 72-byte limit. We must truncate the password to avoid ValueError crashes.
-    return pwd.encode('utf-8')[:72].decode('utf-8', 'ignore')
-
 def hash_password(password: str) -> str:
-    return pwd_context.hash(_truncate_password(password))
+    # bcrypt max length is 72 bytes.
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(_truncate_password(plain_password), hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')[:72]
+    hash_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(pwd_bytes, hash_bytes)
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
