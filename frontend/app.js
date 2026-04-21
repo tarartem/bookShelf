@@ -51,8 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (profileTrigger) {
         profileTrigger.onclick = () => {
-            window.location.href = '/login.html';
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = '/profile.html';
+            } else {
+                window.location.href = '/login.html';
+            }
         };
+        
+        // Update profile icon if logged in
+        if (localStorage.getItem('token')) {
+            profileTrigger.style.borderColor = 'var(--emerald-primary)';
+            profileTrigger.style.background = 'var(--glass-glow)';
+        }
     }
     
     let currentBookId = null;
@@ -322,6 +333,18 @@ document.addEventListener('DOMContentLoaded', () => {
         pageTitle.innerText = book.title;
         pageAuthor.innerText = book.author || 'Unknown Author';
         pageDescription.innerText = book.description || (currentLang === 'uk' ? "Опис відсутній." : "No description available.");
+        
+        // Pre-fill email if logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetch('/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).then(res => res.json()).then(user => {
+                if (user && user.email) {
+                    document.getElementById('page-user-email').value = user.email;
+                }
+            }).catch(() => {});
+        }
         
         bookDetailsView.scrollTo(0, 0);
         pageStatusCard.style.display = 'none';

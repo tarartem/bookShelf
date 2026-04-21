@@ -71,3 +71,63 @@ def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str)
     except Exception as e:
         logger.error(f"❌ Failed to send email to {to_email}: {type(e).__name__}: {e}")
         return False
+
+def send_verification_email(to_email: str, token: str) -> bool:
+    """Send verification email with a link."""
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
+        logger.error("SMTP not configured. Verification email NOT sent.")
+        return False
+
+    base_url = os.getenv("BASE_URL", "http://localhost:8000")
+    verification_url = f"{base_url}/verify.html?token={token}"
+
+    msg = EmailMessage()
+    msg["From"] = SENDER_EMAIL
+    msg["To"] = to_email
+    msg["Date"] = formatdate(localtime=True)
+    msg["Subject"] = "🔐 Verify your BookShelf account"
+    msg.set_content(
+        f"Hi there,\n\nWelcome to BookShelf! Please verify your account by clicking the link below:\n\n"
+        f"{verification_url}\n\n"
+        f"This link will expire in 24 hours.\n\nHappy reading!\nBookShelf Team"
+    )
+
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        logger.info(f"✅ Verification email sent to {to_email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send verification email to {to_email}: {e}")
+        return False
+
+def send_reset_email(email: str, token: str):
+    reset_url = f"{BASE_URL}/reset-password.html?token={token}"
+    subject = "Reset your BookShelf Password"
+    body = f"""
+    Hello,
+    
+    You requested to reset your password. Please click the link below to set a new password:
+    {reset_url}
+    
+    This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
+    
+    Regards,
+    BookShelf Team
+    """
+    try:
+        msg = EmailMessage()
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = email
+        msg["Subject"] = subject
+        msg.set_content(body)
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        logger.info(f"Password reset email sent to {email}")
+    except Exception as e:
+        logger.error(f"Failed to send reset email to {email}: {e}")
+        return False

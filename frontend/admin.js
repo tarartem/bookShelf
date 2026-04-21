@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadStatus = document.getElementById('upload-status');
     const booksList = document.getElementById('admin-books-list');
     const feedbackList = document.getElementById('feedback-list');
+    const contributionsList = document.getElementById('contributions-list');
+    const historyList = document.getElementById('history-list');
+    const contributionsBadge = document.getElementById('contributions-badge');
 
     // Get Auth from localStorage (stored by login.html)
     let authHeader = localStorage.getItem('admin_auth');
@@ -41,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function initDashboard() {
         loadStats();
         loadFeedback();
+        loadContributions();
+        loadHistory();
     }
 
     // --- Stats & Library ---
@@ -81,7 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.deleteBook = async function(id) {
-        if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) return;
+        const confirmed = await showConfirm(
+            "Delete Book?",
+            "Are you sure you want to delete this book? This action cannot be undone.",
+            "Delete",
+            true
+        );
+        if (!confirmed) return;
         try {
             const res = await fetch(`${API_URL}/admin/books/${id}`, { 
                 method: 'DELETE',
@@ -162,6 +173,157 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    // --- Contributions ---
+
+    async function loadContributions() {
+        try {
+            const res = await fetch(`${API_URL}/admin/contributions`, { headers: getHeaders() });
+            const data = await res.json();
+
+            if (contributionsBadge) {
+                contributionsBadge.textContent = data.length;
+                contributionsBadge.style.display = data.length > 0 ? 'inline' : 'none';
+            }
+
+            contributionsList.innerHTML = '';
+            if (!data || data.length === 0) {
+                contributionsList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">No pending contributions to review.</p>';
+                return;
+            }
+
+            data.forEach(book => {
+                const div = document.createElement('div');
+                div.className = 'admin-card-item';
+                div.innerHTML = `
+                    <div style="width: 60px; height: 80px; border-radius: 8px; overflow:hidden; background: #222;">
+                        <img src="/api/${book.cover_filepath}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div style="flex:1;">
+                        <h4 style="margin:0;">${book.title}</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">${book.author} | Owner ID: ${book.owner_id}</p>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Review EPUB</button>
+                        <button class="btn-primary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="approveContribution(${book.id})">Approve</button>
+                        <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger); padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="rejectContribution(event, ${book.id})">Reject</button>
+                    </div>
+                `;
+                contributionsList.appendChild(div);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    window.downloadBook = async function(id) {
+        const res = await fetch(`${API_URL}/books/download/${id}`, { headers: getHeaders() });
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `review_book_${id}.epub`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert("Failed to download book for review.");
+        }
+    };
+
+    async function loadHistory() {
+        try {
+            const res = await fetch(`${API_URL}/admin/history`, { headers: getHeaders() });
+            const userBooks = await res.json();
+
+            historyList.innerHTML = '';
+            if (!userBooks || userBooks.length === 0) {
+                historyList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">No user contributions yet.</p>';
+                return;
+            }
+
+            userBooks.reverse().forEach(book => {
+                const div = document.createElement('div');
+                div.className = 'admin-card-item';
+                const statusColor = book.status === 'approved' ? 'var(--emerald-glow)' : 'var(--danger)';
+                div.innerHTML = `
+                    <div style="flex:1;">
+                        <h4 style="margin:0;">${book.title}</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">
+                            Uploaded by User #${book.owner_id} | Status: <span style="color:${statusColor}; text-transform:capitalize;">${book.status}</span>
+                        </p>
+                    </div>
+                    <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="downloadBook(${book.id})">Download</button>
+                `;
+                historyList.appendChild(div);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    window.approveContribution = async function(id) {
+        try {
+            const res = await fetch(`${API_URL}/admin/contributions/${id}/approve`, { 
+                method: 'POST', 
+                headers: getHeaders() 
+            });
+            if (res.ok) {
+                loadContributions();
+                loadStats();
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    window.rejectContribution = async function(event, id) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const confirmed = await showConfirm(
+            "Reject Contribution?",
+            "This will mark the book as rejected and hide it from the library. You can still see it in History.",
+            "Reject",
+            true
+        );
+        if (!confirmed) return;
+        
+        try {
+            const res = await fetch(`${API_URL}/admin/contributions/${id}/reject`, { 
+                method: 'POST', 
+                headers: getHeaders() 
+            });
+            if (res.ok) {
+                loadContributions();
+                loadHistory();
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    async function showConfirm(title, text, confirmText = "Confirm", isDanger = false) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const titleEl = document.getElementById('modal-title');
+            const textEl = document.getElementById('modal-text');
+            const confirmBtn = document.getElementById('modal-confirm');
+            const cancelBtn = document.getElementById('modal-cancel');
+
+            titleEl.textContent = title;
+            textEl.textContent = text;
+            confirmBtn.textContent = confirmText;
+            confirmBtn.style.background = isDanger ? 'var(--danger)' : 'var(--emerald-primary)';
+            confirmBtn.style.color = isDanger ? 'white' : 'black';
+
+            modal.style.display = 'flex';
+
+            const close = (res) => {
+                modal.style.display = 'none';
+                confirmBtn.onclick = null;
+                cancelBtn.onclick = null;
+                resolve(res);
+            };
+
+            confirmBtn.onclick = () => close(true);
+            cancelBtn.onclick = () => close(false);
+        });
     }
 
     // Start

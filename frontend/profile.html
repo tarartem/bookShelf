@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - BookShelf</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        .profile-container {
+            max-width: 1000px;
+            margin: 100px auto;
+            padding: 0 2rem 120px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+        }
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .profile-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald-primary), var(--velvet-deep));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border: 2px solid var(--emerald-glow);
+            margin: 0 auto 1.5rem;
+        }
+        .user-info h1 {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            color: white;
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+        .user-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .contribution-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .upload-box {
+            background: rgba(16, 185, 129, 0.05);
+            border: 2px dashed rgba(16, 185, 129, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .upload-box:hover {
+            border-color: var(--emerald-primary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .upload-box .icon { font-size: 2.5rem; display: block; margin-bottom: 1rem; }
+        .upload-box h3 { margin-bottom: 0.5rem; color: white; }
+        .upload-box p { color: var(--text-dim); font-size: 0.9rem; }
+
+        .my-books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+        .mini-book-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 0.75rem;
+            position: relative;
+        }
+        .mini-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            background: var(--velvet-deep);
+            object-fit: cover;
+            margin-bottom: 0.75rem;
+        }
+        .mini-title { font-size: 0.9rem; font-weight: 600; color: white; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2; }
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #f59e0b; color: black; }
+        .status-approved { background: var(--emerald-primary); color: black; }
+        .status-rejected { background: var(--danger); color: white; }
+
+        .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-logout:hover { background: var(--danger); color: white; }
+        
+        #file-input { display: none; }
+
+        @media (max-width: 768px) {
+            .profile-container { grid-template-columns: 1fr; margin-top: 80px; }
+        }
+    </style>
+</head>
+<body class="oled-theme">
+    <header class="top-nav-island">
+        <div style="display:flex; align-items:center; gap:1.5rem;">
+            <button onclick="window.location.href='/'" class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 12px; display:flex; align-items:center; gap:0.5rem; color: var(--text-dim); cursor: pointer;">
+                <span>←</span> Назад
+            </button>
+            <a href="index.html" class="header-brand" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem;">
+                <img src="/assets/logo.png" style="height: 32px; border-radius: 8px;">
+                <h1>BookShelf</h1>
+            </a>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <aside class="profile-sidebar">
+            <div class="profile-card">
+                <div class="user-avatar" id="avatar-initials">?</div>
+                <div class="user-info">
+                    <h1 id="user-email">Loading...</h1>
+                    <p id="user-status">Status: Checking...</p>
+                    <span id="member-id" style="font-size: 0.75rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 100px;">Member ID: #000</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:2rem;">
+                    <button class="btn-logout" id="logout-btn">Sign Out</button>
+                    <button id="delete-btn" style="background:none; border:none; color:rgba(239, 68, 68, 0.4); font-size:0.75rem; cursor:pointer;">Delete Account</button>
+                </div>
+            </div>
+            
+            <div class="stat-item" style="text-align: center; background: var(--glass-bg); padding: 1.5rem; border-radius: 20px; border: 1px solid var(--glass-border);">
+                <span style="display:block; font-size: 0.8rem; color: var(--text-dim); text-transform:uppercase; margin-bottom:0.5rem;">Join Date</span>
+                <span id="join-date" style="font-weight: 700; color: var(--emerald-glow);">---</span>
+            </div>
+        </aside>
+
+        <main class="contribution-section">
+            <div class="section-header">
+                <h2 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 0.5rem;">My Contributions</h2>
+                <p style="color: var(--text-muted);">Share your EPUB files with the community.</p>
+            </div>
+
+            <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                <span class="icon">📤</span>
+                <h3>Upload New Book</h3>
+                <p>Drag and drop or click to select EPUB</p>
+                <input type="file" id="file-input" accept=".epub">
+            </div>
+
+            <div id="upload-status" style="margin-top: -1rem; text-align: center; display: none;"></div>
+
+            <div class="my-books-grid" id="my-books-grid">
+                <!-- User books injected here -->
+            </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modal-title">Confirm</h3>
+            <p class="modal-text" id="modal-text">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="modal-cancel" style="padding: 0.8rem 1.5rem; border-radius: 12px; cursor:pointer;">Cancel</button>
+                <button class="btn-primary" id="modal-confirm" style="padding: 0.8rem 1.5rem; border-radius: 12px; background: var(--danger); color: white; cursor:pointer;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Load User Data
+                const userRes = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (userRes.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const user = await userRes.json();
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-status').textContent = user.is_verified ? 'Verified Member' : 'Pending Verification';
+                document.getElementById('avatar-initials').textContent = user.email[0].toUpperCase();
+                document.getElementById('join-date').textContent = new Date(user.created_at).toLocaleDateString();
+                document.getElementById('member-id').textContent = `Member ID: #${user.id.toString().padStart(3, '0')}`;
+
+                // Load My Books
+                loadMyBooks();
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadMyBooks() {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/books/my', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const books = await res.json();
+            
+            const grid = document.getElementById('my-books-grid');
+            grid.innerHTML = '';
+            
+            if (books.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">You haven\'t uploaded any books yet.</p>';
+                return;
+            }
+
+            books.reverse().forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'mini-book-card';
+                const coverHtml = book.cover_filepath 
+                    ? `<img src="/api/${book.cover_filepath}" class="mini-cover" alt="">`
+                    : `<div class="mini-cover" style="display:flex; align-items:center; justify-content:center; font-size:2rem; background:var(--velvet-deep);">📖</div>`;
+                
+                card.innerHTML = `
+                    <span class="status-badge status-${book.status}">${book.status}</span>
+                    ${coverHtml}
+                    <div class="mini-title">${book.title}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('upload-status');
+            status.style.display = 'block';
+            status.innerHTML = `<span style="color: var(--emerald-glow);">Preparing upload: ${file.name}...</span>`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/books/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    status.innerHTML = `<span style="color: var(--emerald-primary);">✅ Successfully uploaded! Pending review.</span>`;
+                    console.log("Upload success, refreshing grid...");
+                    await loadMyBooks(); // Force refresh
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 3000);
+                } else {
+                    status.innerHTML = `<span style="color: var(--danger);">❌ ${data.detail || 'Upload failed.'}</span>`;
+                }
+            } catch (err) {
+                status.innerHTML = `<span style="color: var(--danger);">❌ Connection error.</span>`;
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        async function showConfirm(title, text, confirmText = "Confirm", isDanger = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirm-modal');
+                const titleEl = document.getElementById('modal-title');
+                const textEl = document.getElementById('modal-text');
+                const confirmBtn = document.getElementById('modal-confirm');
+                const cancelBtn = document.getElementById('modal-cancel');
+
+                titleEl.textContent = title;
+                textEl.textContent = text;
+                confirmBtn.textContent = confirmText;
+                confirmBtn.style.background = isDanger ? 'var(--danger)' : 'var(--emerald-primary)';
+                confirmBtn.style.color = isDanger ? 'white' : 'black';
+
+                modal.style.display = 'flex';
+
+                const close = (res) => {
+                    modal.style.display = 'none';
+                    confirmBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(res);
+                };
+
+                confirmBtn.onclick = () => close(true);
+                cancelBtn.onclick = () => close(false);
+            });
+        }
+
+        document.getElementById('delete-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const confirmed = await showConfirm(
+                "Delete Account?", 
+                "This will permanently delete your account and all your contributions. This cannot be undone.",
+                "Delete Forever",
+                true
+            );
+
+            if (!confirmed) return;
+
+            const secondConfirm = await showConfirm(
+                "Final Warning",
+                "Are you absolutely sure? Click below to vanish from BookShelf.",
+                "Yes, Delete",
+                true
+            );
+
+            if (!secondConfirm) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'index.html';
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

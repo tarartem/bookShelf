@@ -110,3 +110,9 @@ bookshelf.db
 # books/ (removed to allow tracking for deployment)
 uploads/
 data/
+
+# Testing and Scripts
+test_books/
+test_assets/
+scripts/
+backend/verify_step*.py

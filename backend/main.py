@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.database import engine, Base, SessionLocal
-from backend.routers import books, admin, feedback
+from backend.routers import books, admin, feedback, auth
 from backend.services.startup_service import load_books_on_startup
 
 # Create database tables
@@ -38,6 +38,7 @@ app.add_middleware(
 
 app.include_router(books.router, prefix="/api/books", tags=["books"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(feedback.router, prefix="/api/feedback", tags=["feedback"])
 
 # Mount static files for uploads

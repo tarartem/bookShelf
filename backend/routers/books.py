@@ -1,22 +1,35 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+import os
+import hashlib
 
 from backend.database import get_db
 from backend.models import Book, BookSendLog
 from backend.schemas import BookResponse, BookSendRequest, BookStats
 from backend.services.email_service import send_epub_email
+from backend.services.epub_service import extract_epub_metadata
+from backend.routers.auth import get_current_user
+from backend.routers.admin import get_current_admin
+from fastapi.responses import FileResponse
 from email_validator import validate_email, EmailNotValidError
 
 router = APIRouter()
 
 @router.get("", response_model=List[BookResponse])
 def get_books(search: str = "", db: Session = Depends(get_db)):
-    query = db.query(Book)
+    query = db.query(Book).filter(Book.status == "approved")
     if search:
         query = query.filter(func.lower(Book.title).contains(search.lower()))
     return query.all()
+
+@router.get("/my", response_model=List[BookResponse])
+def get_my_books(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    return db.query(Book).filter(Book.owner_id == current_user.id).all()
 
 @router.get("/{book_id}", response_model=BookResponse)
 def get_book(book_id: int, db: Session = Depends(get_db)):
@@ -68,3 +81,67 @@ def send_book(book_id: int, request: BookSendRequest, background_tasks: Backgrou
     background_tasks.add_task(send_book_task, email, book.title, book.author, book.epub_filepath)
 
     return {"message": "Book queued for sending. You should receive it shortly."}
+
+@router.post("/upload", response_model=BookResponse)
+async def upload_book(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    if not file.filename.endswith(".epub"):
+        raise HTTPException(status_code=400, detail="Only EPUB files are allowed.")
+
+    os.makedirs("uploads/books", exist_ok=True)
+    
+    # Read file content for hashing
+    content = await file.read()
+    file_hash = hashlib.md5(content).hexdigest()
+
+    # Check for duplicates
+    existing = db.query(Book).filter(Book.file_hash == file_hash).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="This book already exists in our library.")
+
+    # Save file
+    file_path = f"uploads/books/{file_hash}.epub"
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    # Extract metadata
+    title, author, cover_path = extract_epub_metadata(file_path)
+    
+    # Create DB entry
+    new_book = Book(
+        title=title or file.filename.replace(".epub", ""),
+        author=author or "Unknown",
+        epub_filepath=file_path,
+        cover_filepath=cover_path,
+        file_hash=file_hash,
+        status="pending",
+        owner_id=current_user.id
+    )
+    
+    db.add(new_book)
+    db.commit()
+    db.refresh(new_book)
+    
+    return new_book
+
+@router.get("/download/{book_id}")
+def download_book_for_review(
+    book_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin)
+):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    if not os.path.exists(book.epub_filepath):
+        raise HTTPException(status_code=404, detail="EPUB file missing on server")
+        
+    return FileResponse(
+        path=book.epub_filepath, 
+        filename=os.path.basename(book.epub_filepath),
+        media_type='application/epub+zip'
+    )
