@@ -41,6 +41,13 @@ This document outlines the finished implementation of the personal user accounts
 - [x] Native Custom UI prompt modaling (Glassmorphism pop-ups).
 - [x] Rejection Logic: Sets book status to `rejected`, retains in database to preserve history.
 
+### Iteration 8: Credit Economy [✅]
+- [x] Implement `CreditTransaction` model for historical tracking.
+- [x] Gated Downloads: 1 book request = -1 credit deduction.
+- [x] Community Rewards: +5 credits on admin upload approval.
+- [x] Growth Incentives: +10 credits one-time bonus for enabling email notifications.
+- [x] Admin Management: Manual credit adjustments via the "Users" dashboard tab.
+
 ---
 
 ## 🏛️ Contribution Architecture
@@ -75,7 +82,9 @@ sequenceDiagram
     alt Standard Quality
         Admin->>API: Approve Book
         API->>SQLite: Update status="approved"
-        API-->>User: Book now visible in Global Catalog!
+        API->>SQLite: Add +5 Credits to User balance
+        API->>SQLite: Log Transaction (+5, "Upload Approved")
+        API-->>User: Book now visible + Credits awarded!
     else Copyright/Spam/Invalid
         Admin->>API: Reject Book
         API->>SQLite: Update status="rejected"

@@ -11,11 +11,13 @@ I am a product owner and developer who wants to construct an elegant, reliable, 
 2.  **Community Driven**: Registered users can upload their own EPUBs to contribute to the global library.
 3.  **Dedicated Content Context**: Each book has its own dedicated full-page view with immersive, cover-blurred backgrounds and detailed metadata.
 4.  **Discovery & Filtering**: Features include a "Featured Carousel", dynamic random shuffling, and multi-select interactive pills for advanced author filtering.
-5.  **Secure Delivery**: Users receive EPUBs securely to their validated inboxes. 
-6.  **Admin Moderation**: A powerful dashboard allows administrators to review community contributions, download pending books, and approve or reject submissions while maintaining an audit trail.
-7.  **Account Management**: Secure user accounts with JWT sessions, email verification, customizable profiles, password recovery, and full upload history.
-8.  **Localization**: The interface is fully bilingual, defaulting to **Ukrainian (UA)** with seamless English (EN) fallbacks.
-9.  **Mobile First Architecture**: Intuitive touch-targets, scroll persistence, modal dialogs, and native-feeling interactions engineered for smartphones first.
+5.  **Credit Economy**: A "give-to-get" model where book requests cost 1 credit, incentivizing users to contribute back to the library.
+6.  **Incentive Systems**: Automatic rewards for community behavior, including +5 credits for approved book uploads and +10 for opting into email notifications.
+7.  **Secure Delivery**: Users receive EPUBs securely to their validated inboxes after a credit deduction. 
+8.  **Admin Moderation**: A powerful dashboard allows administrators to review contributions, adjust user credit balances manually, and manage the platform's growth.
+9.  **Account Management**: Secure user accounts with JWT sessions, email verification, customizable profiles showing credit balance/history, and password recovery.
+10. **Localization**: The interface is fully bilingual (UA/EN) across all modules including the admin panel and profile settings.
+11. **Mobile First Architecture**: Intuitive touch-targets, scroll persistence, modal dialogs, and native-feeling interactions engineered for smartphones first.
 
 ## Tech Stack
 -   **Backend**: Python (FastAPI) + SQLite (SQLAlchemy)
@@ -27,9 +29,11 @@ I am a product owner and developer who wants to construct an elegant, reliable, 
 - [x] **Contributions**: Users can upload EPUBs which are hashed to prevent duplicates.
 - [x] **Moderation Workflow**: Submissions remain "Pending" until an admin approves or rejects them.
 - [x] **Account Safety**: Implemented password resets and cascading account deletion tools.
-- [x] **Admin Ecosystem**: Insights into book metrics, unique user shares, and historical contribution logs.
+- [x] **Credit Economy**: Implemented a robust 1-credit-per-download system with transaction logging.
+- [x] **Incentives**: Built logic for one-time notification bonuses and approval-based rewards.
+- [x] **Admin Ecosystem**: Insights into book metrics, manual user credit adjustments, and historical logs.
 - [x] **UI Polish**: Replacing all native browser pop-ups with stylized, contextual "Green Velvet" modals.
-- [x] **Delivery Pipeline**: robust background tasks for SMTP email delivery for book requesting and account recovery.
+- [x] **Delivery Pipeline**: Robust background tasks for SMTP email delivery for book requesting and account recovery.
 
 ## 4. Documentation
 - [Deployment Guide (DEPLOY.md)](DEPLOY.md)

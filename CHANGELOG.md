@@ -2,6 +2,14 @@
 
 Всі ключові зміни, вдосконалення та виправлення проекту BookShelf.
 
+## [v3.1] "The Credit Economy" — 2026-04-23
+### Додано
+- **Give-to-Get Model**: Впроваджено систему кредитів (1 кредит = 1 завантаження).
+- **Incentive System**: Автоматичні бонуси за внески (+5) та підписку на сповіщення (+10).
+- **Admin Credit Control**: Можливість адміністраторам вручну коригувати баланс користувачів.
+- **Transaction History**: Повний лог змін балансу для користувачів та адмінів.
+- **Enhanced Deployment**: Автоматична міграція бази даних та підтримка persistent-дисків Render.
+
 ## [v3.0] "The Social Shelf" — 2026-04-21
 ### Додано
 - **User Accounts System**: Повна реєстрація з верифікацією по email та входом на базі JWT.
@@ -19,7 +27,7 @@
 
 ### Виправлено
 - **Initialization Crash**: Усунуто помилку `ReferenceError` (undefined feedbackTriggerFloating), яка блокувала завантаження книг.
-- **Input Styling**: Уніфіковано вигляд усіх текстових полів у додатку (Login, Search, Feedback) під єдиний "Green Velvet" стандарт.
+- **Input Styling**: Уніфіковано вигляд усіх текстових полів у додатку (Login, Search, Feedback) под єдиний "Green Velvet" стандарт.
 
 ---
 
