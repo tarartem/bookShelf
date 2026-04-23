@@ -23,7 +23,7 @@ def migrate():
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';")
     if not cursor.fetchone():
         print("Creating 'users' table...")
-        cursor.execute(\"\"\"
+        cursor.execute('''
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email VARCHAR UNIQUE NOT NULL,
@@ -32,7 +32,7 @@ def migrate():
                 role VARCHAR DEFAULT 'user',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
-        \"\"\")
+        ''')
         print("'users' table created.")
     else:
         print("'users' table already exists.")
@@ -71,7 +71,7 @@ def migrate():
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='credit_transactions';")
     if not cursor.fetchone():
         print("Creating 'credit_transactions' table...")
-        cursor.execute(\"\"\"
+        cursor.execute('''
             CREATE TABLE credit_transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
@@ -80,7 +80,7 @@ def migrate():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
-        \"\"\")
+        ''')
         print("'credit_transactions' table created.")
 
     conn.commit()
