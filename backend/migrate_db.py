@@ -2,11 +2,20 @@ import sqlite3
 import os
 
 def migrate():
-    db_path = "bookshelf.db"
-    if not os.path.exists(db_path):
-        print(f"Database {db_path} not found.")
-        return
+    # Production support: extract path from DATABASE_URL if it's a sqlite URI
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///./bookshelf.db")
+    if db_url.startswith("sqlite:///"):
+        db_path = db_url.replace("sqlite:///", "")
+    else:
+        db_path = "bookshelf.db"
+    
+    # Ensure directory exists if path contains one (e.g. data/bookshelf.db)
+    db_dir = os.path.dirname(db_path)
+    if db_dir and not os.path.exists(db_dir):
+        print(f"Creating directory {db_dir}...")
+        os.makedirs(db_dir, exist_ok=True)
 
+    # Note: connect() will create the file if it doesn't exist
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 

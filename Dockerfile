@@ -24,4 +24,4 @@ VOLUME [ "/app/uploads", "/app/data" ]
 EXPOSE 8000
 
 # Start FastAPI application
-CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python3 -m backend.migrate_db && uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
