@@ -6,8 +6,8 @@ import os
 import hashlib
 
 from backend.database import get_db
-from backend.models import Book, BookSendLog
-from backend.schemas import BookResponse, BookSendRequest, BookStats
+from backend.models import Book, BookSendLog, CreditTransaction
+from backend.schemas import BookResponse, BookSendRequest, BookStats, CreditTransactionResponse
 from backend.services.email_service import send_epub_email
 from backend.services.epub_service import extract_epub_metadata
 from backend.routers.auth import get_current_user
@@ -60,27 +60,55 @@ def send_book_task(email: str, title: str, author: str, path: str):
 
 
 @router.post("/{book_id}/send")
-def send_book(book_id: int, request: BookSendRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    # Validate Email rigorously
+def send_book(
+    book_id: int, 
+    request: BookSendRequest, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    # Check credits
+    if current_user.credits <= 0:
+        raise HTTPException(
+            status_code=403, 
+            detail="У вас закінчилися кредити. Завантажте власну книгу, щоб отримати більше!"
+        )
+
+    # Validate Email
     try:
         valid = validate_email(request.email, check_deliverability=True)
         email = valid.normalized
     except EmailNotValidError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    book = db.query(Book).filter(Book.id == book_id).first()
+    book = db.query(Book).filter(Book.id == book_id, Book.status == "approved").first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
     # Record log
-    log = BookSendLog(book_id=book.id, email=email)
+    log = BookSendLog(book_id=book.id, email=email, user_id=current_user.id)
     db.add(log)
+    
+    # Deduct credit
+    current_user.credits -= 1
+    
+    # Record transaction
+    transaction = CreditTransaction(
+        user_id=current_user.id,
+        amount=-1,
+        reason=f"Запит книги: {book.title}"
+    )
+    db.add(transaction)
+    
     db.commit()
 
     # Background send process
     background_tasks.add_task(send_book_task, email, book.title, book.author, book.epub_filepath)
 
-    return {"message": "Book queued for sending. You should receive it shortly."}
+    return {
+        "message": "Book queued for sending.",
+        "credits_remaining": current_user.credits
+    }
 
 @router.post("/upload", response_model=BookResponse)
 async def upload_book(

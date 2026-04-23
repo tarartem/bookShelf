@@ -369,6 +369,19 @@ document.addEventListener('DOMContentLoaded', () => {
             heroBgBlur.style.backgroundImage = 'none';
         }
         
+        // Handle auth for request button
+        if (!token) {
+            requestPageBtn.innerText = t('loginToDownload');
+            requestPageBtn.onclick = () => window.location.href = '/login.html';
+        } else {
+            requestPageBtn.innerText = t('getThisBook');
+            requestPageBtn.onclick = () => {
+                requestPageBtn.style.display = 'none';
+                emailPageContainer.style.display = 'block';
+                document.getElementById('page-user-email').focus();
+            };
+        }
+        
         document.body.classList.add('details-active');
         bookDetailsView.style.display = 'flex';
         updateStats(book.id);
@@ -426,11 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    requestPageBtn.addEventListener('click', () => {
-        requestPageBtn.style.display = 'none';
-        emailPageContainer.style.display = 'block';
-        document.getElementById('page-user-email').focus();
-    });
+    // Removed direct onclick assignment here, handled in openBookPage now
 
     cancelPageEmailBtn.addEventListener('click', () => {
         emailPageContainer.style.display = 'none';
@@ -515,9 +524,13 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerText = t('deliveringVolume');
 
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ email })
             });
 
@@ -528,7 +541,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>${t('dispatchHint')} <strong>${email}</strong>${t('dispatchHintEnd')}</p>
                 `;
                 pageStatusCard.style.display = 'block';
-                showToast(t('bookSent'));
+                const data = await res.json();
+                const msg = t('bookSent') + (data.credits_remaining !== undefined ? ` (${t('creditsRemaining')} ${data.credits_remaining})` : '');
+                showToast(msg);
             } else {
                 const data = await res.json();
                 alert(data.detail || 'Помилка. Спробуйте пізніше.');

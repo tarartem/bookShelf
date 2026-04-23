@@ -37,7 +37,51 @@ export const translations = {
         author: "Автор",
         resetFilters: "Скинути фільтри",
         findByAuthor: "Фільтрувати за автором",
-        backToLibrary: "← Назад"
+        back: "Назад",
+        loginToDownload: "Увійдіть, щоб отримати книгу",
+        insufficientCredits: "Недостатньо кредитів! Завантажте книгу, щоб отримати більше.",
+        creditsRemaining: "Залишилося кредитів: ",
+        
+        // Profile Page
+        myProfile: "Мій профіль",
+        logout: "Вийти",
+        deleteAccount: "Видалити акаунт",
+        availableCredits: "Доступні кредити",
+        creditHint: "1 книга = 1 кредит",
+        settings: "Налаштування",
+        emailNotifications: "Email сповіщення",
+        notifBonusHint: "Увімкніть та отримайте +10 кредитів",
+        notifEnabled: "Сповіщення увімкнено",
+        joinDate: "Дата реєстрації",
+        myContributions: "Мої внески",
+        shareEpubHint: "Поділіться своїми EPUB файлами зі спільнотою.",
+        uploadNewBook: "Завантажити нову книгу",
+        uploadClickHint: "Перетягніть або натисніть, щоб вибрати EPUB",
+        noContributionsYet: "Ви ще не завантажили жодної книги.",
+        verifiedMember: "Перевірений учасник",
+        pendingVerification: "Очікує підтвердження",
+        memberId: "ID учасника",
+        
+        // Statuses
+        approved: "Схвалено",
+        pending: "Очікує",
+        rejected: "Відхилено",
+        
+        // Modals & Actions
+        confirmation: "Підтвердження",
+        confirm: "Підтвердити",
+        deleteAccountQuestion: "Видалити акаунт?",
+        deleteAccountWarning: "Це назавжди видалить ваш акаунт та всі ваші внески. Цю дію неможливо скасувати.",
+        deleteForever: "Видалити назавжди",
+        lastWarning: "Останнє попередження",
+        absoluteCertainty: "Ви абсолютно впевнені? Натисніть нижче, щоб зникнути з BookShelf.",
+        yesDelete: "Так, видалити",
+        
+        // Upload Status
+        preparingUpload: "Підготовка до завантаження",
+        uploadSuccess: "Успішно завантажено! Очікує перевірки.",
+        uploadError: "Помилка завантаження.",
+        connectionError: "Помилка з'єднання."
     },
     en: {
         appName: "BookShelf",
@@ -76,6 +120,51 @@ export const translations = {
         deliveringVolume: "Delivering your book...",
         author: "Author",
         resetFilters: "Reset Filters",
-        findByAuthor: "Filter books by author"
+        findByAuthor: "Filter books by author",
+        back: "Back",
+        loginToDownload: "Login to get this book",
+        insufficientCredits: "Insufficient credits! Upload a book to earn more.",
+        creditsRemaining: "Credits remaining: ",
+        
+        // Profile Page
+        myProfile: "My Profile",
+        logout: "Logout",
+        deleteAccount: "Delete Account",
+        availableCredits: "Available Credits",
+        creditHint: "1 book = 1 credit",
+        settings: "Settings",
+        emailNotifications: "Email Notifications",
+        notifBonusHint: "Enable and get +10 credits",
+        notifEnabled: "Notifications enabled",
+        joinDate: "Joined on",
+        myContributions: "My Contributions",
+        shareEpubHint: "Share your EPUB files with the community.",
+        uploadNewBook: "Upload New Book",
+        uploadClickHint: "Drag & drop or click to select EPUB",
+        noContributionsYet: "You haven't uploaded any books yet.",
+        verifiedMember: "Verified Member",
+        pendingVerification: "Pending Verification",
+        memberId: "Member ID",
+        
+        // Statuses
+        approved: "Approved",
+        pending: "Pending",
+        rejected: "Rejected",
+
+        // Modals & Actions
+        confirmation: "Confirmation",
+        confirm: "Confirm",
+        deleteAccountQuestion: "Delete Account?",
+        deleteAccountWarning: "This will permanently delete your account and all your contributions. This action cannot be undone.",
+        deleteForever: "Delete Forever",
+        lastWarning: "Last Warning",
+        absoluteCertainty: "Are you absolutely sure? Click below to disappear from BookShelf.",
+        yesDelete: "Yes, delete",
+
+        // Upload Status
+        preparingUpload: "Preparing upload",
+        uploadSuccess: "Upload successful! Pending review.",
+        uploadError: "Upload failed.",
+        connectionError: "Connection error."
     }
 };

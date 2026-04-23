@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackList = document.getElementById('feedback-list');
     const contributionsList = document.getElementById('contributions-list');
     const historyList = document.getElementById('history-list');
+    const usersList = document.getElementById('users-list');
     const contributionsBadge = document.getElementById('contributions-badge');
 
     // Get Auth from localStorage (stored by login.html)
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadFeedback();
         loadContributions();
         loadHistory();
+        loadUsers();
     }
 
     // --- Stats & Library ---
@@ -294,6 +296,67 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 loadContributions();
                 loadHistory();
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    // --- User Management ---
+
+    async function loadUsers() {
+        try {
+            const res = await fetch(`${API_URL}/admin/users`, { headers: getHeaders() });
+            const data = await res.json();
+
+            usersList.innerHTML = '';
+            if (!data || data.length === 0) {
+                usersList.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:3rem;">Користувачів ще немає.</p>';
+                return;
+            }
+
+            data.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'admin-card-item';
+                const dateStr = new Date(user.created_at).toLocaleDateString();
+                div.innerHTML = `
+                    <div style="flex:1;">
+                        <h4 style="margin:0;">${user.email}</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.25rem 0 0;">
+                            Роль: ${user.role} | Реєстрація: ${dateStr} | Сповіщення: ${user.email_notifications ? 'Так' : 'Ні'}
+                        </p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <div style="text-align:right;">
+                            <span style="font-size:0.7rem; color:var(--text-dim);">Кредити</span>
+                            <div style="font-weight:700; color:var(--emerald-glow);">${user.credits}</div>
+                        </div>
+                        <button class="btn-secondary" style="padding:0.5rem 1rem; font-size:0.75rem; border-radius:8px;" onclick="adjustCredits(${user.id}, ${user.credits})">Змінити</button>
+                    </div>
+                `;
+                usersList.appendChild(div);
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    window.adjustCredits = async function(userId, currentCredits) {
+        const newValue = prompt(`Введіть нову кількість кредитів для користувача:`, currentCredits);
+        if (newValue === null || newValue === "") return;
+        
+        const credits = parseInt(newValue);
+        if (isNaN(credits)) {
+            alert("Будь ласка, введіть число.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/admin/users/${userId}/credits`, {
+                method: 'POST',
+                headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credits })
+            });
+            if (res.ok) {
+                loadUsers();
+            } else {
+                alert("Не вдалося оновити кредити.");
             }
         } catch (e) { console.error(e); }
     };

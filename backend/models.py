@@ -11,6 +11,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_verified = Column(Boolean, default=False)
     role = Column(String, default="user") # "admin" or "user"
+    credits = Column(Integer, default=3) # Starting credits
+    email_notifications = Column(Boolean, default=False)
+    received_notif_bonus = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
 
     books = relationship("Book", back_populates="owner")
@@ -38,10 +41,24 @@ class BookSendLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Who sent it
     email = Column(String, index=True, nullable=False)
     sent_at = Column(DateTime, server_default=func.now())
 
     book = relationship("Book", back_populates="send_logs")
+    user = relationship("User")
+
+class CreditTransaction(Base):
+    __tablename__ = "credit_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount = Column(Integer, nullable=False) # Positive for gain, negative for loss
+    reason = Column(String, nullable=False) # e.g., "contribution_approval", "book_request", "notif_bonus", "admin_adjustment"
+    created_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("User")
+
 
 
 class Feedback(Base):

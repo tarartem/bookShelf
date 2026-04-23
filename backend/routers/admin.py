@@ -9,8 +9,8 @@ from sqlalchemy import func
 from typing import List
 
 from backend.database import get_db
-from backend.models import Book, BookSendLog
-from backend.schemas import BookResponse, AdminStatsResponse, BookStats
+from backend.models import Book, BookSendLog, User, CreditTransaction
+from backend.schemas import BookResponse, AdminStatsResponse, BookStats, UserResponse, UserUpdateCredits
 from backend.services.epub_service import extract_epub_metadata
 
 router = APIRouter()
@@ -104,8 +104,24 @@ def approve_contribution(book_id: int, db: Session = Depends(get_db), admin: str
     book = db.query(Book).filter(Book.id == book_id, Book.status == "pending").first()
     if not book: raise HTTPException(status_code=404, detail="Pending book not found")
     book.status = "approved"
+    
+    # Award credits to the owner if it was a user contribution
+    if book.owner_id:
+        user = db.query(User).filter(User.id == book.owner_id).first()
+        if user:
+            bonus = 5
+            user.credits += bonus # Reward for approved contribution
+            
+            # Record transaction
+            transaction = CreditTransaction(
+                user_id=user.id,
+                amount=bonus,
+                reason=f"Схвалено внесок: {book.title}"
+            )
+            db.add(transaction)
+            
     db.commit()
-    return {"message": f"Book '{book.title}' approved."}
+    return {"message": f"Book '{book.title}' approved. Credits awarded to owner if applicable."}
 
 @router.post("/contributions/{book_id}/reject")
 def reject_contribution(book_id: int, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
@@ -118,3 +134,32 @@ def reject_contribution(book_id: int, db: Session = Depends(get_db), admin: str 
 @router.get("/history", response_model=List[BookResponse])
 def get_user_contribution_history(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
     return db.query(Book).filter(Book.owner_id != None).all()
+
+@router.get("/users", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    return db.query(User).all()
+
+@router.post("/users/{user_id}/credits")
+def update_user_credits(
+    user_id: int, 
+    update: UserUpdateCredits, 
+    db: Session = Depends(get_db), 
+    admin: str = Depends(get_current_admin)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    diff = update.credits - user.credits
+    user.credits = update.credits
+    
+    # Record transaction if there's a change
+    if diff != 0:
+        transaction = CreditTransaction(
+            user_id=user.id,
+            amount=diff,
+            reason="Коригування адміністратором"
+        )
+        db.add(transaction)
+        
+    db.commit()
+    return {"message": "Credits updated successfully", "new_credits": user.credits}

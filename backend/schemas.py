@@ -35,6 +35,9 @@ class UserResponse(UserBase):
     id: int
     is_verified: bool
     role: str
+    credits: int
+    email_notifications: bool
+    received_notif_bonus: bool
     created_at: datetime
 
     class Config:
@@ -78,3 +81,18 @@ class AdminStatsResponse(BaseModel):
     total_books: int
     total_sends: int
     books_stats: List[BookStats]
+
+class UserUpdateCredits(BaseModel):
+    credits: int
+
+class NotificationUpdate(BaseModel):
+    enabled: bool
+
+class CreditTransactionResponse(BaseModel):
+    id: int
+    amount: int
+    reason: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
