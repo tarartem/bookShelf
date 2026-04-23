@@ -107,7 +107,7 @@ def send_reset_email(email: str, token: str):
     base_url = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
     reset_url = f"{base_url}/reset-password.html?token={token}"
     subject = "🔑 Скидання пароля BookShelf"
-    body = f"""
+    body = f\"\"\"
     Добрий день!
     
     Ви запитали зміну пароля. Будь ласка, натисніть на посилання нижче, щоб встановити новий пароль:
@@ -117,7 +117,7 @@ def send_reset_email(email: str, token: str):
     
     З повагою,
     Команда BookShelf
-    """
+    \"\"\"
     try:
         msg = EmailMessage()
         msg["From"] = SENDER_EMAIL
