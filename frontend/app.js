@@ -201,13 +201,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAuthorFilters(books) {
-        const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
+        // Count books per author
+        const authorCounts = {};
+        books.forEach(b => {
+            if (b.author) {
+                authorCounts[b.author] = (authorCounts[b.author] || 0) + 1;
+            }
+        });
+
+        const authors = Object.keys(authorCounts).sort();
         authorFilterContainer.innerHTML = '';
         
         authors.forEach(author => {
+            const count = authorCounts[author];
             const pill = document.createElement('div');
             pill.className = `author-pill ${activeAuthorFilters.has(author) ? 'active' : ''}`;
-            pill.innerText = author;
+            pill.innerHTML = `${author} <span class="author-count">${count}</span>`;
             pill.onclick = () => {
                 if (activeAuthorFilters.has(author)) {
                     activeAuthorFilters.delete(author);
