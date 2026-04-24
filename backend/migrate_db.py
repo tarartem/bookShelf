@@ -210,6 +210,22 @@ def run_migrations():
                 """)
                 res = conn.execute(check_query).scalar()
                 if res == 0:
+                    # SPECIAL CASE: If we are adding password_hash but hashed_password exists, rename it
+                    if table == "users" and column == "password_hash":
+                        check_legacy = text("SELECT count(*) FROM information_schema.columns WHERE table_name='users' AND column_name='hashed_password'")
+                        if conn.execute(check_legacy).scalar() > 0:
+                            print("  Found legacy 'hashed_password', renaming to 'password_hash'...")
+                            conn.execute(text("ALTER TABLE users RENAME COLUMN hashed_password TO password_hash"))
+                            continue
+                    
+                    # SPECIAL CASE: If we are adding uploaded_by but owner_id exists, rename it
+                    if table == "books" and column == "uploaded_by":
+                        check_legacy = text("SELECT count(*) FROM information_schema.columns WHERE table_name='books' AND column_name='owner_id'")
+                        if conn.execute(check_legacy).scalar() > 0:
+                            print("  Found legacy 'owner_id', renaming to 'uploaded_by'...")
+                            conn.execute(text("ALTER TABLE books RENAME COLUMN owner_id TO uploaded_by"))
+                            continue
+
                     print(f"  Adding column '{column}' to table '{table}'...")
                     try:
                         conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
@@ -217,6 +233,14 @@ def run_migrations():
                         print(f"  Error adding column {column}: {e}")
                 else:
                     print(f"  Column '{column}' already exists in table '{table}'.")
+            
+            # Final check: If BOTH hashed_password and password_hash exist (from failed migration attempt), drop the legacy one
+            check_both = text("SELECT count(*) FROM information_schema.columns WHERE table_name='users' AND column_name IN ('hashed_password', 'password_hash')")
+            if conn.execute(check_both).scalar() == 2:
+                print("  Cleaning up duplicate password columns...")
+                conn.execute(text("UPDATE users SET password_hash = hashed_password WHERE password_hash IS NULL"))
+                conn.execute(text("ALTER TABLE users DROP COLUMN hashed_password"))
+            
             conn.commit()
 
         conn.commit()
