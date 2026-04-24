@@ -53,7 +53,7 @@ def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str)
     try:
         logger.info(f"Attempting to send email to {to_email} via {SMTP_HOST}:{SMTP_PORT}...")
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
-            server.set_debuglevel(1)  # Show SMTP conversation in logs
+            # server.set_debuglevel(1) # Disabled verbose logging for production
             server.ehlo()
             server.starttls()
             server.ehlo()
@@ -66,7 +66,7 @@ def send_epub_email(to_email: str, book_title: str, author: str, epub_path: str)
         logger.error(f"❌ SMTP Authentication failed for {SMTP_USER}. Check SMTP_PASS/App Password.")
         return False
     except smtplib.SMTPConnectError:
-        logger.error(f"❌ Failed to connect to SMTP server {SMTP_HOST}:{SMTP_PORT}.")
+        logger.error(f"❌ Failed to connect to SMTP server {SMTP_HOST}:{SMTP_HOST}.")
         return False
     except Exception as e:
         logger.error(f"❌ Failed to send email to {to_email}: {type(e).__name__}: {e}")
