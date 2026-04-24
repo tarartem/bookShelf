@@ -26,12 +26,14 @@
         </div>
 
         <!-- Profile Toggle (Right side) -->
-        <div id="profile-trigger" style="position: absolute; right: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.03); transition: 0.3s; border: 1px solid var(--glass-border);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-        </div>
+        <a href="/profile.html" id="profile-link" style="position: absolute; right: 1.5rem; color: inherit; text-decoration: none; z-index: 1002;">
+            <div id="profile-trigger" style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.03); transition: 0.3s; border: 1px solid var(--glass-border);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+        </a>
 
         <!-- Search Mode State: Full-width search bar with Cancel button (Mobile Only) -->
         <div id="mobile-search-controls" class="mobile-search-controls" style="display: none; width: 100%; align-items: center; gap: 1rem;">
