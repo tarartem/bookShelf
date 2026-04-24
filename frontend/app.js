@@ -1,638 +1,489 @@
 import { translations } from './translations.js';
 
 const API_URL = '/api';
-let currentLang = 'uk'; 
+let currentLang = localStorage.getItem('lang') || 'uk';
+let currentUser = null;
+let userLibrary = []; // IDs of unlocked books
+let allBooks = [];
+let activeAuthorFilters = new Set();
+let carouselIndex = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements
-    const searchInputMobile = document.getElementById('search-input-mobile');
-    const cancelSearchBtn = document.getElementById('cancel-search-btn');
-    const searchInputDesktop = document.getElementById('search-input-desktop'); // Added fallback for desktop search
+    console.log("DEBUG: App initializing...");
+    init();
+});
 
-    const booksGrid = document.getElementById('books-grid');
-    const toastContainer = document.getElementById('toast-container');
-    const authorFilterContainer = document.getElementById('author-filter-container');
-    const resetFiltersBtn = document.getElementById('reset-filters-btn');
-    const toggleFiltersBtn = document.getElementById('toggle-author-filters-btn');
-    const headerLogo = document.getElementById('header-logo');
-    const mobileSearchControls = document.getElementById('mobile-search-controls');
-    
-    // Carousel Elements
-    const carouselTrack = document.getElementById('carousel-track');
-    const carouselDots = document.getElementById('carousel-dots');
-    
-    // Page View Elements
-    const bookDetailsView = document.getElementById('book-details-view');
-    const backToLibraryBtn = document.getElementById('back-to-library');
-    const shareBookBtn = document.getElementById('share-book-page-btn');
-    
-    const pageCover = document.getElementById('page-book-cover');
-    const pageTitle = document.getElementById('page-book-title');
-    const pageAuthor = document.getElementById('page-book-author');
-    const pageDescription = document.getElementById('page-book-description');
-    const heroBgBlur = document.getElementById('hero-bg-blur');
-    
-    const requestPageBtn = document.getElementById('page-request-trigger-btn');
-    const deliveryPageContainer = document.getElementById('page-delivery-container');
-    const emailPageForm = document.getElementById('page-email-form');
-    const pageStatusCard = document.getElementById('page-status-card');
-    
-    // New Delivery Options Buttons
-    const downloadEpubBtn = document.getElementById('btn-download-epub');
-    const toggleEmailFormBtn = document.getElementById('btn-toggle-email-form');
-    
-    // Feedback Modal
-    const feedbackModal = document.getElementById('feedback-modal');
-    const closeFeedbackModal = document.getElementById('close-feedback-modal');
-    const fbForm = document.getElementById('feedback-form');
-    
-    // Nav Controls
-    const searchTrigger = document.getElementById('nav-search-trigger');
-    const feedbackTrigger = document.getElementById('nav-feedback-trigger');
-    const homeTrigger = document.getElementById('nav-home');
-    const profileTrigger = document.getElementById('profile-trigger');
-    
-    if (profileTrigger) {
-        profileTrigger.onclick = () => {
-            window.location.href = '/login.html';
-        };
+async function init() {
+    loadLanguage();
+    await loadUser();
+    await loadLibrary();
+    await loadBooks();
+    setupEventListeners();
+    handleRouting();
+    console.log("DEBUG: App initialized.");
+}
+
+function loadLanguage() {
+    currentLang = localStorage.getItem('lang') || 'uk';
+    document.documentElement.lang = currentLang;
+    applyLanguage();
+}
+
+async function loadUser() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log("DEBUG: No token found.");
+        return;
     }
-    
-    let currentBookId = null;
-    let allBooks = [];
-    let userLibrary = []; // Track IDs of unlocked books
-    let carouselIndex = 0;
-    
-    // Multi-select Author Filter
-    let activeAuthorFilters = new Set();
-
-    // --- Localization ---
-
-    function t(key) {
-        return translations[currentLang][key] || key;
-    }
-
-    function applyLanguage() {
-        console.log("Applying translations...");
-        const idsAndKeys = {
-            'brand-title': 'appName',
-            'txt-app-name': 'appName',
-            'txt-nav-home': 'navHome',
-            'txt-nav-search': 'navSearch',
-            'txt-nav-feedback': 'navFeedback',
-            'txt-loading': 'curatingLibrary',
-            'txt-welcome-title': 'welcomeTitle',
-            'txt-welcome-subtitle': 'welcomeSubtitle',
-            'txt-welcome-extra': 'welcomeExtra',
-            'txt-footer-crafting': 'footerCrafting',
-            'txt-footer-admin': 'footerAdmin',
-            'txt-reset-filters': 'resetFilters',
-            'txt-secure-delivery': 'secureDelivery',
-            'txt-delivery-hint': 'deliveryHint',
-            'txt-deliver-now': 'deliverNow',
-            'txt-feedback-title': 'feedbackTitle',
-            'txt-feedback-subtitle': 'feedbackSubtitle',
-            'txt-submit-feedback': 'submitFeedback'
-        };
-
-        for (const [id, key] of Object.entries(idsAndKeys)) {
-            const el = document.getElementById(id);
-            if (el) el.innerText = t(key);
-        }
-        
-        if (toggleFiltersBtn) toggleFiltersBtn.innerText = t('findByAuthor');
-        if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
-        if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
-
-        if (backToLibraryBtn) backToLibraryBtn.innerText = t('backToLibrary');
-        if (requestPageBtn) requestPageBtn.innerText = t('getThisBook');
-        if (shareBookBtn) shareBookBtn.innerText = t('share');
-        
-        // New keys
-        const downloadTxt = document.getElementById('txt-download-epub');
-        if (downloadTxt) downloadTxt.innerText = t('downloadEpub');
-        const sendToEmailTxt = document.getElementById('txt-send-to-email');
-        if (sendToEmailTxt) sendToEmailTxt.innerText = t('sendToEmail');
-        const deliveryOptionsTitle = document.getElementById('txt-delivery-options');
-        if (deliveryOptionsTitle) deliveryOptionsTitle.innerText = t('deliveryOptions');
-
-        const fbMsg = document.getElementById('fb-message');
-        if (fbMsg) fbMsg.placeholder = t('feedbackPlaceholder');
-        console.log("Translations applied successfully.");
-    }
-
-    // --- Core Functions ---
-
-    const lazyObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                lazyObserver.unobserve(entry.target);
-            }
+    try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    }, { threshold: 0.1 });
+        if (response.ok) {
+            currentUser = await response.json();
+            console.log("DEBUG: User loaded:", currentUser.email);
+            updateUIForUser();
+        } else {
+            console.warn("DEBUG: Token invalid, clearing.");
+            localStorage.removeItem('token');
+        }
+    } catch (error) {
+        console.error('DEBUG: Error loading user:', error);
+    }
+}
 
-    async function loadBooks(query = '') {
-        console.log(`Fetching books with query: "${query}"...`);
-        try {
-            // Load user library if logged in
-            if (localStorage.getItem('token')) {
-                await loadLibrary();
+async function loadLibrary() {
+    const token = localStorage.getItem('token');
+    if (!token || !currentUser) return;
+    try {
+        const response = await fetch(`${API_URL}/books/library`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            userLibrary = await response.json();
+            console.log("DEBUG: User library loaded:", userLibrary.length, "books");
+        }
+    } catch (error) {
+        console.error('DEBUG: Error loading library:', error);
+    }
+}
+
+async function loadBooks() {
+    const booksGrid = document.getElementById('books-grid');
+    if (booksGrid) booksGrid.innerHTML = `<div class="loading-state">${t('curatingLibrary')}</div>`;
+
+    try {
+        const response = await fetch(`${API_URL}/books/`);
+        if (response.ok) {
+            allBooks = await response.json();
+            console.log("DEBUG: Books loaded:", allBooks.length);
+            renderBooks(allBooks);
+            renderFeaturedCarousel(allBooks);
+            renderAuthorFilters(allBooks);
+        } else {
+            console.error("DEBUG: Failed to load books, status:", response.status);
+        }
+    } catch (error) {
+        console.error('DEBUG: Error loading books:', error);
+    }
+}
+
+function t(key) {
+    return translations[currentLang][key] || key;
+}
+
+function applyLanguage() {
+    const idsAndKeys = {
+        'brand-title': 'appName',
+        'txt-nav-home': 'navHome',
+        'txt-nav-search': 'navSearch',
+        'txt-nav-feedback': 'navFeedback',
+        'txt-welcome-title': 'welcomeTitle',
+        'txt-welcome-subtitle': 'welcomeSubtitle',
+        'txt-welcome-extra': 'welcomeExtra',
+        'txt-reset-filters': 'resetFilters',
+        'txt-secure-delivery': 'secureDelivery',
+        'txt-delivery-hint': 'deliveryHint',
+        'txt-deliver-now': 'deliverNow',
+        'txt-feedback-title': 'feedbackTitle',
+        'txt-feedback-subtitle': 'feedbackSubtitle',
+        'txt-submit-feedback': 'submitFeedback',
+        'txt-send-to-email': 'sendToEmail',
+        'txt-download-epub': 'downloadEpub',
+        'back-to-library': 'backToLibrary' // Directly on the button
+    };
+
+    for (const [id, key] of Object.entries(idsAndKeys)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = t(key);
+    }
+    
+    // Update placeholders
+    const searchInputMobile = document.getElementById('search-input-mobile');
+    if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
+    
+    const fbPlaceholder = document.getElementById('fb-message');
+    if (fbPlaceholder) fbPlaceholder.placeholder = t('feedbackPlaceholder');
+}
+
+function updateUIForUser() {
+    const profileTrigger = document.getElementById('profile-trigger');
+    if (profileTrigger && currentUser) {
+        profileTrigger.innerHTML = `<span>${currentUser.email.split('@')[0]}</span>`;
+        profileTrigger.onclick = () => window.location.href = '/profile.html';
+    }
+}
+
+function renderBooks(books) {
+    const grid = document.getElementById('books-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    if (books.length === 0) {
+        grid.innerHTML = `<div class="no-results">${t('noResults')}</div>`;
+        return;
+    }
+
+    books.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+            <div class="book-cover-wrapper">
+                <img src="${book.cover_filepath || 'assets/default-cover.jpg'}" alt="${book.title}" loading="lazy">
+            </div>
+            <div class="book-info">
+                <div class="book-title">${book.title}</div>
+                <div class="book-author">${book.author}</div>
+            </div>
+        `;
+        card.onclick = () => openBookDetails(book.id);
+        grid.appendChild(card);
+    });
+}
+
+function renderFeaturedCarousel(books) {
+    const track = document.getElementById('carousel-track');
+    const dots = document.getElementById('carousel-dots');
+    if (!track || !dots || books.length === 0) return;
+
+    const featured = books.slice(0, 5); // Take first 5 as featured
+    track.innerHTML = '';
+    dots.innerHTML = '';
+
+    featured.forEach((book, idx) => {
+        const item = document.createElement('div');
+        item.className = 'carousel-item';
+        item.innerHTML = `
+            <div class="carousel-info">
+                <span class="badge">${t('featuredVolume')}</span>
+                <h2>${book.title}</h2>
+                <p>${book.author}</p>
+            </div>
+            <div class="carousel-cover-side">
+                <img src="${book.cover_filepath}" alt="">
+            </div>
+        `;
+        item.onclick = () => openBookDetails(book.id);
+        track.appendChild(item);
+
+        const dot = document.createElement('div');
+        dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+        dot.onclick = (e) => {
+            e.stopPropagation();
+            goToCarousel(idx);
+        };
+        dots.appendChild(dot);
+    });
+}
+
+function goToCarousel(index) {
+    const track = document.getElementById('carousel-track');
+    const dots = document.querySelectorAll('.dot');
+    if (!track) return;
+    
+    carouselIndex = index;
+    track.style.transform = `translateX(-${index * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+}
+
+function renderAuthorFilters(books) {
+    const container = document.getElementById('author-filter-container');
+    if (!container) return;
+
+    const authors = {};
+    books.forEach(b => {
+        authors[b.author] = (authors[b.author] || 0) + 1;
+    });
+
+    const sortedAuthors = Object.keys(authors).sort();
+    container.innerHTML = '';
+    
+    sortedAuthors.forEach(author => {
+        const pill = document.createElement('div');
+        pill.className = `author-pill ${activeAuthorFilters.has(author) ? 'active' : ''}`;
+        pill.innerHTML = `${author} <span class="author-count">${authors[author]}</span>`;
+        pill.onclick = () => toggleAuthorFilter(author);
+        container.appendChild(pill);
+    });
+}
+
+function toggleAuthorFilter(author) {
+    if (activeAuthorFilters.has(author)) {
+        activeAuthorFilters.delete(author);
+    } else {
+        activeAuthorFilters.add(author);
+    }
+    
+    const filtered = allBooks.filter(b => 
+        activeAuthorFilters.size === 0 || activeAuthorFilters.has(b.author)
+    );
+    
+    renderBooks(filtered);
+    renderAuthorFilters(allBooks);
+}
+
+async function openBookDetails(bookId) {
+    const book = allBooks.find(b => b.id === bookId);
+    if (!book) return;
+
+    console.log("DEBUG: Opening book details for ID:", bookId);
+    document.body.classList.add('details-active');
+    const view = document.getElementById('book-details-view');
+    view.style.display = 'flex';
+    view.scrollTop = 0;
+
+    document.getElementById('page-book-cover').src = book.cover_filepath;
+    document.getElementById('page-book-title').innerText = book.title;
+    document.getElementById('page-book-author').innerText = book.author;
+    document.getElementById('page-book-description').innerText = book.description || '';
+    document.getElementById('hero-bg-blur').style.backgroundImage = `url(${book.cover_filepath})`;
+
+    // Reset UI states
+    document.getElementById('page-status-card').style.display = 'none';
+    document.getElementById('page-email-form').style.display = 'none';
+    
+    updateBookActionsUI(bookId);
+    
+    // Update URL without reload
+    window.history.pushState({ bookId }, book.title, `?book=${bookId}`);
+}
+
+function updateBookActionsUI(bookId) {
+    const isUnlocked = userLibrary.includes(bookId);
+    const unlockBtn = document.getElementById('page-request-trigger-btn');
+    const deliveryContainer = document.getElementById('page-delivery-container');
+
+    if (isUnlocked) {
+        if (unlockBtn) unlockBtn.style.display = 'none';
+        if (deliveryContainer) deliveryContainer.style.display = 'block';
+    } else {
+        if (unlockBtn) {
+            unlockBtn.style.display = 'flex';
+            unlockBtn.innerHTML = `<span>${t('unlockBook')} (1 ${t('credit')})</span>`;
+            unlockBtn.onclick = () => handleUnlock(bookId);
+        }
+        if (deliveryContainer) deliveryContainer.style.display = 'none';
+    }
+}
+
+async function handleUnlock(bookId) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast(t('loginToDownload'));
+        setTimeout(() => window.location.href = '/login.html', 1500);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/books/${bookId}/unlock`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showToast(t('unlockSuccess'));
+            userLibrary.push(bookId);
+            updateBookActionsUI(bookId);
+        } else {
+            const error = await response.json();
+            if (response.status === 402) {
+                showToast(t('insufficientCredits'));
+            } else {
+                showToast(error.detail || 'Error');
             }
+        }
+    } catch (error) {
+        console.error('Unlock error:', error);
+    }
+}
 
-            const res = await fetch(`${API_URL}/books?search=${encodeURIComponent(query)}`);
-            if (!res.ok) throw new Error(`Server error: ${res.status}`);
-            allBooks = await res.json();
-            console.log(`Successfully loaded ${allBooks.length} books.`);
+function setupEventListeners() {
+    // Back button
+    const backBtn = document.getElementById('back-to-library');
+    if (backBtn) {
+        backBtn.onclick = () => {
+            document.body.classList.remove('details-active');
+            document.getElementById('book-details-view').style.display = 'none';
+            window.history.pushState({}, 'BookShelf', '/');
+        };
+    }
 
+    // Reset Filters
+    const resetBtn = document.getElementById('reset-filters-btn');
+    if (resetBtn) {
+        resetBtn.onclick = () => {
+            activeAuthorFilters.clear();
             renderBooks(allBooks);
             renderAuthorFilters(allBooks);
-            if (!query) renderCarousel(allBooks); 
-            checkDeepLink(); 
-        } catch (e) {
-            console.error("Failed to load books:", e);
-            booksGrid.innerHTML = `<p style="color:var(--danger); grid-column: 1/-1; text-align: center;">${e.message}</p>`;
-        }
+        };
     }
 
-    async function loadLibrary() {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        try {
-            const res = await fetch(`${API_URL}/books/library`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const library = await res.json();
-                userLibrary = library.map(b => b.id);
+    // Search Mode
+    const searchTrigger = document.getElementById('nav-search-trigger');
+    if (searchTrigger) {
+        searchTrigger.onclick = () => document.body.classList.add('search-active');
+    }
+
+    const cancelSearch = document.getElementById('cancel-search-btn');
+    if (cancelSearch) {
+        cancelSearch.onclick = () => {
+            document.body.classList.remove('search-active');
+            const input = document.getElementById('search-input-mobile');
+            if (input) {
+                input.value = '';
+                renderBooks(allBooks);
             }
-        } catch(e) { console.error("Error loading library", e); }
+        };
     }
 
-    function renderBooks(books) {
-        booksGrid.innerHTML = '';
-        const filtered = activeAuthorFilters.size > 0 
-            ? books.filter(b => activeAuthorFilters.has(b.author))
-            : books;
+    const searchInputMobile = document.getElementById('search-input-mobile');
+    if (searchInputMobile) {
+        searchInputMobile.oninput = (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allBooks.filter(b => 
+                b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)
+            );
+            renderBooks(filtered);
+        };
+    }
 
-        if (filtered.length === 0) {
-            booksGrid.innerHTML = `<p style="color:var(--text-dim); grid-column: 1/-1; text-align: center; padding: 4rem;">${t('noResults')}</p>`;
-            return;
-        }
+    // Download Logic
+    const downloadBtn = document.getElementById('btn-download-epub');
+    if (downloadBtn) {
+        downloadBtn.onclick = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('book');
+            if (bookId) {
+                window.location.href = `${API_URL}/books/download/${bookId}/user?token=${localStorage.getItem('token')}`;
+            }
+        };
+    }
 
-        filtered.forEach((book, index) => {
-            const card = document.createElement('div');
-            card.className = 'book-card lazy-load-item';
-            // Only feature items in Home Mode (not Search Mode)
-            if (!document.body.classList.contains('search-active') && index % 7 === 0) card.classList.add('bento-featured');
+    // Email Form Toggle
+    const toggleEmailBtn = document.getElementById('btn-toggle-email-form');
+    if (toggleEmailBtn) {
+        toggleEmailBtn.onclick = () => {
+            const form = document.getElementById('page-email-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        };
+    }
+
+    // Email Dispatch
+    const emailForm = document.getElementById('page-email-form');
+    if (emailForm) {
+        emailForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('page-user-email');
+            const email = emailInput ? emailInput.value : '';
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('book');
+            const submitBtn = emailForm.querySelector('button[type="submit"]');
             
-            card.innerHTML = `
-                <div class="book-cover-wrapper">
-                    ${book.cover_filepath
-                        ? `<img src="/api/${book.cover_filepath}" alt="${book.title}" loading="lazy">`
-                        : `<div style="height:100%; display:flex; align-items:center; justify-content:center; background:var(--velvet-deep); font-size:3rem;">📖</div>`}
-                </div>
-                <div class="book-info">
-                    <h3 class="book-title">${book.title}</h3>
-                    <p class="book-author">${book.author || 'Unknown Author'}</p>
-                </div>
-            `;
-            card.addEventListener('click', () => navigateToBook(book));
-            booksGrid.appendChild(card);
-            lazyObserver.observe(card);
-        });
-    }
+            if (!bookId) return;
 
-    function renderAuthorFilters(books) {
-        const authors = [...new Set(books.map(b => b.author).filter(Boolean))].sort();
-        authorFilterContainer.innerHTML = '';
-        
-        authors.forEach(author => {
-            const pill = document.createElement('div');
-            pill.className = `author-pill ${activeAuthorFilters.has(author) ? 'active' : ''}`;
-            pill.innerText = author;
-            pill.onclick = () => {
-                if (activeAuthorFilters.has(author)) {
-                    activeAuthorFilters.delete(author);
+            submitBtn.disabled = true;
+            submitBtn.innerText = t('deliveringVolume');
+
+            try {
+                const response = await fetch(`${API_URL}/books/${bookId}/send?email=${encodeURIComponent(email)}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    emailForm.style.display = 'none';
+                    const statusCard = document.getElementById('page-status-card');
+                    statusCard.style.display = 'block';
+                    statusCard.innerHTML = `<div class="status-success">
+                        <p>${t('successfullyDispatched')} ${email}</p>
+                        <p>${t('checkInbox')}</p>
+                    </div>`;
+                    showToast(t('bookSent'));
                 } else {
-                    activeAuthorFilters.add(author);
+                    const err = await response.json();
+                    alert(err.detail || 'Error');
                 }
-                updateFilterUI(books);
-            };
-            authorFilterContainer.appendChild(pill);
-        });
-        
-        updateResetBtn();
-    }
-
-    function updateFilterUI(books) {
-        renderAuthorFilters(books);
-        renderBooks(books);
-    }
-
-    function updateResetBtn() {
-        const hasSearch = (searchInputMobile && searchInputMobile.value) || (searchInputDesktop && searchInputDesktop.value);
-        if (activeAuthorFilters.size > 0 || hasSearch) {
-            resetFiltersBtn.style.display = 'block';
-        } else {
-            resetFiltersBtn.style.display = 'none';
-        }
-    }
-
-    function resetAppView() {
-        activeAuthorFilters.clear();
-        if (searchInputMobile) searchInputMobile.value = '';
-        if (searchInputDesktop) searchInputDesktop.value = '';
-        
-        // Inline close search/book modes without circular calling
-        document.body.classList.remove('details-active');
-        document.body.classList.remove('search-active');
-        if (bookDetailsView) bookDetailsView.style.display = 'none';
-        currentBookId = null;
-
-        updateFilterUI(allBooks);
-        if (toggleFiltersBtn) toggleFiltersBtn.classList.remove('active');
-        if (authorFilterContainer) authorFilterContainer.classList.remove('active');
-        
-        // Navigation visual state
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        if (homeTrigger) homeTrigger.classList.add('active');
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    resetFiltersBtn.onclick = () => {
-        activeAuthorFilters.clear();
-        if (searchInputMobile) searchInputMobile.value = '';
-        if (searchInputDesktop) searchInputDesktop.value = '';
-        updateFilterUI(allBooks);
-    };
-
-    if (toggleFiltersBtn) {
-        toggleFiltersBtn.onclick = () => {
-            const isActive = authorFilterContainer.classList.toggle('active');
-            toggleFiltersBtn.classList.toggle('active', isActive);
-        };
-    }
-
-    if (headerLogo) {
-        headerLogo.onclick = () => resetAppView();
-    }
-
-    function renderCarousel(books) {
-        if (books.length === 0) return;
-        
-        const shuffled = [...books].sort(() => 0.5 - Math.random());
-        const featured = shuffled.slice(0, 5); 
-        
-        carouselTrack.innerHTML = '';
-        carouselDots.innerHTML = '';
-
-        featured.forEach((book, i) => {
-            const item = document.createElement('div');
-            item.className = 'carousel-item';
-            const coverUrl = book.cover_filepath ? `/api/${book.cover_filepath}` : '';
-
-            item.innerHTML = `
-                <div class="carousel-info">
-                    <span class="badge">${t('featuredVolume')}</span>
-                    <h2>${book.title}</h2>
-                    <p>${book.author || 'Unknown Author'}</p>
-                </div>
-                <div class="carousel-cover-side">
-                   ${coverUrl ? `<img src="${coverUrl}" alt="${book.title}">` : ''}
-                </div>
-            `;
-            item.addEventListener('click', () => navigateToBook(book));
-            carouselTrack.appendChild(item);
-
-            const dot = document.createElement('div');
-            dot.className = `dot ${i === 0 ? 'active' : ''}`;
-            dot.addEventListener('click', () => setCarousel(i));
-            carouselDots.appendChild(dot);
-        });
-
-        if (window.carouselTimer) clearInterval(window.carouselTimer);
-        window.carouselTimer = setInterval(() => {
-            carouselIndex = (carouselIndex + 1) % featured.length;
-            setCarousel(carouselIndex);
-        }, 5000);
-    }
-
-    function setCarousel(index) {
-        carouselIndex = index;
-        carouselTrack.style.transform = `translateX(-${index * 100}%)`;
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((d, i) => d.classList.toggle('active', i === index));
-    }
-
-    function navigateToBook(book) {
-        window.history.pushState({ bookId: book.id }, book.title, `#book-${book.id}`);
-        openBookPage(book);
-    }
-
-    function openBookPage(book) {
-        currentBookId = book.id;
-        pageTitle.innerText = book.title;
-        pageAuthor.innerText = book.author || 'Unknown Author';
-        pageDescription.innerText = book.description || (currentLang === 'uk' ? "Опис відсутній." : "No description available.");
-        
-        bookDetailsView.scrollTo(0, 0);
-        pageStatusCard.style.display = 'none';
-        if (deliveryPageContainer) deliveryPageContainer.style.display = 'none';
-        document.body.classList.add('details-active');
-        bookDetailsView.style.display = 'flex';
-
-        if (book.cover_filepath) {
-            const coverUrl = `/api/${book.cover_filepath}`;
-            pageCover.src = coverUrl;
-            heroBgBlur.style.backgroundImage = `url(${coverUrl})`;
-        } else {
-            pageCover.src = '';
-            heroBgBlur.style.backgroundImage = 'none';
-        }
-        
-        // Unlock System Logic
-        const isUnlocked = userLibrary.includes(book.id);
-        if (isUnlocked) {
-            requestPageBtn.style.display = 'none';
-            showDeliveryOptions();
-        } else {
-            requestPageBtn.style.display = 'block';
-            requestPageBtn.innerText = `${t('unlockBook')} (1 ${t('credit')})`;
-            deliveryPageContainer.style.display = 'none';
-        }
-
-        updateStats(book.id);
-    }
-
-    function showDeliveryOptions() {
-        requestPageBtn.style.display = 'none';
-        deliveryPageContainer.style.display = 'block';
-        emailPageForm.style.display = 'none'; // Keep form hidden until toggled
-        
-        const hintEl = document.getElementById('txt-delivery-hint-p');
-        if (hintEl) hintEl.innerText = t('deliveryHint');
-    }
-
-    async function unlockBookRequest(bookId) {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = '/login.html';
-            return;
-        }
-
-        requestPageBtn.innerText = '...';
-        requestPageBtn.disabled = true;
-        
-        try {
-            const res = await fetch(`${API_URL}/books/${bookId}/unlock`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                userLibrary.push(bookId);
-                showToast(t('unlockSuccess'));
-                showDeliveryOptions();
-            } else {
-                const data = await res.json();
-                alert(data.detail || 'Error unlocking book.');
-            }
-        } catch(e) {
-            console.error(e);
-        } finally {
-            requestPageBtn.disabled = false;
-            requestPageBtn.innerText = `${t('unlockBook')} (1 ${t('credit')})`;
-        }
-    }
-
-    async function updateStats(bookId) {
-        try {
-            const res = await fetch(`${API_URL}/books/${bookId}/stats`);
-            const stats = await res.json();
-            const shareTxt = currentLang === 'uk' ? 'Поділилися' : 'Shared';
-            const readersTxt = currentLang === 'uk' ? 'читачів' : 'readers';
-            document.getElementById('page-stats').innerHTML = `
-                <span>⭐ ${shareTxt} <strong>${stats.total_sends}</strong></span>
-                <span style="margin-left: 1rem;">📖 <strong>${stats.unique_users}</strong> ${readersTxt}</span>
-            `;
-        } catch (e) { console.error(e); }
-    }
-
-    function closeBookPage() {
-        document.body.classList.remove('details-active');
-        bookDetailsView.style.display = 'none';
-        currentBookId = null;
-        
-        // If we came from search, stay in search. Otherwise reset.
-        if (!document.body.classList.contains('search-active')) {
-            resetAppView();
-        }
-    }
-
-    function checkDeepLink() {
-        const hash = window.location.hash;
-        if (hash.startsWith('#book-')) {
-            const id = parseInt(hash.replace('#book-', ''));
-            const book = allBooks.find(b => b.id === id);
-            if (book) openBookPage(book);
-        }
-    }
-
-    window.addEventListener('popstate', () => {
-        if (window.location.hash.startsWith('#book-')) {
-            checkDeepLink();
-        } else {
-            closeBookPage();
-        }
-    });
-
-    backToLibraryBtn.addEventListener('click', () => {
-        window.history.pushState(null, '', window.location.pathname);
-        closeBookPage(); 
-    });
-
-    shareBookBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showToast(t('linkCopied'));
-        });
-    });
-
-    requestPageBtn.addEventListener('click', () => {
-        if (!userLibrary.includes(currentBookId)) {
-            unlockBookRequest(currentBookId);
-        } else {
-            showDeliveryOptions();
-        }
-    });
-
-    if (downloadEpubBtn) {
-        downloadEpubBtn.addEventListener('click', () => {
-            const token = localStorage.getItem('token');
-            window.location.href = `${API_URL}/books/download/${currentBookId}/user?token=${token}`;
-        });
-    }
-
-    if (toggleEmailFormBtn) {
-        toggleEmailFormBtn.addEventListener('click', () => {
-            const isHidden = emailPageForm.style.display === 'none';
-            emailPageForm.style.display = isHidden ? 'block' : 'none';
-            if (!isHidden) {
-                bookDetailsView.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                document.getElementById('page-user-email').focus();
-            }
-        });
-    }
-
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = message;
-        toastContainer.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 400);
-        }, 3000);
-    }
-
-    // --- Search Interaction Logic ---
-
-    function openSearchMode() {
-        document.body.classList.add('search-active');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        if (searchTrigger) searchTrigger.classList.add('active');
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (searchInputMobile) {
-            searchInputMobile.value = '';
-            setTimeout(() => searchInputMobile.focus(), 150);
-        }
-        renderBooks(allBooks); // Refresh grid
-    }
-
-    function closeSearchMode() {
-        document.body.classList.remove('search-active');
-        if (searchInputMobile) searchInputMobile.value = '';
-        if (searchInputDesktop) searchInputDesktop.value = '';
-        updateFilterUI(allBooks);
-    }
-
-    const performSearch = (val) => {
-        const query = val.trim().toLowerCase();
-        updateResetBtn();
-        const clearSearchBtn = document.getElementById('clear-search-btn');
-        
-        if (clearSearchBtn) {
-            clearSearchBtn.style.display = query ? 'block' : 'none';
-        }
-
-        if (!query) {
-            renderBooks(allBooks);
-            return;
-        }
-        const filtered = allBooks.filter(b => {
-            return b.title.toLowerCase().includes(query) || (b.author || '').toLowerCase().includes(query);
-        });
-        renderBooks(filtered);
-    };
-
-    if (searchInputMobile) searchInputMobile.addEventListener('input', (e) => performSearch(e.target.value));
-    if (searchInputDesktop) searchInputDesktop.addEventListener('input', (e) => performSearch(e.target.value));
-    
-    const clearSearchBtn = document.getElementById('clear-search-btn');
-    if (clearSearchBtn) {
-        clearSearchBtn.onclick = () => {
-            if (searchInputMobile) {
-                searchInputMobile.value = '';
-                searchInputMobile.focus();
-                performSearch('');
-            }
-        };
-    }
-
-    if (cancelSearchBtn) cancelSearchBtn.onclick = () => closeSearchMode();
-
-    emailPageForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('page-user-email').value;
-        const submitBtn = emailPageForm.querySelector('button[type="submit"]');
-
-        submitBtn.disabled = true;
-        submitBtn.innerText = t('deliveringVolume');
-
-        try {
-            const res = await fetch(`${API_URL}/books/${currentBookId}/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            if (res.ok) {
-                emailPageContainer.style.display = 'none';
-                pageStatusCard.innerHTML = `
-                    <h4>${t('successfullyDispatched')}</h4>
-                    <p>${t('dispatchHint')} <strong>${email}</strong>${t('dispatchHintEnd')}</p>
-                `;
-                pageStatusCard.style.display = 'block';
-                showToast(t('bookSent'));
-            } else {
-                const data = await res.json();
-                alert(data.detail || 'Error');
+            } catch (err) {
+                console.error(err);
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = t('deliverNow');
             }
-        } catch (err) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = t('deliverNow');
-        }
-    });
-
-    fbForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = document.getElementById('fb-message').value;
-        try {
-            const res = await fetch(`${API_URL}/feedback/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
-            });
-            if (res.ok) {
-                fbForm.reset();
-                showToast(t('feedbackSubmitted'));
-                feedbackModal.classList.remove('active');
-            }
-        } catch(err) { console.error(err); }
-    });
-
-    if (homeTrigger) {
-        homeTrigger.onclick = (e) => {
-            e.preventDefault();
-            resetAppView();
         };
     }
 
-    if (searchTrigger) {
-        searchTrigger.onclick = (e) => {
-            e.preventDefault();
-            openSearchMode();
-        };
+    // Feedback
+    const fbTrigger = document.getElementById('nav-feedback-trigger');
+    if (fbTrigger) {
+        fbTrigger.onclick = () => document.getElementById('feedback-modal').classList.add('active');
     }
 
-    if (feedbackTrigger) {
-        feedbackTrigger.onclick = (e) => {
-            e.preventDefault();
-            if (feedbackModal) feedbackModal.classList.add('active');
-        };
+    const closeFb = document.getElementById('close-feedback-modal');
+    if (closeFb) {
+        closeFb.onclick = () => document.getElementById('feedback-modal').classList.remove('active');
     }
 
-    if (closeFeedbackModal) closeFeedbackModal.onclick = () => feedbackModal.classList.remove('active');
+    const fbForm = document.getElementById('feedback-form');
+    if (fbForm) {
+        fbForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('fb-message').value;
+            try {
+                const res = await fetch(`${API_URL}/feedback/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    fbForm.reset();
+                    showToast(t('feedbackSubmitted'));
+                    document.getElementById('feedback-modal').classList.remove('active');
+                }
+            } catch (err) { console.error(err); }
+        };
+    }
+}
+
+function handleRouting() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get('book');
+    if (bookId) {
+        openBookDetails(parseInt(bookId));
+    }
+}
+
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
     
-    // Close on click outside
-    window.onclick = (e) => {
-        if (e.target === feedbackModal) feedbackModal.classList.remove('active');
-    };
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    container.appendChild(toast);
     
-    applyLanguage(); 
-    loadBooks();
-});
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
