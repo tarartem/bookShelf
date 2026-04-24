@@ -128,9 +128,20 @@ function applyLanguage() {
 
 function updateUIForUser() {
     const profileTrigger = document.getElementById('profile-trigger');
-    if (profileTrigger && currentUser) {
-        profileTrigger.innerHTML = `<span>${currentUser.email.split('@')[0]}</span>`;
-        profileTrigger.onclick = () => window.location.href = '/profile.html';
+    if (profileTrigger) {
+        if (currentUser) {
+            const initial = currentUser.email[0].toUpperCase();
+            profileTrigger.innerHTML = `<div style="font-weight:700; color:var(--emerald-primary); font-size:1.1rem;">${initial}</div>`;
+            profileTrigger.onclick = () => window.location.href = '/profile.html';
+            profileTrigger.title = currentUser.email;
+        } else {
+            profileTrigger.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>`;
+            profileTrigger.onclick = () => window.location.href = '/login.html';
+        }
     }
 }
 
@@ -259,9 +270,15 @@ async function openBookDetails(bookId) {
     document.getElementById('page-book-description').innerText = book.description || '';
     document.getElementById('hero-bg-blur').style.backgroundImage = `url(${book.cover_filepath})`;
 
-    // Reset UI states
-    document.getElementById('page-status-card').style.display = 'none';
-    document.getElementById('page-email-form').style.display = 'none';
+    // Set share icon
+    const shareBtn = document.getElementById('share-book-page-btn');
+    if (shareBtn) {
+        shareBtn.innerHTML = '🔗';
+        shareBtn.onclick = () => {
+            navigator.clipboard.writeText(window.location.href);
+            showToast(t('linkCopied'));
+        };
+    }
     
     updateBookActionsUI(bookId);
     
@@ -280,6 +297,8 @@ function updateBookActionsUI(bookId) {
     } else {
         if (unlockBtn) {
             unlockBtn.style.display = 'flex';
+            unlockBtn.style.alignItems = 'center';
+            unlockBtn.style.justifyContent = 'center';
             unlockBtn.innerHTML = `<span>${t('unlockBook')} (1 ${t('credit')})</span>`;
             unlockBtn.onclick = () => handleUnlock(bookId);
         }

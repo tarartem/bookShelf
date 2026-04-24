@@ -1,35 +1,105 @@
-        async function loadUserLibrary() {
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій Профіль - BookShelf</title>
+    <link rel="stylesheet" href="/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode oled-theme">
+    <header class="top-nav-island">
+        <div class="header-brand" onclick="window.location.href='/'">
+            <img src="/assets/logo.png" alt="" style="height: 32px; width: 32px;">
+            <h1 style="font-size: 1.25rem;">BookShelf</h1>
+        </div>
+        <a href="/" class="btn-secondary btn-mini" style="position: absolute; right: 1.5rem;">На головну</a>
+    </header>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="user-avatar-large" id="user-initial">?</div>
+            <div class="user-info">
+                <h2 id="user-email">Завантаження...</h2>
+                <div class="credits-card" id="user-credits">0 кредитів</div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>Моя Бібліотека</span>
+        </div>
+
+        <div class="library-grid" id="my-library-grid">
+            <!-- Injected via JS -->
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Вийти з акаунту</button>
+    </div>
+
+    <script type="module">
+        import { translations } from './translations.js';
+        const currentLang = localStorage.getItem('lang') || 'uk';
+        const t = (key) => translations[currentLang][key] || key;
+
+        async function init() {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/books/library', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const books = await res.json();
-            
-            const grid = document.getElementById('my-library-grid');
-            grid.innerHTML = '';
-            
-            if (books.length === 0) {
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">Поки що порожньо.</p>`;
+            if (!token) {
+                window.location.href = '/login.html';
                 return;
             }
 
-            books.reverse().forEach(book => {
-                const card = document.createElement('div');
-                card.className = 'mini-book-card';
-                card.style.cursor = 'pointer';
-                const coverHtml = book.cover_filepath 
-                    ? `<img src="/api/${book.cover_filepath}" class="mini-cover" alt="">`
-                    : `<div class="mini-cover" style="display:flex; align-items:center; justify-content:center; font-size:2rem; background:var(--velvet-deep);">📖</div>`;
+            try {
+                // Load User Data
+                const userRes = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!userRes.ok) throw new Error('Auth failed');
+                const user = await userRes.json();
                 
-                card.innerHTML = `
-                    <span class="status-badge status-approved">В бібліотеці</span>
-                    ${coverHtml}
-                    <div class="mini-title">${book.title}</div>
-                `;
-                card.onclick = () => {
-                    // Navigate to home and open book
-                    window.location.href = `/#book-${book.id}`;
-                };
-                grid.appendChild(card);
-            });
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('user-initial').innerText = user.email[0].toUpperCase();
+                document.getElementById('user-credits').innerText = `${user.credits} ${t('credit')}`;
+
+                // Load Library
+                const libRes = await fetch('/api/books/library', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const books = await libRes.json();
+                
+                const grid = document.getElementById('my-library-grid');
+                grid.innerHTML = '';
+                
+                if (books.length === 0) {
+                    grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">Поки що порожньо.</p>`;
+                    return;
+                }
+
+                books.reverse().forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'mini-book-card';
+                    card.onclick = () => window.location.href = `/?book=${book.id}`;
+                    
+                    const coverSrc = book.cover_filepath ? `/${book.cover_filepath}` : 'assets/default-cover.jpg';
+                    
+                    card.innerHTML = `
+                        <img src="${coverSrc}" class="mini-cover" alt="">
+                        <div class="mini-title">${book.title}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
         }
+
+        window.logout = () => {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        };
+
+        init();
+    </script>
+</body>
+</html>

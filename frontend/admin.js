@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.className = 'admin-card-item';
                 div.innerHTML = `
                     <div style="width: 60px; height: 80px; border-radius: 8px; overflow:hidden; background: #222;">
-                        <img src="/api/${book.cover_filepath}" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="/${book.cover_filepath}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div style="flex:1;">
                         <h4 style="margin:0;">${book.title}</h4>
