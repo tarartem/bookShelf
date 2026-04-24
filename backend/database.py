@@ -11,16 +11,13 @@ TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
 is_remote = DATABASE_URL.startswith("libsql://") or DATABASE_URL.startswith("https://")
 
 if is_remote:
-    import libsql
-    # Turso URLs should be converted to https:// format for the client
-    clean_url = DATABASE_URL.replace("libsql://", "https://")
-    
-    def create_libsql_conn():
-        return libsql.connect(database=clean_url, auth_token=TURSO_AUTH_TOKEN)
+    # Now that we have the 'libsql' package, we use the official dialect
+    clean_host = DATABASE_URL.replace("libsql://", "").replace("https://", "").strip("/")
+    final_url = f"sqlite+libsql://{clean_host}"
     
     engine = create_engine(
-        "sqlite://", # Use dummy sqlite dialect
-        creator=create_libsql_conn,
+        final_url,
+        connect_args={"auth_token": TURSO_AUTH_TOKEN} if TURSO_AUTH_TOKEN else {},
         isolation_level=None
     )
 else:
