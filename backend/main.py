@@ -67,5 +67,18 @@ def health_check(db: Session = Depends(get_db)):
             "error": str(e)
         }
 
+@app.get("/api/debug/db")
+def debug_db(db: Session = Depends(get_db)):
+    from sqlalchemy import text
+    try:
+        tables = ["users", "books", "credit_transactions", "user_library"]
+        info = {}
+        for table in tables:
+            res = db.execute(text(f"SELECT column_name, data_type FROM information_schema.columns WHERE table_name='{table}'"))
+            info[table] = [f"{row[0]} ({row[1]})" for row in res]
+        return info
+    except Exception as e:
+        return {"error": str(e)}
+
 # Frontend - catch all others and serve index.html (Vanilla SPA)
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
