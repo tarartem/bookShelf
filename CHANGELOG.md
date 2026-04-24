@@ -2,6 +2,18 @@
 
 Всі ключові зміни, вдосконалення та виправлення проекту BookShelf.
 
+## [v3.2] "The Persistent Shelf" — 2026-04-24
+### Змінено
+- **Database Migration**: Замінено SQLite на **Neon PostgreSQL** (хмарна БД, безкоштовний тариф, постійне збереження).
+- **Zero-Downtime Schema**: Міграція тепер використовує `CREATE TABLE IF NOT EXISTS` та `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` — повністю ідемпотентна.
+- **Dependency Cleanup**: Видалено `sqlalchemy-libsql`, `libsql` та пов'язані Turso-пакети; замінено на `psycopg2-binary`.
+
+### Виправлено
+- **Data Loss on Restart**: Дані користувачів (акаунти, кредити, сесії) тепер зберігаються між рестартами сервера.
+- **Email Verification Reliability**: Верифікаційні токени більше не зникають після перезапуску Render.
+
+---
+
 ## [v3.1] "The Credit Economy" — 2026-04-23
 ### Додано
 - **Give-to-Get Model**: Впроваджено систему кредитів (1 кредит = 1 завантаження).
@@ -48,7 +60,6 @@
 ### Додано
 - **Render.com Deployment**: Повний перехід на хмарну інфраструктуру Render.
 - **Persistent Storage**: Налаштовано збереження бази даних SQLite та EPUB-файлів на постійному диску.
-- **SMTP Integration**: Налаштовано надійну доставку книг через Gmail SMTP.
 
 ---
 

@@ -59,18 +59,18 @@ sequenceDiagram
     actor User
     participant App as Frontend (profile.html)
     participant API as FastAPI Backend
-    participant SQLite as Database
+    participant DB as Database (Neon PostgreSQL)
     actor Admin
 
     User->>App: Drag/Drop EPUB File
     App->>API: POST /api/books/upload (with JWT)
-    API->>SQLite: Check file_hash for duplicates
+    API->>DB: Check file_hash for duplicates
     alt Hash Matches
-        SQLite-->>API: Conflict!
+        DB-->>API: Conflict!
         API-->>App: 400 'Book already exists'
     else Unique Hash
         API->>API: Extract Title, Author, Cover
-        API->>SQLite: Insert Book (status="pending", owner_id=User)
+        API->>DB: Insert Book (status="pending", owner_id=User)
         API-->>App: 200 OK
         App-->>User: Refresh 'My Contributions' Grid
     end
@@ -81,13 +81,13 @@ sequenceDiagram
     
     alt Standard Quality
         Admin->>API: Approve Book
-        API->>SQLite: Update status="approved"
-        API->>SQLite: Add +5 Credits to User balance
-        API->>SQLite: Log Transaction (+5, "Upload Approved")
+        API->>DB: Update status="approved"
+        API->>DB: Add +5 Credits to User balance
+        API->>DB: Log Transaction (+5, "Upload Approved")
         API-->>User: Book now visible + Credits awarded!
     else Copyright/Spam/Invalid
         Admin->>API: Reject Book
-        API->>SQLite: Update status="rejected"
+        API->>DB: Update status="rejected"
         API-->>User: Book visually updated to Red Rejected Tag
     end
 ```
@@ -96,3 +96,26 @@ sequenceDiagram
 - **Dev Mode Email Emulation**: If SMTP credentials are not configured in `.env`, the system deliberately suppresses 500 crashes and prints physical clickable token links directly to the `uvicorn` console.
 - **Account Cascade**: Executing the `/api/auth/me` Account Deletion actively purges all mapped contributions tied to the user to prevent orphaned data ghosts.
 - **Color Identity**: Status badges must follow strict semantic coloring (`approved` = Emerald, `pending` = Amber warning, `rejected` = Velvet Danger).
+
+## 🏗️ Production Infrastructure
+
+| Layer | Service | Notes |
+|---|---|---|
+| **Hosting** | Render.com (Free) | Auto-deploys on every GitHub push to `main` |
+| **Database** | Neon PostgreSQL (Free) | Cloud-hosted, persistent across Render restarts |
+| **Email** | Gmail SMTP via `aiosmtplib` | Configured via `SMTP_*` env vars on Render |
+| **Auth** | JWT Bearer tokens | `SECRET_KEY` set in Render environment |
+| **Files** | Render Docker filesystem | EPUBs/covers stored in `/app/uploads/`; reset on redeploy |
+
+### Required Render Environment Variables
+```
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require   # Neon connection string
+SECRET_KEY=<random 32+ char string>
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your@gmail.com
+SMTP_PASSWORD=<gmail app password>
+FROM_EMAIL=your@gmail.com
+BASE_URL=https://your-app.onrender.com
+ADMIN_SECRET=<your admin password>
+```

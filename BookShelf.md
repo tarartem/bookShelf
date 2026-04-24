@@ -20,9 +20,10 @@ I am a product owner and developer who wants to construct an elegant, reliable, 
 11. **Mobile First Architecture**: Intuitive touch-targets, scroll persistence, modal dialogs, and native-feeling interactions engineered for smartphones first.
 
 ## Tech Stack
--   **Backend**: Python (FastAPI) + SQLite (SQLAlchemy)
+-   **Backend**: Python (FastAPI) + PostgreSQL (SQLAlchemy + psycopg2)
 -   **Frontend**: Vanilla JS (ES6 Modules) + Native CSS Custom Properties (zero-bloat/no frameworks).
--   **Storage**: Persistent local disk storage structured for dockerized Render deployment.
+-   **Database**: Neon PostgreSQL (cloud-hosted, persistent, free tier — survives server restarts).
+-   **Storage**: Uploaded EPUBs and covers stored on Render's Docker filesystem; database data is fully cloud-persistent via Neon.
 
 ## Features & Modules (Updated)
 - [x] **User Accounts**: Registration, Login, and secure JWT verification tracking.
