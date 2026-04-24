@@ -19,7 +19,8 @@ if is_remote:
     
     engine = create_engine(
         final_url,
-        connect_args={"auth_token": TURSO_AUTH_TOKEN} if TURSO_AUTH_TOKEN else {}
+        connect_args={"auth_token": TURSO_AUTH_TOKEN} if TURSO_AUTH_TOKEN else {},
+        isolation_level=None
     )
 else:
     # Standard local SQLite
