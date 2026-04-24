@@ -175,10 +175,12 @@ def run_migrations():
             alter_stmts = [
                 "ALTER TABLE books ADD COLUMN uploaded_by INTEGER REFERENCES users(id)",
                 "ALTER TABLE books ADD COLUMN status VARCHAR DEFAULT 'pending'",
+                "ALTER TABLE users ADD COLUMN password_hash VARCHAR",
                 "ALTER TABLE users ADD COLUMN credits INTEGER DEFAULT 3",
                 "ALTER TABLE users ADD COLUMN email_notifications BOOLEAN DEFAULT FALSE",
                 "ALTER TABLE users ADD COLUMN received_notif_bonus BOOLEAN DEFAULT FALSE",
                 "ALTER TABLE users ADD COLUMN role VARCHAR DEFAULT 'user'",
+                "ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE",
             ]
             for stmt in alter_stmts:
                 try:
@@ -191,10 +193,12 @@ def run_migrations():
             columns_to_add = [
                 ("books", "uploaded_by", "INTEGER REFERENCES users(id)"),
                 ("books", "status", "VARCHAR DEFAULT 'pending'"),
+                ("users", "password_hash", "VARCHAR"),
                 ("users", "credits", "INTEGER DEFAULT 3"),
                 ("users", "email_notifications", "BOOLEAN DEFAULT FALSE"),
                 ("users", "received_notif_bonus", "BOOLEAN DEFAULT FALSE"),
                 ("users", "role", "VARCHAR DEFAULT 'user'"),
+                ("users", "is_verified", "BOOLEAN DEFAULT FALSE"),
             ]
             
             for table, column, col_type in columns_to_add:
