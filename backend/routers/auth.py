@@ -42,13 +42,20 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     
     # Record initial credits transaction
+    # Explicitly use 3 if new_user.credits is None to prevent NOT NULL constraint error
+    initial_credits = new_user.credits if new_user.credits is not None else 3
     initial_tx = CreditTransaction(
         user_id=new_user.id,
-        amount=new_user.credits,
+        amount=initial_credits,
         reason="Вітальний бонус при реєстрації"
     )
     db.add(initial_tx)
-    db.commit()
+    try:
+        db.commit()
+        print(f"DEBUG: Initial transaction created for {new_user.email}")
+    except Exception as e:
+        print(f"ERROR: Failed to create initial transaction: {e}")
+        db.rollback()
     
     print(f"DEBUG: User created: {new_user.email} (ID: {new_user.id})")
     

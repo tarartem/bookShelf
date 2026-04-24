@@ -129,19 +129,28 @@ function applyLanguage() {
 function updateUIForUser() {
     const profileTrigger = document.getElementById('profile-trigger');
     if (profileTrigger) {
+        console.log("DEBUG: Updating profile icon UI, currentUser:", currentUser ? currentUser.email : "Guest");
         if (currentUser) {
             const initial = currentUser.email[0].toUpperCase();
-            profileTrigger.innerHTML = `<div style="font-weight:700; color:var(--emerald-primary); font-size:1.1rem;">${initial}</div>`;
-            profileTrigger.onclick = () => window.location.href = '/profile.html';
+            profileTrigger.innerHTML = `<div style="font-weight:700; color:var(--emerald-primary); font-size:1.1rem; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">${initial}</div>`;
+            profileTrigger.onclick = (e) => {
+                console.log("DEBUG: Profile icon clicked (User)");
+                window.location.href = '/profile.html';
+            };
             profileTrigger.title = currentUser.email;
         } else {
             profileTrigger.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>`;
-            profileTrigger.onclick = () => window.location.href = '/login.html';
+            profileTrigger.onclick = (e) => {
+                console.log("DEBUG: Profile icon clicked (Guest)");
+                window.location.href = '/login.html';
+            };
         }
+    } else {
+        console.warn("DEBUG: profile-trigger element not found in DOM");
     }
 }
 

@@ -1,39 +1,102 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мій Профіль - BookShelf</title>
+    <title>Profile - BookShelf</title>
     <link rel="stylesheet" href="/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 </head>
-<body class="dark-mode oled-theme">
-    <header class="top-nav-island">
-        <div class="header-brand" onclick="window.location.href='/'">
-            <img src="/assets/logo.png" alt="" style="height: 32px; width: 32px;">
-            <h1 style="font-size: 1.25rem;">BookShelf</h1>
-        </div>
-        <a href="/" class="btn-secondary btn-mini" style="position: absolute; right: 1.5rem;">На головну</a>
-    </header>
+<body class="dark-mode oled-theme profile-page">
 
     <div class="profile-container">
-        <div class="profile-header">
-            <div class="user-avatar-large" id="user-initial">?</div>
-            <div class="user-info">
-                <h2 id="user-email">Завантаження...</h2>
-                <div class="credits-card" id="user-credits">0 кредитів</div>
+        <!-- Header -->
+        <header class="profile-header">
+            <a href="/" class="back-to-home">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span id="txt-back-library">Library</span>
+            </a>
+            <div class="user-main-info">
+                <div class="profile-avatar" id="avatar-initials">?</div>
+                <div class="user-meta">
+                    <h2 id="user-email">...</h2>
+                    <span id="user-status" class="status-badge">...</span>
+                </div>
+            </div>
+            <div class="credits-badge" title="Your Balance">
+                <span class="credits-icon">💎</span>
+                <span id="user-credits" class="credits-value">0</span>
+                <span class="credits-label">Credits</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="profile-grid">
+            <!-- Sidebar: Account Stats -->
+            <aside class="profile-sidebar">
+                <div class="glass-panel stat-card">
+                    <div class="stat-item">
+                        <label id="txt-member-since">Member Since</label>
+                        <span id="join-date">...</span>
+                    </div>
+                    <div class="stat-item">
+                        <label id="txt-id">ID</label>
+                        <span id="member-id">#000</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel settings-card">
+                    <h3>Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label id="txt-email-notif">Email Notifications</label>
+                            <span class="bonus-hint" id="notif-bonus-label">+10 bonus for enabling</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notif-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <button id="logout-btn" class="btn-secondary logout-btn">
+                        <span>Logout</span>
+                    </button>
+
+                    <button id="delete-btn" class="btn-danger-minimal">
+                        <span>Delete Account</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main: Contributions -->
+            <section class="profile-main">
+                <div class="section-header">
+                    <h3 id="txt-contributions">My Contributions</h3>
+                    <label for="file-input" class="btn-primary btn-mini upload-trigger">
+                        <span>+ Upload EPUB</span>
+                    </label>
+                    <input type="file" id="file-input" accept=".epub" style="display: none;">
+                </div>
+                
+                <div id="upload-status" class="upload-status-box" style="display: none;"></div>
+
+                <div id="my-books-grid" class="mini-grid">
+                    <div class="loading">Loading...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h3 class="modal-title" id="modal-title">Confirm</h3>
+            <p class="modal-text" id="modal-text">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="modal-cancel">Cancel</button>
+                <button class="btn-primary" id="modal-confirm" style="background: var(--danger); color: white;">Confirm</button>
             </div>
         </div>
-
-        <div class="section-title">
-            <span>Моя Бібліотека</span>
-        </div>
-
-        <div class="library-grid" id="my-library-grid">
-            <!-- Injected via JS -->
-        </div>
-
-        <button class="logout-btn" onclick="logout()">Вийти з акаунту</button>
     </div>
 
     <script type="module">
@@ -41,65 +104,198 @@
         const currentLang = localStorage.getItem('lang') || 'uk';
         const t = (key) => translations[currentLang][key] || key;
 
-        async function init() {
+        function applyLanguage() {
+            const ids = {
+                'txt-back-library': 'backToLibrary',
+                'txt-member-since': 'memberSince',
+                'txt-email-notif': 'emailNotifications',
+                'txt-contributions': 'myContributions'
+            };
+            for (const [id, key] of Object.entries(ids)) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = t(key);
+            }
+            document.querySelector('#logout-btn span').innerText = t('logout');
+            document.querySelector('#delete-btn span').innerText = t('deleteAccount');
+            document.querySelector('.upload-trigger span').innerText = t('uploadEpub');
+        }
+
+        async function loadProfile() {
             const token = localStorage.getItem('token');
             if (!token) {
-                window.location.href = '/login.html';
+                window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // Load User Data
                 const userRes = await fetch('/api/auth/me', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!userRes.ok) throw new Error('Auth failed');
-                const user = await userRes.json();
-                
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('user-initial').innerText = user.email[0].toUpperCase();
-                document.getElementById('user-credits').innerText = `${user.credits} ${t('credit')}`;
 
-                // Load Library
-                const libRes = await fetch('/api/books/library', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const books = await libRes.json();
-                
-                const grid = document.getElementById('my-library-grid');
-                grid.innerHTML = '';
-                
-                if (books.length === 0) {
-                    grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">Поки що порожньо.</p>`;
+                if (userRes.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
                     return;
                 }
 
-                books.reverse().forEach(book => {
-                    const card = document.createElement('div');
-                    card.className = 'mini-book-card';
-                    card.onclick = () => window.location.href = `/?book=${book.id}`;
-                    
-                    const coverSrc = book.cover_filepath ? `/${book.cover_filepath}` : 'assets/default-cover.jpg';
-                    
-                    card.innerHTML = `
-                        <img src="${coverSrc}" class="mini-cover" alt="">
-                        <div class="mini-title">${book.title}</div>
-                    `;
-                    grid.appendChild(card);
-                });
+                const user = await userRes.json();
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-status').textContent = user.is_verified ? t('verifiedMember') : t('pendingVerification');
+                document.getElementById('avatar-initials').textContent = user.email[0].toUpperCase();
+                document.getElementById('join-date').textContent = new Date(user.created_at).toLocaleDateString();
+                document.getElementById('member-id').textContent = `#${user.id.toString().padStart(3, '0')}`;
+                document.getElementById('user-credits').textContent = user.credits;
+                
+                const notifToggle = document.getElementById('notif-toggle');
+                notifToggle.checked = user.email_notifications;
+                
+                if (user.received_notif_bonus) {
+                    document.getElementById('notif-bonus-label').innerHTML = `<span style="color:var(--emerald-primary);">${t('notifEnabled')}</span>`;
+                }
+
+                loadMyBooks();
             } catch (err) {
                 console.error(err);
-                localStorage.removeItem('token');
-                window.location.href = '/login.html';
             }
         }
 
-        window.logout = () => {
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        };
+        async function loadMyBooks() {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/books/my', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const books = await res.json();
+            
+            const grid = document.getElementById('my-books-grid');
+            grid.innerHTML = '';
+            
+            if (books.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">${t('noContributionsYet')}</p>`;
+                return;
+            }
 
-        init();
+            books.reverse().forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'mini-book-card';
+                // FIXED PATH: removed /api/ prefix
+                const coverHtml = book.cover_filepath 
+                    ? `<img src="${book.cover_filepath}" class="mini-cover" alt="">`
+                    : `<div class="mini-cover" style="display:flex; align-items:center; justify-content:center; font-size:2rem; background:var(--velvet-deep);">📖</div>`;
+                
+                card.innerHTML = `
+                    <span class="status-badge status-${book.status}">${t(book.status)}</span>
+                    ${coverHtml}
+                    <div class="mini-title">${book.title}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('upload-status');
+            status.style.display = 'block';
+            status.innerHTML = `<span style="color: var(--emerald-glow);">${t('preparingUpload')}: ${file.name}...</span>`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/books/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    status.innerHTML = `<span style="color: var(--emerald-primary);">✅ ${t('uploadSuccess')}</span>`;
+                    await loadMyBooks();
+                    setTimeout(() => { status.style.display = 'none'; }, 3000);
+                } else {
+                    status.innerHTML = `<span style="color: var(--danger);">❌ ${data.detail || t('uploadError')}</span>`;
+                }
+            } catch (err) {
+                status.innerHTML = `<span style="color: var(--danger);">❌ ${t('connectionError')}</span>`;
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('notif-toggle').addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/auth/notifications', {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ enabled })
+                });
+                if (res.ok) {
+                    loadProfile();
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        async function showConfirm(title, text, confirmText = t('confirm'), isDanger = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirm-modal');
+                const titleEl = document.getElementById('modal-title');
+                const textEl = document.getElementById('modal-text');
+                const confirmBtn = document.getElementById('modal-confirm');
+                const cancelBtn = document.getElementById('modal-cancel');
+
+                titleEl.textContent = title;
+                textEl.textContent = text;
+                confirmBtn.textContent = confirmText;
+                confirmBtn.style.background = isDanger ? 'var(--danger)' : 'var(--emerald-primary)';
+                confirmBtn.style.color = isDanger ? 'white' : 'black';
+
+                modal.style.display = 'flex';
+
+                const close = (res) => {
+                    modal.style.display = 'none';
+                    confirmBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    resolve(res);
+                };
+
+                confirmBtn.onclick = () => close(true);
+                cancelBtn.onclick = () => close(false);
+            });
+        }
+
+        document.getElementById('delete-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const confirmed = await showConfirm(t('deleteAccountQuestion'), t('deleteAccountWarning'), t('deleteForever'), true);
+            if (!confirmed) return;
+            const secondConfirm = await showConfirm(t('lastWarning'), t('absoluteCertainty'), t('yesDelete'), true);
+            if (!secondConfirm) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'index.html';
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        applyLanguage();
+        loadProfile();
     </script>
 </body>
 </html>
