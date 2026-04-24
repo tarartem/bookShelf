@@ -187,19 +187,32 @@ def run_migrations():
                 except Exception:
                     conn.rollback()
         else:
-            alter_stmts = [
-                "ALTER TABLE books ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES users(id)",
-                "ALTER TABLE books ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'pending'",
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 3",
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_notifications BOOLEAN DEFAULT FALSE",
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS received_notif_bonus BOOLEAN DEFAULT FALSE",
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR DEFAULT 'user'",
+            # Robust PostgreSQL column checking
+            columns_to_add = [
+                ("books", "uploaded_by", "INTEGER REFERENCES users(id)"),
+                ("books", "status", "VARCHAR DEFAULT 'pending'"),
+                ("users", "credits", "INTEGER DEFAULT 3"),
+                ("users", "email_notifications", "BOOLEAN DEFAULT FALSE"),
+                ("users", "received_notif_bonus", "BOOLEAN DEFAULT FALSE"),
+                ("users", "role", "VARCHAR DEFAULT 'user'"),
             ]
-            for stmt in alter_stmts:
-                try:
-                    conn.execute(text(stmt))
-                except Exception as e:
-                    print(f"  Column migration skipped: {e}")
+            
+            for table, column, col_type in columns_to_add:
+                # Check if column exists
+                check_query = text(f"""
+                    SELECT count(*) 
+                    FROM information_schema.columns 
+                    WHERE table_name='{table}' AND column_name='{column}';
+                """)
+                res = conn.execute(check_query).scalar()
+                if res == 0:
+                    print(f"  Adding column '{column}' to table '{table}'...")
+                    try:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
+                    except Exception as e:
+                        print(f"  Error adding column {column}: {e}")
+                else:
+                    print(f"  Column '{column}' already exists in table '{table}'.")
             conn.commit()
 
         conn.commit()

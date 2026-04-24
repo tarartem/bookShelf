@@ -90,6 +90,15 @@ def load_books_on_startup(db: Session):
                 if json_description and book_entry.description != json_description:
                     book_entry.description = json_description
                     updated_count += 1
+                
+                # CRITICAL: Re-extract cover if missing from disk (e.g. after Render restart)
+                if not book_entry.cover_filepath or not os.path.exists(book_entry.cover_filepath):
+                    print(f"DEBUG: Cover missing for '{book_entry.title}', re-extracting...")
+                    _, _, new_cover = extract_epub_metadata(epub_path)
+                    if new_cover:
+                        book_entry.cover_filepath = new_cover
+                        db.add(book_entry)
+                        updated_count += 1
                 continue
 
             # NEW BOOK IMPORT

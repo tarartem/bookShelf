@@ -42,7 +42,29 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(feedback.router, prefix="/api/feedback", tags=["feedback"])
 
 # Mount static files for uploads
-app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
+# Changed from /api/uploads to /uploads to match DB paths and frontend expectations
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+@app.get("/api/health")
+def health_check(db: Session = Depends(get_db)):
+    from backend.models import User, Book
+    try:
+        user_count = db.query(User).count()
+        book_count = db.query(Book).count()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "stats": {
+                "users": user_count,
+                "books": book_count
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "error": str(e)
+        }
 
 # Frontend - catch all others and serve index.html (Vanilla SPA)
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
