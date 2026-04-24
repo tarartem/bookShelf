@@ -359,6 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pageStatusCard.style.display = 'none';
         emailPageContainer.style.display = 'none';
         requestPageBtn.style.display = 'block';
+        
+        // Reset submit button state
+        const submitBtn = emailPageForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = t('deliverNow');
+        }
 
         if (book.cover_filepath) {
             const coverUrl = `/api/${book.cover_filepath}`;

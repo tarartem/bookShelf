@@ -76,7 +76,7 @@ def send_book(
 
     # Validate Email
     try:
-        valid = validate_email(request.email, check_deliverability=True)
+        valid = validate_email(request.email, check_deliverability=False)
         email = valid.normalized
     except EmailNotValidError as e:
         raise HTTPException(status_code=400, detail=str(e))
