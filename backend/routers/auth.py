@@ -32,7 +32,7 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     hashed_pwd = hash_password(user_in.password)
     new_user = User(
         email=user_in.email,
-        hashed_password=hashed_pwd,
+        password_hash=hashed_pwd,
         is_verified=False,
         role="user"
     )
@@ -124,14 +124,14 @@ async def reset_password(request: PasswordResetConfirm, db: Session = Depends(ge
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено.")
     
-    user.hashed_password = hash_password(request.new_password)
+    user.password_hash = hash_password(request.new_password)
     db.commit()
     return {"message": "Password updated successfully. You can now login."}
 
 @router.post("/login", response_model=Token)
 def login(user_in: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_in.email).first()
-    if not user or not verify_password(user_in.password, user.hashed_password):
+    if not user or not verify_password(user_in.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Невірна електронна пошта або пароль.",

@@ -212,27 +212,18 @@ async def upload_book(
                     detail=f"This exact file already exists in the system as '{b.title}'."
                 )
 
-    # 2. Extract Metadata
-    metadata = extract_epub_metadata(filepath)
-    
-    # 3. Save Cover Image
-    cover_filepath = None
-    if metadata.get("cover_image_data"):
-        ext = metadata["cover_image_ext"] or "jpg"
-        cover_filename = f"cover_{os.urandom(8).hex()}.{ext}"
-        cover_filepath = os.path.join(COVER_DIR, cover_filename)
-        with open(cover_filepath, "wb") as f:
-            f.write(metadata["cover_image_data"])
-            
+    # 2. Extract Metadata (returns tuple: title, author, cover_filepath)
+    ext_title, ext_author, cover_filepath = extract_epub_metadata(filepath)
+
     # Normalize path for DB
     db_cover_path = cover_filepath.replace("\\", "/") if cover_filepath else None
     db_epub_path = filepath.replace("\\", "/")
 
     # Create book entry
     new_book = Book(
-        title=metadata["title"] or "Unknown Title",
-        author=metadata["author"] or "Unknown Author",
-        description=metadata["description"] or "",
+        title=ext_title or "Unknown Title",
+        author=ext_author or "Unknown Author",
+        description="",
         cover_filepath=db_cover_path,
         epub_filepath=db_epub_path,
         uploaded_by=current_user.id,

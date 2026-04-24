@@ -168,6 +168,40 @@ def run_migrations():
                 );
             '''))
 
+
+        # --- COLUMN MIGRATIONS (safe, idempotent adds for pre-existing tables) ---
+        print("Applying column migrations...")
+        if is_sqlite:
+            alter_stmts = [
+                "ALTER TABLE books ADD COLUMN uploaded_by INTEGER REFERENCES users(id)",
+                "ALTER TABLE books ADD COLUMN status VARCHAR DEFAULT 'pending'",
+                "ALTER TABLE users ADD COLUMN credits INTEGER DEFAULT 3",
+                "ALTER TABLE users ADD COLUMN email_notifications BOOLEAN DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN received_notif_bonus BOOLEAN DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN role VARCHAR DEFAULT 'user'",
+            ]
+            for stmt in alter_stmts:
+                try:
+                    conn.execute(text(stmt))
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
+        else:
+            alter_stmts = [
+                "ALTER TABLE books ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES users(id)",
+                "ALTER TABLE books ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'pending'",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 3",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_notifications BOOLEAN DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS received_notif_bonus BOOLEAN DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR DEFAULT 'user'",
+            ]
+            for stmt in alter_stmts:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as e:
+                    print(f"  Column migration skipped: {e}")
+            conn.commit()
+
         conn.commit()
 
     print("Migration completed successfully.")
