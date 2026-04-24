@@ -10,3 +10,4 @@ lxml
 python-dotenv
 bcrypt
 python-jose[cryptography]
+sqlalchemy-libsql
