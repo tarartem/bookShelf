@@ -11,7 +11,8 @@ from backend.models import Book, BookSendLog, CreditTransaction, UserLibrary
 from backend.schemas import BookResponse, BookSendRequest, BookStats, CreditTransactionResponse
 from backend.services.email_service import send_epub_email
 from backend.services.epub_service import extract_epub_metadata
-from backend.routers.auth import get_current_user, get_current_admin
+from backend.routers.auth import get_current_user
+from backend.routers.admin import get_current_admin
 from email_validator import validate_email, EmailNotValidError
 
 router = APIRouter()
