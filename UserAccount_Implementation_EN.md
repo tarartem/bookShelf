@@ -55,25 +55,44 @@ This document outlines the finished implementation of the personal user accounts
 This diagram shows the high-level infrastructure and how the different cloud services interact to provide a persistent and reliable experience.
 
 ```mermaid
-graph TD
-    User((User)) -->|HTTPS| Render[Render Web Service]
-    Admin((Admin)) -->|HTTPS| Render
+flowchart TD
+    %% Define Styles
+    classDef user fill:#2d3436,stroke:#74b9ff,stroke-width:2px,color:#fff
+    classDef render fill:#0984e3,stroke:#fff,stroke-width:2px,color:#fff
+    classDef neon fill:#00b894,stroke:#fff,stroke-width:2px,color:#fff
+    classDef github fill:#2d3436,stroke:#fff,stroke-width:2px,color:#fff
+    classDef email fill:#d63031,stroke:#fff,stroke-width:2px,color:#fff
+    classDef ephemeral fill:#fdcb6e,stroke:#e17055,stroke-width:2px,color:#2d3436,stroke-dasharray: 5 5
+
+    %% Nodes
+    U((👤 User)):::user
+    A((👑 Admin)):::user
     
-    subgraph "Render.com (Cloud Hosting)"
-        Render -->|Python/FastAPI| AppLogic[App Logic]
-        AppLogic -->|Local FileSystem| Uploads[/app/uploads/]
+    subgraph "☁️ Render.com (Cloud Hosting - Free Tier)"
+        API[🚀 FastAPI Application]:::render
+        FS[(📁 Ephemeral Storage \n /app/uploads/)]:::ephemeral
     end
     
-    subgraph "Neon.tech (Cloud Database)"
-        AppLogic -->|SQL/psycopg2| Postgres[(PostgreSQL)]
+    subgraph "☁️ Neon.tech (Cloud Database)"
+        DB[(🐘 PostgreSQL DB \n Persistent State)]:::neon
     end
     
-    subgraph "External Services"
-        AppLogic -->|SMTP| Gmail[Gmail SMTP]
-        GitHub[GitHub Repository] -->|Auto-Deploy| Render
+    subgraph "🔗 External Providers"
+        GH[🐙 GitHub Repository]:::github
+        SMTP[📧 Gmail SMTP]:::email
     end
+
+    %% Connections
+    U -->|HTTPS / UI| API
+    A -->|HTTPS / Dashboard| API
     
-    Gmail -->|Email| User
+    API -->|Read/Write Files \n (Lost on Restart)| FS
+    API <-->|SQL / psycopg2 \n (Persistent Data)| DB
+    
+    API -->|Send Notifications| SMTP
+    SMTP -->|EPUBs & Tokens| U
+    
+    GH -.->|Auto-Deploy on Push| API
 ```
 
 ## 🏛️ Contribution Lifecycle Flow
