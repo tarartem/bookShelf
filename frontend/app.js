@@ -367,6 +367,20 @@ function setupEventListeners() {
         };
     }
 
+    // Logo click to go home
+    const logo = document.getElementById('header-logo');
+    if (logo) {
+        logo.onclick = () => {
+            if (document.body.classList.contains('details-active')) {
+                document.body.classList.remove('details-active');
+                document.getElementById('book-details-view').style.display = 'none';
+                window.history.pushState({}, 'BookShelf', '/');
+            } else {
+                window.location.href = '/';
+            }
+        };
+    }
+
     // Search Mode
     const searchTrigger = document.getElementById('nav-search-trigger');
     if (searchTrigger) {
