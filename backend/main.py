@@ -1,9 +1,10 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
-from backend.database import engine, Base, SessionLocal
+from backend.database import engine, Base, SessionLocal, get_db
 from backend.routers import books, admin, feedback, auth
 from backend.services.startup_service import load_books_on_startup
 
