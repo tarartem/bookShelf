@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 sqlalchemy
+psycopg2-binary
 python-multipart
 email-validator
 aiosmtplib
@@ -10,5 +11,3 @@ lxml
 python-dotenv
 bcrypt
 python-jose[cryptography]
-sqlalchemy-libsql
-libsql
