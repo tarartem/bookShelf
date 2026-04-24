@@ -11,15 +11,16 @@ TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
 is_remote = DATABASE_URL.startswith("libsql://") or DATABASE_URL.startswith("https://")
 
 if is_remote:
-    # Now that we have the 'libsql' package, we use the official dialect
+    # Use official sqlite+libsql dialect
     clean_host = DATABASE_URL.replace("libsql://", "").replace("https://", "").strip("/")
     final_url = f"sqlite+libsql://{clean_host}"
-    
-    # NUCLEAR OPTION: Monkeypatch SQLAlchemy to prevent it from ever running 
-    # 'PRAGMA read_uncommitted' which Turso rejects.
+
+    # Monkeypatch: prevent SQLAlchemy from running PRAGMA read_uncommitted
+    # which Turso rejects with 405 Method Not Allowed
     from sqlalchemy.dialects.sqlite.base import SQLiteDialect
     SQLiteDialect.get_isolation_level = lambda self, dbapi_conn: "SERIALIZABLE"
-    
+    SQLiteDialect.get_default_isolation_level = lambda self, dbapi_conn: "SERIALIZABLE"
+
     engine = create_engine(
         final_url,
         connect_args={"auth_token": TURSO_AUTH_TOKEN} if TURSO_AUTH_TOKEN else {},
@@ -28,8 +29,10 @@ if is_remote:
 else:
     # Standard local SQLite
     engine = create_engine(
-        DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+        DATABASE_URL,
+        connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
     )
+
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -38,9 +41,11 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         dbapi_connection.create_function("lower", 1, lambda x: x.lower() if x is not None else None)
         dbapi_connection.create_function("upper", 1, lambda x: x.upper() if x is not None else None)
 
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
