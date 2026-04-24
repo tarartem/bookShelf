@@ -15,6 +15,11 @@ if is_remote:
     clean_host = DATABASE_URL.replace("libsql://", "").replace("https://", "").strip("/")
     final_url = f"sqlite+libsql://{clean_host}"
     
+    # NUCLEAR OPTION: Monkeypatch SQLAlchemy to prevent it from ever running 
+    # 'PRAGMA read_uncommitted' which Turso rejects.
+    from sqlalchemy.dialects.sqlite.base import SQLiteDialect
+    SQLiteDialect.get_isolation_level = lambda self, dbapi_conn: "SERIALIZABLE"
+    
     engine = create_engine(
         final_url,
         connect_args={"auth_token": TURSO_AUTH_TOKEN} if TURSO_AUTH_TOKEN else {},
