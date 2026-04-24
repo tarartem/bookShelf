@@ -50,7 +50,33 @@ This document outlines the finished implementation of the personal user accounts
 
 ---
 
-## 🏛️ Contribution Architecture
+## 🏗️ System Architecture
+
+This diagram shows the high-level infrastructure and how the different cloud services interact to provide a persistent and reliable experience.
+
+```mermaid
+graph TD
+    User((User)) -->|HTTPS| Render[Render Web Service]
+    Admin((Admin)) -->|HTTPS| Render
+    
+    subgraph "Render.com (Cloud Hosting)"
+        Render -->|Python/FastAPI| AppLogic[App Logic]
+        AppLogic -->|Local FileSystem| Uploads[/app/uploads/]
+    end
+    
+    subgraph "Neon.tech (Cloud Database)"
+        AppLogic -->|SQL/psycopg2| Postgres[(PostgreSQL)]
+    end
+    
+    subgraph "External Services"
+        AppLogic -->|SMTP| Gmail[Gmail SMTP]
+        GitHub[GitHub Repository] -->|Auto-Deploy| Render
+    end
+    
+    Gmail -->|Email| User
+```
+
+## 🏛️ Contribution Lifecycle Flow
 
 The below diagram maps the lifecycle of an uploaded book from the User's device to the globally visible BookShelf catalog.
 
@@ -102,7 +128,7 @@ sequenceDiagram
 | Layer | Service | Notes |
 |---|---|---|
 | **Hosting** | Render.com (Free) | Auto-deploys on every GitHub push to `main` |
-| **Database** | Neon PostgreSQL (Free) | Cloud-hosted, persistent across Render restarts |
+| **Database** | Neon.tech PostgreSQL (Free) | Cloud-hosted, persistent across Render restarts |
 | **Email** | Gmail SMTP via `aiosmtplib` | Configured via `SMTP_*` env vars on Render |
 | **Auth** | JWT Bearer tokens | `SECRET_KEY` set in Render environment |
 | **Files** | Render Docker filesystem | EPUBs/covers stored in `/app/uploads/`; reset on redeploy |
