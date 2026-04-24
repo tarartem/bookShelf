@@ -1,50 +1,44 @@
 import os
-from sqlalchemy import text
-from backend.database import engine, is_sqlite
+from sqlalchemy import create_engine, text
+from backend.database import DATABASE_URL
 
-
-def migrate():
-    print("Connecting to database to check for migrations...")
+def run_migrations():
+    print(f"Connecting to database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else DATABASE_URL}")
+    engine = create_engine(DATABASE_URL)
+    is_sqlite = DATABASE_URL.startswith("sqlite")
 
     with engine.connect() as conn:
-
         # --- USERS TABLE ---
         print("Ensuring 'users' table exists...")
         if is_sqlite:
             conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    email VARCHAR UNIQUE NOT NULL,
-                    hashed_password VARCHAR NOT NULL,
-                    is_verified BOOLEAN DEFAULT 0,
+                    email VARCHAR NOT NULL UNIQUE,
+                    password_hash VARCHAR NOT NULL,
                     role VARCHAR DEFAULT 'user',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    is_verified BOOLEAN DEFAULT FALSE,
                     credits INTEGER DEFAULT 3,
-                    email_notifications BOOLEAN DEFAULT 0,
-                    received_notif_bonus BOOLEAN DEFAULT 0,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                    email_notifications BOOLEAN DEFAULT FALSE,
+                    received_notif_bonus BOOLEAN DEFAULT FALSE
                 );
             '''))
         else:
             conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
-                    email VARCHAR UNIQUE NOT NULL,
-                    hashed_password VARCHAR NOT NULL,
-                    is_verified BOOLEAN DEFAULT FALSE,
+                    email VARCHAR NOT NULL UNIQUE,
+                    password_hash VARCHAR NOT NULL,
                     role VARCHAR DEFAULT 'user',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    is_verified BOOLEAN DEFAULT FALSE,
                     credits INTEGER DEFAULT 3,
                     email_notifications BOOLEAN DEFAULT FALSE,
-                    received_notif_bonus BOOLEAN DEFAULT FALSE,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    received_notif_bonus BOOLEAN DEFAULT FALSE
                 );
             '''))
-
-        for col_name, col_type in [("credits", "INTEGER DEFAULT 3"), ("email_notifications", "BOOLEAN DEFAULT FALSE"), ("received_notif_bonus", "BOOLEAN DEFAULT FALSE")]:
-            try:
-                conn.execute(text(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
-            except Exception:
-                pass
-
+        
         # --- BOOKS TABLE ---
         print("Ensuring 'books' table exists...")
         if is_sqlite:
@@ -54,12 +48,12 @@ def migrate():
                     title VARCHAR NOT NULL,
                     author VARCHAR,
                     description TEXT,
-                    epub_filepath VARCHAR NOT NULL,
                     cover_filepath VARCHAR,
-                    file_hash VARCHAR,
-                    status VARCHAR DEFAULT 'approved',
-                    owner_id INTEGER,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                    epub_filepath VARCHAR NOT NULL,
+                    uploaded_by INTEGER,
+                    status VARCHAR DEFAULT 'pending',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (uploaded_by) REFERENCES users(id)
                 );
             '''))
         else:
@@ -69,22 +63,16 @@ def migrate():
                     title VARCHAR NOT NULL,
                     author VARCHAR,
                     description TEXT,
-                    epub_filepath VARCHAR NOT NULL,
                     cover_filepath VARCHAR,
-                    file_hash VARCHAR,
-                    status VARCHAR DEFAULT 'approved',
-                    owner_id INTEGER,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    epub_filepath VARCHAR NOT NULL,
+                    uploaded_by INTEGER,
+                    status VARCHAR DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (uploaded_by) REFERENCES users(id)
                 );
             '''))
-
-        for col_name, col_type in [("file_hash", "VARCHAR"), ("status", "VARCHAR DEFAULT 'approved'"), ("owner_id", "INTEGER")]:
-            try:
-                conn.execute(text(f"ALTER TABLE books ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
-            except Exception:
-                pass
-
-        # --- LOGS TABLE ---
+            
+        # --- BOOK SEND LOG TABLE ---
         print("Ensuring 'book_send_logs' table exists...")
         if is_sqlite:
             conn.execute(text('''
@@ -94,7 +82,8 @@ def migrate():
                     user_id INTEGER,
                     email VARCHAR NOT NULL,
                     sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (book_id) REFERENCES books(id)
+                    FOREIGN KEY (book_id) REFERENCES books(id),
+                    FOREIGN KEY (user_id) REFERENCES users(id)
                 );
             '''))
         else:
@@ -105,11 +94,12 @@ def migrate():
                     user_id INTEGER,
                     email VARCHAR NOT NULL,
                     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (book_id) REFERENCES books(id)
+                    FOREIGN KEY (book_id) REFERENCES books(id),
+                    FOREIGN KEY (user_id) REFERENCES users(id)
                 );
             '''))
 
-        # --- TRANSACTIONS TABLE ---
+        # --- CREDIT TRANSACTIONS TABLE ---
         print("Ensuring 'credit_transactions' table exists...")
         if is_sqlite:
             conn.execute(text('''
@@ -153,10 +143,34 @@ def migrate():
                 );
             '''))
 
+        # --- USER LIBRARY TABLE ---
+        print("Ensuring 'user_library' table exists...")
+        if is_sqlite:
+            conn.execute(text('''
+                CREATE TABLE IF NOT EXISTS user_library (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id),
+                    FOREIGN KEY (book_id) REFERENCES books(id)
+                );
+            '''))
+        else:
+            conn.execute(text('''
+                CREATE TABLE IF NOT EXISTS user_library (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id),
+                    FOREIGN KEY (book_id) REFERENCES books(id)
+                );
+            '''))
+
         conn.commit()
 
     print("Migration completed successfully.")
 
-
 if __name__ == "__main__":
-    migrate()
+    run_migrations()

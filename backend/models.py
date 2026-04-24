@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from backend.database import Base
@@ -8,32 +8,33 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
+    role = Column(String, default="user")
+    created_at = Column(DateTime, server_default=func.now())
     is_verified = Column(Boolean, default=False)
-    role = Column(String, default="user") # "admin" or "user"
-    credits = Column(Integer, default=3) # Starting credits
+    
+    # Economics
+    credits = Column(Integer, default=3)
     email_notifications = Column(Boolean, default=False)
     received_notif_bonus = Column(Boolean, default=False)
-    created_at = Column(DateTime, server_default=func.now())
 
-    books = relationship("Book", back_populates="owner")
+    books_uploaded = relationship("Book", back_populates="uploader")
 
 class Book(Base):
     __tablename__ = "books"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True, nullable=False)
-    author = Column(String, index=True, nullable=True)
-    description = Column(Text, nullable=True)
+    author = Column(String, index=True)
+    description = Column(Text)
+    cover_filepath = Column(String)
     epub_filepath = Column(String, nullable=False)
-    cover_filepath = Column(String, nullable=True)
-    file_hash = Column(String, index=True, nullable=True) # For duplicate detection
-    status = Column(String, default="approved") # "pending", "approved", "rejected"
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Null for system/admin books
+    
+    uploaded_by = Column(Integer, ForeignKey("users.id"))
+    status = Column(String, default="pending") # pending, approved, rejected
     created_at = Column(DateTime, server_default=func.now())
 
-    owner = relationship("User", back_populates="books")
-    send_logs = relationship("BookSendLog", back_populates="book", cascade="all, delete-orphan")
+    uploader = relationship("User", back_populates="books_uploaded")
 
 
 class BookSendLog(Base):
@@ -41,12 +42,11 @@ class BookSendLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Who sent it
-    email = Column(String, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Who requested it
+    email = Column(String, nullable=False)
     sent_at = Column(DateTime, server_default=func.now())
 
-    book = relationship("Book", back_populates="send_logs")
-    user = relationship("User")
+    book = relationship("Book")
 
 class CreditTransaction(Base):
     __tablename__ = "credit_transactions"
@@ -59,6 +59,16 @@ class CreditTransaction(Base):
 
     user = relationship("User")
 
+class UserLibrary(Base):
+    __tablename__ = "user_library"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    unlocked_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("User")
+    book = relationship("Book")
 
 
 class Feedback(Base):

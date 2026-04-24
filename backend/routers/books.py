@@ -1,62 +1,131 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from typing import List
 import os
+import shutil
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 import hashlib
 
 from backend.database import get_db
-from backend.models import Book, BookSendLog, CreditTransaction
+from backend.models import Book, BookSendLog, CreditTransaction, UserLibrary
 from backend.schemas import BookResponse, BookSendRequest, BookStats, CreditTransactionResponse
 from backend.services.email_service import send_epub_email
 from backend.services.epub_service import extract_epub_metadata
-from backend.routers.auth import get_current_user
-from backend.routers.admin import get_current_admin
-from fastapi.responses import FileResponse
+from backend.routers.auth import get_current_user, get_current_admin
 from email_validator import validate_email, EmailNotValidError
 
 router = APIRouter()
 
-@router.get("", response_model=List[BookResponse])
-def get_books(search: str = "", db: Session = Depends(get_db)):
+UPLOAD_DIR = "uploads/books"
+COVER_DIR = "uploads/covers"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(COVER_DIR, exist_ok=True)
+
+@router.get("/", response_model=List[BookResponse])
+def get_books(search: Optional[str] = None, db: Session = Depends(get_db)):
     query = db.query(Book).filter(Book.status == "approved")
     if search:
-        query = query.filter(func.lower(Book.title).contains(search.lower()))
-    return query.all()
+        search = f"%{search}%"
+        query = query.filter((Book.title.ilike(search)) | (Book.author.ilike(search)))
+    
+    # Removed backend randomization so it doesn't shuffle during search inputs.
+    books = query.all()
+    return books
 
 @router.get("/my", response_model=List[BookResponse])
-def get_my_books(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    return db.query(Book).filter(Book.owner_id == current_user.id).all()
+def get_my_books(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return db.query(Book).filter(Book.uploaded_by == current_user.id).all()
 
-@router.get("/{book_id}", response_model=BookResponse)
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(Book).filter(Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book
-
-@router.get("/{book_id}/stats", response_model=BookStats)
-def get_book_stats(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(Book).filter(Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    
-    total_sends = db.query(BookSendLog).filter(BookSendLog.book_id == book_id).count()
-    unique_users = db.query(func.count(func.distinct(BookSendLog.email))).filter(BookSendLog.book_id == book_id).scalar()
-    
-    return BookStats(
-        book_id=book_id,
-        title=book.title,
-        total_sends=total_sends,
-        unique_users=unique_users or 0
-    )
+@router.get("/pending", response_model=List[BookResponse])
+def get_pending_books(db: Session = Depends(get_db), admin = Depends(get_current_admin)):
+    return db.query(Book).filter(Book.status == "pending").all()
 
 
 def send_book_task(email: str, title: str, author: str, path: str):
     send_epub_email(email, title, author, path)
+
+
+@router.post("/{book_id}/unlock")
+def unlock_book(
+    book_id: int, 
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    # Check if already unlocked
+    existing = db.query(UserLibrary).filter(
+        UserLibrary.user_id == current_user.id,
+        UserLibrary.book_id == book_id
+    ).first()
+    
+    if existing:
+        return {"message": "Already unlocked", "credits_remaining": current_user.credits}
+
+    # Check credits
+    if current_user.credits <= 0 and current_user.role != "admin":
+        raise HTTPException(
+            status_code=403, 
+            detail="У вас закінчилися кредити. Завантажте власну книгу, щоб отримати більше!"
+        )
+
+    book = db.query(Book).filter(Book.id == book_id, Book.status == "approved").first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    # Add to library
+    new_unlock = UserLibrary(user_id=current_user.id, book_id=book.id)
+    db.add(new_unlock)
+
+    # Deduct credit and log transaction (only for regular users)
+    if current_user.role != "admin":
+        current_user.credits -= 1
+        transaction = CreditTransaction(
+            user_id=current_user.id,
+            amount=-1,
+            reason=f"Розблокування книги: {book.title}"
+        )
+        db.add(transaction)
+    
+    db.commit()
+
+    return {
+        "message": "Book unlocked successfully.",
+        "credits_remaining": current_user.credits
+    }
+
+@router.get("/library", response_model=List[BookResponse])
+def get_user_library(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    # Return all books the user has unlocked
+    unlocked_books = db.query(Book).join(UserLibrary).filter(UserLibrary.user_id == current_user.id).all()
+    return unlocked_books
+
+@router.get("/download/{book_id}/user")
+def download_user_book(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    # Admins bypass check, otherwise verify unlock
+    if current_user.role != "admin":
+        unlocked = db.query(UserLibrary).filter(
+            UserLibrary.user_id == current_user.id,
+            UserLibrary.book_id == book_id
+        ).first()
+        
+        if not unlocked:
+            raise HTTPException(status_code=403, detail="You must unlock this book first.")
+            
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book or not os.path.exists(book.epub_filepath):
+        raise HTTPException(status_code=404, detail="Book not found on server")
+        
+    return FileResponse(
+        path=book.epub_filepath, 
+        filename=os.path.basename(book.epub_filepath),
+        media_type='application/epub+zip'
+    )
 
 
 @router.post("/{book_id}/send")
@@ -67,12 +136,15 @@ def send_book(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    # Check credits
-    if current_user.credits <= 0:
-        raise HTTPException(
-            status_code=403, 
-            detail="У вас закінчилися кредити. Завантажте власну книгу, щоб отримати більше!"
-        )
+    # We now enforce unlocking before sending
+    if current_user.role != "admin":
+        unlocked = db.query(UserLibrary).filter(
+            UserLibrary.user_id == current_user.id,
+            UserLibrary.book_id == book_id
+        ).first()
+        
+        if not unlocked:
+             raise HTTPException(status_code=403, detail="You must unlock this book first before sending.")
 
     # Validate Email
     try:
@@ -88,18 +160,6 @@ def send_book(
     # Record log
     log = BookSendLog(book_id=book.id, email=email, user_id=current_user.id)
     db.add(log)
-    
-    # Deduct credit
-    current_user.credits -= 1
-    
-    # Record transaction
-    transaction = CreditTransaction(
-        user_id=current_user.id,
-        amount=-1,
-        reason=f"Запит книги: {book.title}"
-    )
-    db.add(transaction)
-    
     db.commit()
 
     # Background send process
@@ -110,63 +170,128 @@ def send_book(
         "credits_remaining": current_user.credits
     }
 
-@router.post("/upload", response_model=BookResponse)
+def calculate_file_hash(filepath: str) -> str:
+    """Calculate SHA-256 hash of a file."""
+    sha256_hash = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+@router.post("/upload")
 async def upload_book(
-    file: UploadFile = File(...),
+    file: UploadFile = File(...), 
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
     if not file.filename.endswith(".epub"):
-        raise HTTPException(status_code=400, detail="Only EPUB files are allowed.")
+        raise HTTPException(status_code=400, detail="Only EPUB files are supported.")
 
-    os.makedirs("uploads/books", exist_ok=True)
+    filepath = os.path.join(UPLOAD_DIR, file.filename)
     
-    # Read file content for hashing
-    content = await file.read()
-    file_hash = hashlib.md5(content).hexdigest()
+    # Save the file temporarily to compute hash and extract metadata
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
-    # Check for duplicates
-    existing = db.query(Book).filter(Book.file_hash == file_hash).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="This book already exists in our library.")
-
-    # Save file
-    file_path = f"uploads/books/{file_hash}.epub"
-    with open(file_path, "wb") as f:
-        f.write(content)
-
-    # Extract metadata
-    title, author, cover_path = extract_epub_metadata(file_path)
+    # 1. Duplicate Detection by Hash
+    file_hash = calculate_file_hash(filepath)
     
-    # Create DB entry
+    # We need a way to compare hashes. For simplicity without altering the DB schema drastically:
+    # Let's check existing files. If the library grows large, we MUST add a `file_hash` column to the DB.
+    # For now, we will iterate existing approved books and check.
+    # (In a real massive production app, you'd query the DB for the hash).
+    existing_books = db.query(Book).all()
+    for b in existing_books:
+        if os.path.exists(b.epub_filepath):
+            existing_hash = calculate_file_hash(b.epub_filepath)
+            if existing_hash == file_hash:
+                os.remove(filepath) # Clean up
+                raise HTTPException(
+                    status_code=409, 
+                    detail=f"This exact file already exists in the system as '{b.title}'."
+                )
+
+    # 2. Extract Metadata
+    metadata = extract_epub_metadata(filepath)
+    
+    # 3. Save Cover Image
+    cover_filepath = None
+    if metadata.get("cover_image_data"):
+        ext = metadata["cover_image_ext"] or "jpg"
+        cover_filename = f"cover_{os.urandom(8).hex()}.{ext}"
+        cover_filepath = os.path.join(COVER_DIR, cover_filename)
+        with open(cover_filepath, "wb") as f:
+            f.write(metadata["cover_image_data"])
+            
+    # Normalize path for DB
+    db_cover_path = cover_filepath.replace("\\", "/") if cover_filepath else None
+    db_epub_path = filepath.replace("\\", "/")
+
+    # Create book entry
     new_book = Book(
-        title=title or file.filename.replace(".epub", ""),
-        author=author or "Unknown",
-        epub_filepath=file_path,
-        cover_filepath=cover_path,
-        file_hash=file_hash,
-        status="pending",
-        owner_id=current_user.id
+        title=metadata["title"] or "Unknown Title",
+        author=metadata["author"] or "Unknown Author",
+        description=metadata["description"] or "",
+        cover_filepath=db_cover_path,
+        epub_filepath=db_epub_path,
+        uploaded_by=current_user.id,
+        status="pending"
     )
-    
     db.add(new_book)
     db.commit()
     db.refresh(new_book)
-    
-    return new_book
 
-@router.get("/download/{book_id}")
-def download_book_for_review(
-    book_id: int,
-    db: Session = Depends(get_db),
-    admin: str = Depends(get_current_admin)
-):
+    return {"message": "Book uploaded successfully and is pending review.", "id": new_book.id}
+
+@router.get("/{book_id}/stats", response_model=BookStats)
+def get_book_stats(book_id: int, db: Session = Depends(get_db)):
+    logs = db.query(BookSendLog).filter(BookSendLog.book_id == book_id).all()
+    unique_users = len(set(log.email for log in logs))
+    return {"total_sends": len(logs), "unique_users": unique_users}
+
+# --- ADMIN ENDPOINTS ---
+
+@router.post("/{book_id}/approve")
+def approve_book(book_id: int, db: Session = Depends(get_db), admin = Depends(get_current_admin)):
     book = db.query(Book).filter(Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
+        
+    book.status = "approved"
     
+    # Grant credit to the uploader
+    uploader = book.uploader
+    if uploader:
+        uploader.credits += 1
+        transaction = CreditTransaction(
+            user_id=uploader.id,
+            amount=1,
+            reason=f"Бонус за книгу: {book.title}"
+        )
+        db.add(transaction)
+    
+    db.commit()
+    return {"message": "Book approved and 1 credit granted to uploader"}
+
+@router.post("/{book_id}/reject")
+def reject_book(book_id: int, db: Session = Depends(get_db), admin = Depends(get_current_admin)):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+        
+    book.status = "rejected"
+    # No credits granted.
+    db.commit()
+    return {"message": "Book rejected"}
+
+@router.get("/download/{book_id}/admin")
+def download_book_for_review(book_id: int, db: Session = Depends(get_db), admin = Depends(get_current_admin)):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+        
     if not os.path.exists(book.epub_filepath):
-        raise HTTPException(status_code=404, detail="EPUB file missing on server")
+        raise HTTPException(status_code=404, detail="File missing from disk")
         
     return FileResponse(
         path=book.epub_filepath, 
