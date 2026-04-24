@@ -1,173 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookShelf App</title>
-    <meta name="description" content="Browse and receive amazing EPUB books straight to your email.">
-    
-    <!-- Icons & PWA -->
-    <link rel="icon" type="image/png" href="/assets/logo.png">
-    <link rel="apple-touch-icon" href="/assets/logo.png">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0a0a0a">
-
-    <link rel="stylesheet" href="/index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-</head>
-<body class="dark-mode oled-theme">
-
-    <!-- Floating Top Island (Header) -->
-    <header class="top-nav-island" id="site-header">
-        <!-- Default State: Brand Logo -->
-        <div class="header-brand" id="header-logo" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
-            <img src="/assets/logo.png" alt="BookShelf Logo" style="height: 32px; width: 32px; border-radius: 8px; object-fit: cover;">
-            <h1 id="brand-title" style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
-        </div>
-
-        <!-- Profile Toggle (Right side) -->
-        <div id="profile-trigger" style="position: absolute; right: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.03); transition: 0.3s; border: 1px solid var(--glass-border);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-        </div>
-
-        <!-- Search Mode State: Full-width search bar with Cancel button (Mobile Only) -->
-        <div id="mobile-search-controls" class="mobile-search-controls" style="display: none; width: 100%; align-items: center; gap: 1rem;">
-            <div class="search-pill" style="flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.4rem 1rem;">
-                <span style="font-size: 1.2rem; margin-right: 0.5rem;">🔍</span>
-                <input type="text" id="search-input-mobile" placeholder="Search by title or author..." style="background: none; border: none; color: white; width: 100%; outline: none; font-size: 1rem;">
-                <button id="clear-search-btn" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; display: none; padding: 0 0.5rem;">✕</button>
-            </div>
-            <button id="cancel-search-btn" style="background: none; border: none; color: var(--emerald-primary); font-weight: 600; cursor: pointer; white-space: nowrap;">Cancel</button>
-        </div>
-        
-        <!-- Desktop Search (Optional: Keep it if needed for PC UX, or remove if user meant ALL headers) -->
-        <div class="desktop-header-search desktop-only" style="flex: 0 0 320px; display: none;">
-             <input type="text" id="search-input-desktop" placeholder="Quick search..." style="width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.6rem 1.2rem; color: white; outline: none;">
-        </div>
-    </header>
-
-    <div class="app-container">
-        <!-- Featured Carousel -->
-        <section id="featured-carousel" class="featured-carousel">
-            <div class="carousel-track" id="carousel-track"></div>
-            <div class="carousel-dots" id="carousel-dots"></div>
-        </section>
-
-        <div class="instructions-panel" id="user-instructions">
-            <p><span id="txt-welcome-title"></span> <strong><span id="txt-welcome-subtitle"></span></strong><span id="txt-welcome-extra"></span></p>
-        </div>
-
-        <!-- Filter by Author Pills -->
-        <div class="filter-controls-container">
-            <button id="toggle-author-filters-btn" class="btn-secondary btn-mini mobile-only" style="margin-bottom: 0.5rem; width: 100%;">Filter by Author</button>
-            <div class="author-filter-row" id="author-filter-container">
-                <!-- Author pills injected via JS -->
-            </div>
-            <button id="reset-filters-btn" class="btn-secondary btn-mini" style="display: none; margin-bottom: 2rem;">🔄 <span id="txt-reset-filters"></span></button>
-        </div>
-
-        <main id="books-grid" class="books-grid bento-mode">
-            <div class="loading" id="txt-loading">Loading...</div>
-        </main>
-
-        <footer class="main-footer">
-            <div class="footer-content">
-                <p>&copy; 2026 <span id="txt-app-name">BookShelf</span> &middot; <span id="txt-footer-crafting"></span></p>
-                <div class="footer-links">
-                    <a href="/admin.html" class="footer-admin-link" id="txt-footer-admin">Dashboard</a>
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Mobile Sticky Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item active" id="nav-home">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-label" id="txt-nav-home">Home</span>
-        </a>
-        <a href="#" class="nav-item" id="nav-search-trigger">
-            <span class="nav-icon">🔍</span>
-            <span class="nav-label" id="txt-nav-search">Search</span>
-        </a>
-        <a href="#" class="nav-item" id="nav-feedback-trigger">
-            <span class="nav-icon">💬</span>
-            <span class="nav-label" id="txt-nav-feedback">Feedback</span>
-        </a>
-    </nav>
-
-    <!-- Floating Controls (Desktop) -->
-    <div class="floating-controls desktop-only">
-        <button id="back-to-top-btn" class="btn-secondary floating-btn" title="Back to Top" style="display:none;">↑</button>
-    </div>
-
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Dedicated Book Details Page -->
-    <section id="book-details-view" class="details-page-view" style="display:none;">
-        <div class="page-header">
-            <button id="back-to-library" class="back-link"></button>
-        </div>
-        
-        <div class="details-content-wrapper">
-            <div class="details-hero">
-                <div class="hero-bg-blur" id="hero-bg-blur"></div>
-                <div class="hero-container">
-                    <div class="hero-cover-art">
-                        <img id="page-book-cover" src="" alt="Cover" loading="lazy">
-                    </div>
-                    <div class="hero-info">
-                        <h2 id="page-book-title" class="serif-title"></h2>
-                        <p class="page-author serif-text" id="page-book-author"></p>
-                        
-                        <div class="hero-description" id="page-book-description"></div>
-
-                        <div id="page-stats" class="stat-badge-mini" style="margin-top:1rem;"></div>
-                        
-                        <div class="page-action-row" style="display:flex; gap:1rem; align-items:center; margin-top:2.5rem;">
-                            <button id="page-request-trigger-btn" class="btn-primary"></button>
-                            <button class="icon-btn-circle share-btn-themed" id="share-book-page-btn"></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="page-body">
-                <div class="page-column-main" id="page-email-container" style="display:none; max-width:600px;">
+                <div class="page-column-main" id="page-delivery-container" style="display:none; max-width:600px;">
                     <div class="glass-panel delivery-box" style="position:static; width:100%;">
-                        <h4 id="txt-secure-delivery"></h4>
-                        <p id="txt-delivery-hint"></p>
-                        <form id="page-email-form" class="form-group" style="margin-top:1.5rem;">
+                        <h4 id="txt-delivery-options">Delivery Options</h4>
+                        
+                        <div id="delivery-action-row" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="button" class="btn-primary" id="btn-download-epub" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--emerald-primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span id="txt-download-epub">Download EPUB</span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-toggle-email-form" style="width: 100%;">
+                                📧 <span id="txt-send-to-email">Send to Email / Kindle</span>
+                            </button>
+                        </div>
+
+                        <form id="page-email-form" class="form-group" style="margin-top:1.5rem; display:none; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+                            <p id="txt-delivery-hint" style="margin-bottom: 0.5rem; color: var(--text-secondary);"></p>
                             <input type="email" id="page-user-email" placeholder="your@email.com" required>
                             <button type="submit" class="btn-primary" id="txt-deliver-now" style="margin-top:1rem;"></button>
-                            <button type="button" id="page-cancel-email-btn" class="btn-secondary" style="margin-top:0.5rem;"></button>
                         </form>
-                        <div id="page-status-card" class="status-card" style="display:none;"></div>
+                        <div id="page-status-card" class="status-card" style="display:none; margin-top: 1rem;"></div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Feedback Modal -->
-    <div id="feedback-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <div class="modal-drag-handle"></div>
-            <span class="close-btn" id="close-feedback-modal">&times;</span>
-            <h2 id="txt-feedback-title"></h2>
-            <p id="txt-feedback-subtitle" style="color:var(--text-secondary); margin-bottom: 1.5rem;"></p>
-            
-            <form id="feedback-form" class="form-group">
-                <textarea id="fb-message" required></textarea>
-                <button type="submit" class="btn-primary" id="txt-submit-feedback"></button>
-            </form>
-            <p id="fb-status" class="status-msg"></p>
-        </div>
-    </div>
-
-    <script type="module" src="/app.js"></script>
-</body>
-</html>
