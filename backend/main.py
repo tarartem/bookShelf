@@ -8,8 +8,10 @@ from backend.database import engine, Base, SessionLocal, get_db
 from backend.routers import books, admin, feedback, auth
 from backend.services.startup_service import load_books_on_startup
 
-# Create database tables
+# Create database tables and run migrations
+from backend.migrate_db import run_migrations
 Base.metadata.create_all(bind=engine)
+run_migrations()
 
 import threading
 
