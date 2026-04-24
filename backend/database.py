@@ -11,11 +11,9 @@ TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
 is_remote = DATABASE_URL.startswith("libsql://") or DATABASE_URL.startswith("https://")
 
 if is_remote:
-    # Format: sqlite+libsql://[host]?auth_token=[token]
-    host = DATABASE_URL.replace("libsql://", "").replace("https://", "")
-    # Remove any trailing slashes
-    host = host.split('/')[0]
-    final_url = f"sqlite+libsql://{host}"
+    # Turso URLs should be converted to sqlite+libsql:// format for SQLAlchemy
+    clean_host = DATABASE_URL.replace("libsql://", "").replace("https://", "").strip("/")
+    final_url = f"sqlite+libsql://{clean_host}"
     
     engine = create_engine(
         final_url,
