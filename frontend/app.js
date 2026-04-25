@@ -313,6 +313,7 @@ function updateBookActionsUI(bookId) {
         }
         if (deliveryContainer) deliveryContainer.style.display = 'none';
     }
+    applyLanguage(); // Ensure new elements are localized
 }
 
 async function handleUnlock(bookId) {
@@ -448,9 +449,13 @@ function setupEventListeners() {
             submitBtn.innerText = t('deliveringVolume');
 
             try {
-                const response = await fetch(`${API_URL}/books/${bookId}/send?email=${encodeURIComponent(email)}`, {
+                const response = await fetch(`${API_URL}/books/${bookId}/send`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    headers: { 
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
                 });
 
                 if (response.ok) {
