@@ -107,7 +107,7 @@
         function applyLanguage() {
             const ids = {
                 'txt-back-library': 'backToLibrary',
-                'txt-member-since': 'memberSince',
+                'txt-member-since': 'joinDate',
                 'txt-email-notif': 'emailNotifications',
                 'txt-contributions': 'myContributions'
             };
@@ -117,7 +117,7 @@
             }
             document.querySelector('#logout-btn span').innerText = t('logout');
             document.querySelector('#delete-btn span').innerText = t('deleteAccount');
-            document.querySelector('.upload-trigger span').innerText = t('uploadEpub');
+            document.querySelector('.upload-trigger span').innerText = t('uploadNewBook');
         }
 
         async function loadProfile() {
