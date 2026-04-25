@@ -1404,14 +1404,24 @@ input[type="password"]:focus {
     color: var(--emerald-primary);
 }
 
+.mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
 .mini-book-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 0.85rem;
+    border-radius: 12px;
+    padding: 0.5rem;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .mini-book-card:hover {
