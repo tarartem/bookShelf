@@ -122,9 +122,6 @@ function applyLanguage() {
     // Update placeholders
     const searchInputMobile = document.getElementById('search-input-mobile');
     if (searchInputMobile) searchInputMobile.placeholder = t('placeholderSearch');
-
-    const searchInputDesktop = document.getElementById('search-input-desktop');
-    if (searchInputDesktop) searchInputDesktop.placeholder = t('placeholderSearch');
     
     const fbPlaceholder = document.getElementById('fb-message');
     if (fbPlaceholder) fbPlaceholder.placeholder = t('feedbackPlaceholder');
@@ -259,27 +256,12 @@ function toggleAuthorFilter(author) {
         activeAuthorFilters.add(author);
     }
     
-    applyFiltersAndSearch();
-    renderAuthorFilters(allBooks);
-
-    const resetBtn = document.getElementById('reset-filters-btn');
-    if (resetBtn) {
-        resetBtn.style.display = activeAuthorFilters.size > 0 ? 'inline-block' : 'none';
-    }
-}
-
-function applyFiltersAndSearch() {
-    const searchInput = document.getElementById('search-input-mobile');
-    const searchInputDesktop = document.getElementById('search-input-desktop');
-    const query = (searchInput?.value || searchInputDesktop?.value || '').toLowerCase();
-
-    const filtered = allBooks.filter(b => {
-        const matchesAuthor = activeAuthorFilters.size === 0 || activeAuthorFilters.has(b.author);
-        const matchesSearch = !query || b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
-        return matchesAuthor && matchesSearch;
-    });
+    const filtered = allBooks.filter(b => 
+        activeAuthorFilters.size === 0 || activeAuthorFilters.has(b.author)
+    );
     
     renderBooks(filtered);
+    renderAuthorFilters(allBooks);
 }
 
 async function openBookDetails(bookId) {
@@ -394,14 +376,8 @@ function setupEventListeners() {
     if (resetBtn) {
         resetBtn.onclick = () => {
             activeAuthorFilters.clear();
-            const inputMobile = document.getElementById('search-input-mobile');
-            const inputDesktop = document.getElementById('search-input-desktop');
-            if (inputMobile) inputMobile.value = '';
-            if (inputDesktop) inputDesktop.value = '';
-            
-            applyFiltersAndSearch();
+            renderBooks(allBooks);
             renderAuthorFilters(allBooks);
-            resetBtn.style.display = 'none';
         };
     }
 
@@ -422,11 +398,7 @@ function setupEventListeners() {
     // Search Mode
     const searchTrigger = document.getElementById('nav-search-trigger');
     if (searchTrigger) {
-        searchTrigger.onclick = () => {
-            document.body.classList.add('search-active');
-            const input = document.getElementById('search-input-mobile');
-            if (input) setTimeout(() => input.focus(), 100);
-        };
+        searchTrigger.onclick = () => document.body.classList.add('search-active');
     }
 
     const cancelSearch = document.getElementById('cancel-search-btn');
@@ -443,12 +415,13 @@ function setupEventListeners() {
 
     const searchInputMobile = document.getElementById('search-input-mobile');
     if (searchInputMobile) {
-        searchInputMobile.oninput = () => applyFiltersAndSearch();
-    }
-
-    const searchInputDesktop = document.getElementById('search-input-desktop');
-    if (searchInputDesktop) {
-        searchInputDesktop.oninput = () => applyFiltersAndSearch();
+        searchInputMobile.oninput = (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allBooks.filter(b => 
+                b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)
+            );
+            renderBooks(filtered);
+        };
     }
 
     // Download Logic

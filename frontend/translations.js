@@ -103,7 +103,7 @@ export const translations = {
         navFeedback: "Feedback",
         footerAdmin: "Dashboard",
         footerCrafting: "Crafting literary experiences.",
-        backToLibrary: "← Back",
+        backToLibrary: "Back",
         getThisBook: "Get this Book",
         unlockBook: "Unlock",
         unlockSuccess: "Book unlocked successfully!",

@@ -25,15 +25,15 @@
             <h1 id="brand-title" style="font-size: 1.5rem; letter-spacing: -0.5px;">BookShelf</h1>
         </div>
 
-        <!-- Profile Toggle (Right side) -->
-        <a href="/profile.html" id="profile-link" style="position: absolute; right: 1.5rem; color: inherit; text-decoration: none; z-index: 1002;">
+        <!-- Profile Trigger (Right side) -->
+        <div id="profile-link" style="position: absolute; right: 1.5rem; color: inherit; text-decoration: none; z-index: 1002;">
             <div id="profile-trigger" style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.03); transition: 0.3s; border: 1px solid var(--glass-border);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
             </div>
-        </a>
+        </div>
 
         <!-- Search Mode State: Full-width search bar with Cancel button (Mobile Only) -->
         <div id="mobile-search-controls" class="mobile-search-controls" style="display: none; width: 100%; align-items: center; gap: 1rem;">
@@ -45,8 +45,8 @@
             <button id="cancel-search-btn" style="background: none; border: none; color: var(--emerald-primary); font-weight: 600; cursor: pointer; white-space: nowrap;">Cancel</button>
         </div>
         
-        <!-- Desktop Search (Optional: Keep it if needed for PC UX, or remove if user meant ALL headers) -->
-        <div class="desktop-header-search desktop-only" style="flex: 0 0 320px; display: none;">
+        <!-- Desktop Search -->
+        <div class="desktop-header-search desktop-only" style="flex: 0 0 320px;">
              <input type="text" id="search-input-desktop" placeholder="Quick search..." style="width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 100px; padding: 0.6rem 1.2rem; color: white; outline: none;">
         </div>
     </header>
