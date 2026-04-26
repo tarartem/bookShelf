@@ -110,7 +110,8 @@ function applyLanguage() {
         'txt-submit-feedback': 'submitFeedback',
         'txt-send-to-email': 'sendToEmail',
         'txt-download-epub': 'downloadEpub',
-        'back-to-library': 'backToLibrary' // Directly on the button
+        'back-to-library': 'backToLibrary', // Directly on the button
+        'toggle-author-filters-btn': 'findByAuthor'
     };
 
     for (const [id, key] of Object.entries(idsAndKeys)) {
@@ -355,6 +356,18 @@ function setupEventListeners() {
             document.body.classList.remove('details-active');
             document.getElementById('book-details-view').style.display = 'none';
             window.history.pushState({}, 'BookShelf', '/');
+        };
+    }
+    
+    // Toggle Author Filters (Mobile)
+    const toggleAuthorBtn = document.getElementById('toggle-author-filters-btn');
+    if (toggleAuthorBtn) {
+        toggleAuthorBtn.onclick = () => {
+            const container = document.getElementById('author-filter-container');
+            if (container) {
+                container.classList.toggle('active');
+                toggleAuthorBtn.classList.toggle('active');
+            }
         };
     }
 
