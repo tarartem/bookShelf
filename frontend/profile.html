@@ -62,6 +62,10 @@
                         <span>Logout</span>
                     </button>
 
+                    <button id="nav-feedback-trigger" class="btn-secondary" style="width: 100%; margin-top: 0.5rem; justify-content: center; display: flex; align-items: center; gap: 0.5rem;">
+                        <span id="txt-nav-feedback">Feedback</span>
+                    </button>
+
                     <button id="delete-btn" class="btn-danger-minimal">
                         <span>Delete Account</span>
                     </button>
@@ -87,6 +91,23 @@
         </main>
     </div>
 
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="feedback-content glass-panel">
+            <div class="modal-header">
+                <h3 id="txt-feedback-title">Send Feedback</h3>
+                <button id="close-feedback-modal" class="close-btn">&times;</button>
+            </div>
+            <p id="txt-feedback-subtitle">We'd love to hear your thoughts!</p>
+            <form id="feedback-form">
+                <textarea id="fb-message" placeholder="What's on your mind?" required></textarea>
+                <button type="submit" class="btn-primary" id="txt-submit-feedback">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content glass-panel">
@@ -109,7 +130,11 @@
                 'txt-back-library': 'backToLibrary',
                 'txt-member-since': 'joinDate',
                 'txt-email-notif': 'emailNotifications',
-                'txt-contributions': 'myContributions'
+                'txt-contributions': 'myContributions',
+                'txt-nav-feedback': 'navFeedback',
+                'txt-feedback-title': 'feedbackTitle',
+                'txt-feedback-subtitle': 'feedbackSubtitle',
+                'txt-submit-feedback': 'submitFeedback'
             };
             for (const [id, key] of Object.entries(ids)) {
                 const el = document.getElementById(id);
@@ -293,6 +318,53 @@
                 }
             } catch (err) { console.error(err); }
         });
+
+        // Feedback Logic
+        document.getElementById('nav-feedback-trigger').addEventListener('click', () => {
+            document.getElementById('feedback-modal').classList.add('active');
+        });
+
+        document.getElementById('close-feedback-modal').addEventListener('click', () => {
+            document.getElementById('feedback-modal').classList.remove('active');
+        });
+
+        document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('fb-message').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = t('sharingThoughts');
+
+            try {
+                const res = await fetch('/api/feedback/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    document.getElementById('fb-message').value = '';
+                    showToast(t('feedbackSubmitted'));
+                    document.getElementById('feedback-modal').classList.remove('active');
+                }
+            } catch (err) { console.error(err); }
+            finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = t('submitFeedback');
+            }
+        });
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
 
         applyLanguage();
         loadProfile();

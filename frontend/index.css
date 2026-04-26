@@ -343,6 +343,12 @@ body.search-active .app-container {
     box-shadow: 0 15px 35px rgba(0,0,0,0.8);
 }
 
+@media (min-width: 901px) {
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
 .nav-item {
     display: flex;
     flex-direction: column;
