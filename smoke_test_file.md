@@ -16,6 +16,7 @@ This document tracks the essential manual and automated checks to ensure the Boo
     - *Expected*: Returns to the library grid, maintaining previous scroll position and search results.
 - [ ] **Featured Carousel**: Swipe/click through the carousel.
     - *Expected*: Smooth transitions between featured book covers.
+    - *Expected*: Books are randomized on every page load (Discovery mode).
 
 ## 🖥️ 2. Desktop & Responsive UX
 - [ ] **Desktop Search**: Type in the header search bar.
@@ -34,6 +35,8 @@ This document tracks the essential manual and automated checks to ensure the Boo
     - *Expected*: Temporary token allows setting a new password.
 - [ ] **JWT Session Stability**: Log in, then refresh the page.
     - *Expected*: User remains logged in (session persists in localStorage).
+- [ ] **Guest Profile Access**: Visit page without logging in.
+    - *Expected*: Profile icon (SVG) is visible and clicking it redirects to `/login.html`.
 - [ ] **Account Deletion**: Delete account from Profile settings.
     - *Expected*: Logs out user and purges all personal contributions from database.
 

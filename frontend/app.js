@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function init() {
     loadLanguage();
+    updateUIForUser(); // Initialize UI state (Guest/User)
     await loadUser();
     await loadLibrary();
     await loadBooks();
@@ -75,8 +76,13 @@ async function loadBooks() {
     try {
         const response = await fetch(`${API_URL}/books/`);
         if (response.ok) {
-            allBooks = await response.json();
-            console.log("DEBUG: Books loaded:", allBooks.length);
+            let books = await response.json();
+            console.log("DEBUG: Books loaded:", books.length);
+            
+            // Smarter Randomization: Shuffle once on load to provide fresh discovery
+            // but keep it stable during the session's filtering/searching.
+            allBooks = shuffleArray(books);
+            
             renderBooks(allBooks);
             renderFeaturedCarousel(allBooks);
             renderAuthorFilters(allBooks);
@@ -86,6 +92,15 @@ async function loadBooks() {
     } catch (error) {
         console.error('DEBUG: Error loading books:', error);
     }
+}
+
+function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
 }
 
 function t(key) {
