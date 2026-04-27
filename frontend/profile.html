@@ -10,43 +10,44 @@
 <body class="dark-mode oled-theme profile-page">
 
     <div class="profile-container">
+        <!-- Back Link -->
+        <a href="/" class="back-to-home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span id="txt-back-library">Back to Library</span>
+        </a>
+
         <!-- Header -->
         <header class="profile-header">
-            <a href="/" class="back-to-home">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                <span id="txt-back-library">Library</span>
-            </a>
-            <div class="user-info">
-                <div class="user-avatar-large" id="avatar-initials">?</div>
-                <div class="user-meta">
-                    <h2 id="user-email">...</h2>
-                    <span id="user-status" class="status-badge">...</span>
-                </div>
+            <div class="user-avatar-large" id="avatar-initials">?</div>
+            <div class="user-meta">
+                <h2 id="user-email">...</h2>
+                <span id="user-status" class="status-badge">...</span>
             </div>
             <div class="credits-badge" title="Your Balance">
                 <span class="credits-icon">💎</span>
                 <span id="user-credits" class="credits-value">0</span>
-                <span class="credits-label">Credits</span>
+                <span class="credits-label" id="txt-credits-label">Credits</span>
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- Main Content Grid -->
         <main class="profile-grid">
-            <!-- Sidebar: Account Stats -->
+            <!-- Sidebar -->
             <aside class="profile-sidebar">
-                <div class="glass-panel stat-card">
+                <div class="profile-card">
+                    <h3 id="txt-stats-title">Account Stats</h3>
                     <div class="stat-item">
                         <label id="txt-member-since">Member Since</label>
                         <span id="join-date">...</span>
                     </div>
                     <div class="stat-item">
-                        <label id="txt-id">ID</label>
+                        <label id="txt-id">Member ID</label>
                         <span id="member-id">#000</span>
                     </div>
                 </div>
 
-                <div class="glass-panel settings-card">
-                    <h3>Settings</h3>
+                <div class="profile-card">
+                    <h3 id="txt-settings-title">Settings</h3>
                     <div class="setting-item">
                         <div class="setting-info">
                             <label id="txt-email-notif">Email Notifications</label>
@@ -54,61 +55,63 @@
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="notif-toggle">
-                            <span class="slider round"></span>
+                            <span class="slider"></span>
                         </label>
                     </div>
                     
-                    <button id="logout-btn" class="btn-secondary logout-btn">
-                        <span>Logout</span>
-                    </button>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+                        <button id="nav-feedback-trigger" class="btn-secondary">
+                            <span id="txt-nav-feedback">Feedback</span>
+                        </button>
+                        
+                        <button id="logout-btn" class="btn-secondary">
+                            <span id="txt-logout">Logout</span>
+                        </button>
 
-                    <button id="nav-feedback-trigger" class="btn-secondary" style="width: 100%; margin-top: 0.5rem; justify-content: center; display: flex; align-items: center; gap: 0.5rem;">
-                        <span id="txt-nav-feedback">Feedback</span>
-                    </button>
-
-                    <button id="delete-btn" class="btn-danger-minimal">
-                        <span>Delete Account</span>
-                    </button>
+                        <button id="delete-btn" class="btn-danger-minimal">
+                            <span id="txt-delete-account">Delete Account</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
-            <!-- Main: Contributions -->
+            <!-- Main Section -->
             <section class="profile-main">
-                <div class="profile-tabs" style="display: flex; gap: 1rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 1rem; padding-bottom: 0.5rem; flex-wrap: wrap; align-items: center;">
-                    <button id="tab-library" class="tab-btn active" style="background: none; border: none; color: white; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid var(--emerald-primary);">
+                <nav class="profile-tabs">
+                    <button id="tab-library" class="tab-btn active">
                         <span id="txt-my-library">My Library</span>
                     </button>
-                    <button id="tab-uploads" class="tab-btn" style="background: none; border: none; color: var(--text-dim); font-weight: 400; cursor: pointer; padding: 0.5rem 1rem;">
+                    <button id="tab-uploads" class="tab-btn">
                         <span id="txt-my-uploads">My Uploads</span>
                     </button>
                     
-                    <div style="margin-left: auto;">
+                    <div class="tab-actions">
                         <label for="file-input" class="btn-primary btn-mini upload-trigger">
-                            <span>+ Upload EPUB</span>
+                            <span id="txt-upload-new">+ Upload EPUB</span>
                         </label>
                         <input type="file" id="file-input" accept=".epub" style="display: none;">
                     </div>
-                </div>
+                </nav>
                 
                 <div id="upload-status" class="upload-status-box" style="display: none;"></div>
 
                 <div id="my-books-grid" class="mini-grid">
-                    <div class="loading">Loading...</div>
+                    <div class="loading">Loading your collection...</div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Feedback Modal -->
+    <!-- Modals (Themed) -->
     <div id="feedback-modal" class="modal-overlay">
-        <div class="feedback-content glass-panel">
-            <div class="modal-header">
-                <h3 id="txt-feedback-title">Send Feedback</h3>
-                <button id="close-feedback-modal" class="close-btn">&times;</button>
+        <div class="modal-content profile-card">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="txt-feedback-title" style="margin:0;">Send Feedback</h3>
+                <button id="close-feedback-modal" class="close-btn" style="background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
-            <p id="txt-feedback-subtitle">We'd love to hear your thoughts!</p>
-            <form id="feedback-form">
-                <textarea id="fb-message" placeholder="What's on your mind?" required></textarea>
+            <p id="txt-feedback-subtitle" class="modal-text">We'd love to hear your thoughts!</p>
+            <form id="feedback-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <textarea id="fb-message" placeholder="What's on your mind?" required style="min-height: 120px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; color: white; outline: none;"></textarea>
                 <button type="submit" class="btn-primary" id="txt-submit-feedback">Submit Feedback</button>
             </form>
         </div>
@@ -116,14 +119,13 @@
 
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
+        <div class="modal-content profile-card">
             <h3 class="modal-title" id="modal-title">Confirm</h3>
             <p class="modal-text" id="modal-text">Are you sure?</p>
-            <div class="modal-actions">
+            <div class="modal-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
                 <button class="btn-secondary" id="modal-cancel">Cancel</button>
-                <button class="btn-primary" id="modal-confirm" style="background: var(--danger); color: white;">Confirm</button>
+                <button class="btn-primary" id="modal-confirm">Confirm</button>
             </div>
         </div>
     </div>
@@ -137,21 +139,25 @@
             const ids = {
                 'txt-back-library': 'backToLibrary',
                 'txt-member-since': 'joinDate',
+                'txt-id': 'memberId',
                 'txt-email-notif': 'emailNotifications',
                 'txt-my-library': 'myLibrary',
                 'txt-my-uploads': 'myUploads',
                 'txt-nav-feedback': 'navFeedback',
+                'txt-logout': 'logout',
+                'txt-delete-account': 'deleteAccount',
+                'txt-upload-new': 'uploadNewBook',
                 'txt-feedback-title': 'feedbackTitle',
                 'txt-feedback-subtitle': 'feedbackSubtitle',
-                'txt-submit-feedback': 'submitFeedback'
+                'txt-submit-feedback': 'submitFeedback',
+                'txt-credits-label': 'credits',
+                'txt-stats-title': 'myProfile',
+                'txt-settings-title': 'settings'
             };
             for (const [id, key] of Object.entries(ids)) {
                 const el = document.getElementById(id);
                 if (el) el.innerText = t(key);
             }
-            document.querySelector('#logout-btn span').innerText = t('logout');
-            document.querySelector('#delete-btn span').innerText = t('deleteAccount');
-            document.querySelector('.upload-trigger span').innerText = t('uploadNewBook');
         }
 
         async function loadProfile() {
@@ -215,24 +221,12 @@
             const upBtn = document.getElementById('tab-uploads');
             
             if (tab === 'library') {
-                libBtn.style.color = 'white';
-                libBtn.style.fontWeight = '600';
-                libBtn.style.borderBottom = '2px solid var(--emerald-primary)';
-                
-                upBtn.style.color = 'var(--text-dim)';
-                upBtn.style.fontWeight = '400';
-                upBtn.style.borderBottom = 'none';
-                
+                libBtn.classList.add('active');
+                upBtn.classList.remove('active');
                 loadMyBooks('/api/books/library');
             } else {
-                upBtn.style.color = 'white';
-                upBtn.style.fontWeight = '600';
-                upBtn.style.borderBottom = '2px solid var(--emerald-primary)';
-                
-                libBtn.style.color = 'var(--text-dim)';
-                libBtn.style.fontWeight = '400';
-                libBtn.style.borderBottom = 'none';
-                
+                upBtn.classList.add('active');
+                libBtn.classList.remove('active');
                 loadMyBooks('/api/books/my');
             }
             
@@ -241,13 +235,14 @@
 
         async function loadMyBooks(endpoint) {
             const token = localStorage.getItem('token');
-            document.getElementById('my-books-grid').innerHTML = '<div class="loading">Loading...</div>';
+            const grid = document.getElementById('my-books-grid');
+            grid.innerHTML = '<div class="loading" style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-dim);">' + t('curatingLibrary') + '</div>';
+            
             const res = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const books = await res.json();
             
-            const grid = document.getElementById('my-books-grid');
             grid.innerHTML = '';
             
             if (books.length === 0) {
@@ -264,7 +259,7 @@
                 
                 let actionHtml = '';
                 if (activeTab === 'library') {
-                    actionHtml = `<div style="margin-top:0.5rem;"><button class="btn-primary btn-mini" style="width:100%; display:flex; justify-content:center; gap:0.5rem; align-items:center;" onclick="window.location.href='/api/books/download/${book.id}/user?token=${token}'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button></div>`;
+                    actionHtml = `<div style="margin-top:auto; padding-top:0.5rem;"><button class="btn-primary btn-mini" style="width:100%; display:flex; justify-content:center; gap:0.5rem; align-items:center;" onclick="window.location.href='/api/books/download/${book.id}/user?token=${token}'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button></div>`;
                 }
 
                 card.innerHTML = `
@@ -346,10 +341,10 @@
                 confirmBtn.style.background = isDanger ? 'var(--danger)' : 'var(--emerald-primary)';
                 confirmBtn.style.color = isDanger ? 'white' : 'black';
 
-                modal.style.display = 'flex';
+                modal.classList.add('active');
 
                 const close = (res) => {
-                    modal.style.display = 'none';
+                    modal.classList.remove('active');
                     confirmBtn.onclick = null;
                     cancelBtn.onclick = null;
                     resolve(res);
@@ -380,14 +375,13 @@
             } catch (err) { console.error(err); }
         });
 
-        // Feedback Logic
         document.getElementById('nav-feedback-trigger').addEventListener('click', () => {
             document.getElementById('feedback-modal').classList.add('active');
         });
 
-        document.getElementById('close-feedback-modal').addEventListener('click', () => {
+        document.getElementById('close-feedback-modal').onclick = () => {
             document.getElementById('feedback-modal').classList.remove('active');
-        });
+        };
 
         document.getElementById('feedback-form').addEventListener('submit', async (e) => {
             e.preventDefault();

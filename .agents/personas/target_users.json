@@ -1,0 +1,109 @@
+{
+    "project": "BookShelf",
+    "version": "2026.1",
+    "personas": [
+        {
+            "id": "persona_01",
+            "name": "The Casual Commuter (Maya)",
+            "profile": "30yo Professional, uses public transit. High distraction environment.",
+            "traits": [
+                "Impatience",
+                "One-handed operation",
+                "Spotty connectivity"
+            ],
+            "goals": [
+                "Find a book in < 30 seconds",
+                "Forward to Kindle via email instantly"
+            ],
+            "friction_thresholds": {
+                "max_clicks_to_action": 3,
+                "load_time_tolerance_ms": 1500,
+                "mobile_ergonomics": "critical"
+            },
+            "agent_instruction": "Evaluate if the UI can be navigated entirely with the thumb."
+        },
+        {
+            "id": "persona_02",
+            "name": "The Library Curator (David)",
+            "profile": "55yo Bibliophile. Desktop user, contributes 10+ EPUBs per week.",
+            "traits": [
+                "Detail-oriented",
+                "Privacy-conscious",
+                "Organized"
+            ],
+            "goals": [
+                "Bulk upload EPUBs",
+                "Correct metadata/covers",
+                "Community recognition"
+            ],
+            "friction_thresholds": {
+                "metadata_accuracy": "high",
+                "desktop_scaling": "essential",
+                "upload_stability": "critical"
+            },
+            "agent_instruction": "Check for drag-and-drop efficiency and bulk editing capabilities."
+        },
+        {
+            "id": "persona_03",
+            "name": "The Silver Reader (Elena)",
+            "profile": "70yo Retired Teacher. Uses a tablet/smartphone with high font scaling.",
+            "traits": [
+                "Tech-hesitant",
+                "High readability needs",
+                "Email-reliant"
+            ],
+            "goals": [
+                "Receive books in email without 'tech' friction",
+                "Simple discovery"
+            ],
+            "friction_thresholds": {
+                "font_size_min": "18px",
+                "contrast_ratio": "7:1",
+                "icon_labels": "required"
+            },
+            "agent_instruction": "Verify that 'Forward to Email' doesn't require complex SMTP knowledge."
+        },
+        {
+            "id": "persona_04",
+            "name": "The Privacy Sentinel (Liam)",
+            "profile": "28yo Cybersecurity Analyst. Extremely cautious about data harvesting.",
+            "traits": [
+                "Skeptical",
+                "Minimalist",
+                "Technical"
+            ],
+            "goals": [
+                "Use the app without an account",
+                "Ensure EPUBs are stripped of tracking pixels",
+                "Verify SSL/TLS for email forwarding"
+            ],
+            "friction_thresholds": {
+                "auth_requirement": "zero-tolerance",
+                "data_collection": "minimal",
+                "transparency": "critical"
+            },
+            "agent_instruction": "Assess if the 'Forward to Email' feature can function via session-based tokens without permanent user profiling."
+        },
+        {
+            "id": "persona_05",
+            "name": "The Global Student (Amina)",
+            "profile": "21yo University Student in a region with high data costs and 3G speeds.",
+            "traits": [
+                "Budget-conscious",
+                "Mobile-only",
+                "Academic"
+            ],
+            "goals": [
+                "Download lightweight EPUBs",
+                "Preview book metadata without loading high-res covers",
+                "Contribute open-source textbooks"
+            ],
+            "friction_thresholds": {
+                "total_page_weight_kb": 800,
+                "offline_capability": "high",
+                "image_optimization": "aggressive"
+            },
+            "agent_instruction": "Evaluate if the UI remains functional when 'low-bandwidth mode' is active (e.g., blurred or missing covers)."
+        }
+    ]
+}

@@ -70,6 +70,24 @@ export const translations = {
         verifiedMember: "Перевірений учасник",
         pendingVerification: "Очікує підтвердження",
         memberId: "ID учасника",
+        credits: "Кредити",
+        
+        // Auth Pages
+        welcomeBack: "З поверненням",
+        loginSubtitle: "Увійдіть до своєї бібліотеки",
+        emailAddress: "Електронна пошта",
+        newToBookshelf: "Вперше у BookShelf?",
+        forgotPassword: "Забули пароль?",
+        joinUs: "Приєднуйтесь до нас",
+        signupSubtitle: "Створіть свій особистий обліковий запис",
+        confirmPassword: "Підтвердіть пароль",
+        alreadyHaveAccount: "Вже є акаунт?",
+        checkYourEmail: "Перевірте свою пошту!",
+        verificationSent: "Ми надіслали посилання для підтвердження на вашу пошту. Будь ласка, підтвердіть свій акаунт, щоб почати читати.",
+        backToCatalog: "Повернутися до каталогу",
+        loginError: "Помилка входу. Перевірте свої дані.",
+        signupError: "Помилка реєстрації. Спробуйте ще раз.",
+        passwordsDoNotMatch: "Паролі не співпадають.",
         
         // Statuses
         approved: "Схвалено",
@@ -163,7 +181,25 @@ export const translations = {
         verifiedMember: "Verified Member",
         pendingVerification: "Pending Verification",
         memberId: "Member ID",
-        
+        credits: "Credits",
+
+        // Auth Pages
+        welcomeBack: "Welcome Back",
+        loginSubtitle: "Sign in to your library",
+        emailAddress: "Email Address",
+        newToBookshelf: "New to BookShelf?",
+        forgotPassword: "Forgot Password?",
+        joinUs: "Join Us",
+        signupSubtitle: "Create your personal library account",
+        confirmPassword: "Confirm Password",
+        alreadyHaveAccount: "Already have an account?",
+        checkYourEmail: "Check your email!",
+        verificationSent: "We've sent a verification link to your email. Please verify your account to start reading.",
+        backToCatalog: "Back to Catalog",
+        loginError: "Login failed. Please check your credentials.",
+        signupError: "Signup failed. Please try again.",
+        passwordsDoNotMatch: "Passwords do not match.",
+
         // Statuses
         approved: "Approved",
         pending: "Pending",
