@@ -1,30 +1,34 @@
-# UX Concept: "My Library" (Unlocked Books View)
+# UX Concept: Profile Overhaul - UI Consistency & Usability Polish
 
-## 1. Overview
-Currently, when a user permanently unlocks (downloads/emails) a book, there is no centralized place to view all their unlocked books. They have to search the global catalog to find them again.
-This feature resolves that UX friction by creating a "My Library" location—a dedicated view where users can quickly access their purchased/unlocked items.
+## 1. Vision Statement
+The Profile Page should feel like a seamless extension of the BookShelf library. This overhaul focuses on eliminating "visual debt"—removing inconsistent styling, ad-hoc components, and overlapping elements in favor of a unified, high-performance OLED interface.
 
-## 2. Target Personas Addressed
-* **The Casual Commuter (Maya)**: Needs to find her books in < 30 seconds. A dedicated "My Library" view prevents her from having to search or filter the global catalog on a spotty connection.
-* **The Silver Reader (Elena)**: Needs simple discovery. Having a dedicated space for "her books" makes the app feel more like a personal bookshelf, reducing tech friction.
+## 2. Core Pillars
 
-## 3. Proposed User Flow & UI Layout
-* **Integration Point**: The `profile.html` page will host the tabbed view, but access will be heavily simplified via the main navigation.
-* **Tabbed Interface**: We will transform the "My Contributions" section in `profile.html` into a tabbed interface.
-  * **Tab 1: My Library (Unlocked Books)** - *Default View*. Displays all books the user has spent credits on or unlocked.
-  * **Tab 2: My Uploads (Contributions)** - Displays the books the user has uploaded to the platform.
-* **Navigation**: A dedicated "My Books" element will be added directly to the floating navigation bar (the top nav island). Clicking this icon will take the user instantly to the "My Library" tabbed interface in `profile.html`, bypassing the need to navigate through general profile settings.
-* **Visuals**: Books in "My Library" will be displayed using the existing `mini-book-card` component for consistency and fast loading (important for Maya and Amina). We'll add an action button (e.g., "Download" or "Send to Kindle") directly on these cards to minimize clicks.
+### 2.1 Component Standardization
+*   **Unified Action System**: Every button on the profile page will be mapped to the central design system (`btn-primary`, `btn-secondary`, `btn-danger-minimal`). No more unique inline button styles.
+*   **Tab System Re-engineered**: The tabbed navigation for "My Library" and "My Uploads" will be moved from inline JS/CSS to a structured `.profile-tab-nav` component.
+*   **Card Harmony**: The `mini-book-card` will be updated to share the same tactile feel (border, glow, hover) as the main catalog cards, just scaled down for personal collections.
 
-## 4. Friction Thresholds Maintained
-* **max_clicks_to_action**: Improved. Click "My Books" in Nav -> Read/Download (2 clicks).
-* **mobile_ergonomics**: The tabbed interface will be optimized for thumb reach, placed clearly under the profile header.
-* **total_page_weight_kb**: Using the `mini-book-card` ensures we don't load heavy UI elements, keeping it under the 800kb limit for Amina.
+### 2.2 Layout Integrity (No Overlap)
+*   **Responsive Safe Zones**: Implement strict padding and margin rules for the `.profile-container` to ensure it never overlaps with the fixed `top-nav-island` or the `mobile-bottom-nav`.
+*   **Grid Alignment**: The "My Books" grid will align to the same horizontal rhythm as the main catalog, preventing "visual jumping" when switching views.
 
-## 5. Technical Considerations (High-Level)
-* Need a backend endpoint (e.g., `/api/books/unlocked`) to fetch the user's unlocked books.
-* Update `profile.html` to include the tabbed UI logic.
-* Update `translations.js` for the new UI text ("My Library", "My Uploads").
+### 2.3 Simplicity & Usability
+*   **Information Hierarchy**: The sidebar will be reorganized for better scannability. Primary actions (Settings/Notifications) will be clearly separated from secondary actions (Logout/Delete).
+*   **Visual Feedback**: Standardized status badges for books (Pending, Approved) with a unified color palette.
+*   **Language & Typography**: Ensure all text follows the `Lora` (Serif) for titles and `Inter` (Sans) for functional text hierarchy.
+
+## 3. Targeted Improvements (SUT Phase Focus)
+1.  **Sidebar Refinement**: Convert "Member Since" and "ID" into a clean "Identity Card" panel.
+2.  **Notification Toggle**: Update the switch to match the premium OLED aesthetic (emerald accents).
+3.  **Empty States**: Beautiful "Empty Shelf" illustrations or themed messages when a user has no books yet.
+4.  **Transitions**: Add a subtle "slide-and-fade" transition when switching between "Library" and "Uploads" tabs.
+
+## 4. Technical Constraints
+*   **Zero Inline CSS**: All styling must reside in `index.css`.
+*   **Mobile First**: The layout must remain thumb-optimized for the 1-handed Maya persona.
+*   **No New Endpoints**: Focus entirely on the presentation of existing data.
 
 ---
-**Status**: Awaiting Human Approval before proceeding to SUT Phase (Step 2) or Architecture (Step 3).
+**Status**: Generated by @UX_Strategist. Awaiting Human Approval to proceed to Step 2 (SUT Phase).
