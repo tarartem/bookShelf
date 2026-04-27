@@ -74,12 +74,20 @@
 
             <!-- Main: Contributions -->
             <section class="profile-main">
-                <div class="section-header">
-                    <h3 id="txt-contributions">My Contributions</h3>
-                    <label for="file-input" class="btn-primary btn-mini upload-trigger">
-                        <span>+ Upload EPUB</span>
-                    </label>
-                    <input type="file" id="file-input" accept=".epub" style="display: none;">
+                <div class="profile-tabs" style="display: flex; gap: 1rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 1rem; padding-bottom: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <button id="tab-library" class="tab-btn active" style="background: none; border: none; color: white; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid var(--emerald-primary);">
+                        <span id="txt-my-library">My Library</span>
+                    </button>
+                    <button id="tab-uploads" class="tab-btn" style="background: none; border: none; color: var(--text-dim); font-weight: 400; cursor: pointer; padding: 0.5rem 1rem;">
+                        <span id="txt-my-uploads">My Uploads</span>
+                    </button>
+                    
+                    <div style="margin-left: auto;">
+                        <label for="file-input" class="btn-primary btn-mini upload-trigger">
+                            <span>+ Upload EPUB</span>
+                        </label>
+                        <input type="file" id="file-input" accept=".epub" style="display: none;">
+                    </div>
                 </div>
                 
                 <div id="upload-status" class="upload-status-box" style="display: none;"></div>
@@ -130,7 +138,8 @@
                 'txt-back-library': 'backToLibrary',
                 'txt-member-since': 'joinDate',
                 'txt-email-notif': 'emailNotifications',
-                'txt-contributions': 'myContributions',
+                'txt-my-library': 'myLibrary',
+                'txt-my-uploads': 'myUploads',
                 'txt-nav-feedback': 'navFeedback',
                 'txt-feedback-title': 'feedbackTitle',
                 'txt-feedback-subtitle': 'feedbackSubtitle',
@@ -178,15 +187,62 @@
                     document.getElementById('notif-bonus-label').innerHTML = `<span style="color:var(--emerald-primary);">${t('notifEnabled')}</span>`;
                 }
 
-                loadMyBooks();
+                initTabs();
             } catch (err) {
                 console.error(err);
             }
         }
 
-        async function loadMyBooks() {
+        let activeTab = 'library';
+
+        function initTabs() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'uploads') {
+                activeTab = 'uploads';
+            } else {
+                activeTab = 'library';
+            }
+            
+            document.getElementById('tab-library').onclick = () => switchTab('library');
+            document.getElementById('tab-uploads').onclick = () => switchTab('uploads');
+            
+            switchTab(activeTab);
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const libBtn = document.getElementById('tab-library');
+            const upBtn = document.getElementById('tab-uploads');
+            
+            if (tab === 'library') {
+                libBtn.style.color = 'white';
+                libBtn.style.fontWeight = '600';
+                libBtn.style.borderBottom = '2px solid var(--emerald-primary)';
+                
+                upBtn.style.color = 'var(--text-dim)';
+                upBtn.style.fontWeight = '400';
+                upBtn.style.borderBottom = 'none';
+                
+                loadMyBooks('/api/books/library');
+            } else {
+                upBtn.style.color = 'white';
+                upBtn.style.fontWeight = '600';
+                upBtn.style.borderBottom = '2px solid var(--emerald-primary)';
+                
+                libBtn.style.color = 'var(--text-dim)';
+                libBtn.style.fontWeight = '400';
+                libBtn.style.borderBottom = 'none';
+                
+                loadMyBooks('/api/books/my');
+            }
+            
+            window.history.replaceState({}, '', `?tab=${tab}`);
+        }
+
+        async function loadMyBooks(endpoint) {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/books/my', {
+            document.getElementById('my-books-grid').innerHTML = '<div class="loading">Loading...</div>';
+            const res = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const books = await res.json();
@@ -202,15 +258,20 @@
             books.reverse().forEach(book => {
                 const card = document.createElement('div');
                 card.className = 'mini-book-card';
-                // FIXED PATH: removed /api/ prefix
                 const coverHtml = book.cover_filepath 
                     ? `<img src="${book.cover_filepath}" class="mini-cover" alt="">`
                     : `<div class="mini-cover" style="display:flex; align-items:center; justify-content:center; font-size:2rem; background:var(--velvet-deep);">📖</div>`;
                 
+                let actionHtml = '';
+                if (activeTab === 'library') {
+                    actionHtml = `<div style="margin-top:0.5rem;"><button class="btn-primary btn-mini" style="width:100%; display:flex; justify-content:center; gap:0.5rem; align-items:center;" onclick="window.location.href='/api/books/download/${book.id}/user?token=${token}'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button></div>`;
+                }
+
                 card.innerHTML = `
                     <span class="status-badge status-${book.status}">${t(book.status)}</span>
                     ${coverHtml}
                     <div class="mini-title">${book.title}</div>
+                    ${actionHtml}
                 `;
                 grid.appendChild(card);
             });
@@ -238,7 +299,7 @@
                 const data = await res.json();
                 if (res.ok) {
                     status.innerHTML = `<span style="color: var(--emerald-primary);">✅ ${t('uploadSuccess')}</span>`;
-                    await loadMyBooks();
+                    switchTab('uploads');
                     setTimeout(() => { status.style.display = 'none'; }, 3000);
                 } else {
                     status.innerHTML = `<span style="color: var(--danger);">❌ ${data.detail || t('uploadError')}</span>`;
