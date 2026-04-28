@@ -1,5 +1,5 @@
 ---
-description: A bug fix workflow. Moves a task through Architect, Dev, QA, and DevOps.
+description: Moves a task through Architect, Dev, QA, and DevOps.
 ---
 
 Step 1: Act as @Architect.

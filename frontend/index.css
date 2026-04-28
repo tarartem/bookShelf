@@ -1404,14 +1404,12 @@ input[type="password"]:focus {
 /* Tabs System */
 .profile-tabs {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     border-bottom: 1px solid var(--glass-border);
     margin-bottom: 2rem;
     padding-bottom: 0;
     align-items: center;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    flex-wrap: wrap; /* Fixed: Allow wrapping to prevent overflow */
 }
 .profile-tabs::-webkit-scrollbar {
     display: none;
@@ -1451,8 +1449,82 @@ input[type="password"]:focus {
 }
 
 .tab-actions {
-    margin-left: auto;
     padding-bottom: 0.5rem;
+}
+
+@media (min-width: 601px) {
+    .tab-actions {
+        margin-left: auto;
+    }
+}
+
+.upload-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    cursor: pointer;
+    background: var(--emerald-primary);
+    color: black;
+    font-weight: 700;
+    padding: 0.6rem 1.25rem;
+    border-radius: 12px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.upload-trigger:hover {
+    background: var(--emerald-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger-minimal {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-danger-minimal:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+
+.sidebar-btn {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 0.75rem;
+}
+
+.sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--emerald-primary);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.sidebar-btn:last-child {
+    margin-bottom: 0;
 }
 
 /* Grid & Cards Refinement */

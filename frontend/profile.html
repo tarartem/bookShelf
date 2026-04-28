@@ -59,13 +59,12 @@
                         </label>
                     </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
-                        <button id="nav-feedback-trigger" class="btn-secondary">
-                            <span id="txt-nav-feedback">Feedback</span>
+                    <div class="account-actions" style="margin-top: 2rem;">
+                        <button id="feedback-trigger-btn" class="sidebar-btn">
+                            💬 <span id="txt-feedback-trigger">Give Feedback</span>
                         </button>
-                        
-                        <button id="logout-btn" class="btn-secondary">
-                            <span id="txt-logout">Logout</span>
+                        <button id="logout-btn" class="sidebar-btn">
+                            🚪 <span id="txt-logout">Log Out</span>
                         </button>
 
                         <button id="delete-btn" class="btn-danger-minimal">
@@ -223,10 +222,12 @@
             if (tab === 'library') {
                 libBtn.classList.add('active');
                 upBtn.classList.remove('active');
+                document.querySelector('.tab-actions').style.display = 'none';
                 loadMyBooks('/api/books/library');
             } else {
                 upBtn.classList.add('active');
                 libBtn.classList.remove('active');
+                document.querySelector('.tab-actions').style.display = 'block';
                 loadMyBooks('/api/books/my');
             }
             
@@ -281,7 +282,7 @@
                 // BUG-003: Navigate to book details in catalog
                 card.onclick = (e) => {
                     if (e.target.closest('button')) return;
-                    window.location.href = `/?id=${book.id}`;
+                    window.location.href = `/?book=${book.id}`;
                 };
 
                 grid.appendChild(card);
