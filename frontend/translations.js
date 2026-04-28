@@ -17,6 +17,7 @@ export const translations = {
         getThisBook: "Отримати книгу",
         unlockBook: "Розблокувати",
         unlockSuccess: "Книгу розблоковано!",
+        inLibrary: "У бібліотеці",
         credit: "кредит",
         deliveryOptions: "Варіанти доставки",
         downloadEpub: "Завантажити EPUB",

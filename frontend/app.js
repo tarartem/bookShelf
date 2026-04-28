@@ -62,7 +62,8 @@ async function loadLibrary() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
-            userLibrary = await response.json();
+            const data = await response.json();
+            userLibrary = data.map(b => b.id); // Store only IDs for easier lookup
             console.log("DEBUG: User library loaded:", userLibrary.length, "books");
         }
     } catch (error) {
@@ -333,13 +334,23 @@ async function openBookDetails(bookId) {
 }
 
 function updateBookActionsUI(bookId) {
-    const isUnlocked = userLibrary.includes(bookId);
+    const isUnlocked = userLibrary.includes(Number(bookId));
     const unlockBtn = document.getElementById('page-request-trigger-btn');
     const deliveryContainer = document.getElementById('page-delivery-container');
+    const pageStats = document.getElementById('page-stats');
 
     if (isUnlocked) {
         if (unlockBtn) unlockBtn.style.display = 'none';
         if (deliveryContainer) deliveryContainer.style.display = 'block';
+        
+        // Add "In Library" badge if not already there
+        if (pageStats && !pageStats.querySelector('.badge-owned')) {
+            const badge = document.createElement('span');
+            badge.className = 'badge-owned';
+            badge.style.marginLeft = '0.5rem';
+            badge.innerText = `✓ ${t('inLibrary')}`;
+            pageStats.appendChild(badge);
+        }
     } else {
         if (unlockBtn) {
             unlockBtn.style.display = 'flex';
@@ -349,6 +360,10 @@ function updateBookActionsUI(bookId) {
             unlockBtn.onclick = () => handleUnlock(bookId);
         }
         if (deliveryContainer) deliveryContainer.style.display = 'none';
+        
+        // Remove badge if switching (though rare in current detail view)
+        const badge = pageStats?.querySelector('.badge-owned');
+        if (badge) badge.remove();
     }
     applyLanguage(); // Ensure new elements are localized
 }
@@ -369,7 +384,9 @@ async function handleUnlock(bookId) {
 
         if (response.ok) {
             showToast(t('unlockSuccess'));
-            userLibrary.push(bookId);
+            if (!userLibrary.includes(Number(bookId))) {
+                userLibrary.push(Number(bookId));
+            }
             updateBookActionsUI(bookId);
         } else {
             const error = await response.json();
