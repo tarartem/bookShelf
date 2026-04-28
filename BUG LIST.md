@@ -7,11 +7,11 @@
 
 The 5 bugs are grouped into **3 batches** based on shared files to avoid double-touching the same code and to keep commits atomic and reviewable.
 
-| Batch | Bugs | Files Touched | Priority |
-| :--- | :--- | :--- | :--- |
-| **Batch 1** | BUG-006, BUG-002, BUG-003 | `profile.html` | 🔴 Critical — Fix first |
-| **Batch 2** | BUG-001, BUG-004 | `app.js`, `index.css` | 🟡 Medium |
-| **Batch 3** | BUG-005 | `index.css` | 🔴 High — CSS-only |
+| Batch | Bugs | Files Touched | Priority | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Batch 1** | BUG-006, BUG-002, BUG-003 | `profile.html` | 🔴 Critical | ✅ `Done` |
+| **Batch 2** | BUG-001, BUG-004 | `app.js`, `index.css` | 🟡 Medium | ✅ `Done` |
+| **Batch 3** | BUG-005 | `index.css` | 🔴 High | ✅ `Done` |
 
 ---
 
@@ -20,7 +20,7 @@ The 5 bugs are grouped into **3 batches** based on shared files to avoid double-
 - **Platform**: Desktop
 - **Severity**: 🟡 Medium
 - **Batch**: 2 (with BUG-004)
-- **Status**: `Open`
+- **Status**: ✅ `Fixed`
 
 **Description**
 The "My Library" icon/button added to the header navigation bar overlaps with the search bar on desktop viewports. Elements are not properly spaced or z-indexed.
@@ -39,7 +39,7 @@ The book icon and search bar must never intersect. Minimum 12px gap required bet
 - **Platform**: Desktop + Mobile
 - **Severity**: 🟢 Low
 - **Batch**: 1 (with BUG-003)
-- **Status**: `Open`
+- **Status**: ✅ `Fixed`
 
 **Description**
 The `status-badge status-approved` chip ("Approved") is rendered on every book card inside the **My Library** tab. This badge is only meaningful in the **My Uploads** tab where users track their submission status. In My Library, all books are already unlocked and accessible — the badge is misleading and clutters the UI.
@@ -82,7 +82,7 @@ Instead of suppressing the click or navigating away to the catalog, we should:
 - **Platform**: Mobile only
 - **Severity**: 🟢 Low
 - **Batch**: 2 (with BUG-001)
-- **Status**: `Open`
+- **Status**: ✅ `Fixed`
 
 **Description**
 The My Library icon/link is displayed in the mobile header navigation bar. On mobile, this consumes scarce navigation space and breaks the thumb-zone layout defined in the Bento Constraints rule. The profile page is already accessible via the user avatar navigation.
@@ -101,7 +101,7 @@ The My Library icon must be hidden on viewports < 600px (`display: none` or a re
 - **Platform**: Mobile only
 - **Severity**: 🔴 High
 - **Batch**: 3 (standalone)
-- **Status**: `Open`
+- **Status**: ✅ `Fixed`
 
 **Description**
 On mobile viewports (≤ 393px), the "My Profile" stats card and "Settings" card in the profile sidebar are wider than the viewport, causing horizontal overflow and a broken layout. This violates two project rules:
