@@ -278,13 +278,10 @@
                     ${actionHtml}
                 `;
                 
-                // BUG-003: Explicitly prevent any parent navigation or bubbling if something exists
+                // BUG-003: Navigate to book details in catalog
                 card.onclick = (e) => {
-                    // If they clicked the button, let it happen. 
-                    // Otherwise, we just stay here.
                     if (e.target.closest('button')) return;
-                    e.preventDefault();
-                    e.stopPropagation();
+                    window.location.href = `/?id=${book.id}`;
                 };
 
                 grid.appendChild(card);

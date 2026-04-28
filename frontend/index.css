@@ -1217,7 +1217,10 @@ input[type="password"]:focus {
 
 @media (max-width: 600px) {
     .profile-page .profile-container {
-        padding: 100px 1rem 120px; /* Reduced side padding on mobile */
+        padding: 80px 1rem 120px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 }
 
@@ -1325,14 +1328,24 @@ input[type="password"]:focus {
     overflow: hidden;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
 }
 
 @media (max-width: 600px) {
     .profile-card {
-        padding: 1.25rem 1rem;
+        padding: 1rem;
+        margin: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
     .profile-grid {
         gap: 1.5rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .profile-sidebar {
+        width: 100%;
     }
 }
 
