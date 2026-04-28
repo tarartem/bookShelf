@@ -389,9 +389,17 @@ function setupEventListeners() {
     const backBtn = document.getElementById('back-to-library');
     if (backBtn) {
         backBtn.onclick = () => {
-            document.body.classList.remove('details-active');
-            document.getElementById('book-details-view').style.display = 'none';
-            window.history.pushState({}, 'BookShelf', '/');
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromProfile = urlParams.get('from') === 'profile';
+
+            if (fromProfile) {
+                window.location.href = '/profile.html?tab=library';
+            } else {
+                document.body.classList.remove('details-active');
+                const detailsView = document.getElementById('book-details-view');
+                if (detailsView) detailsView.style.display = 'none';
+                window.history.pushState({}, 'BookShelf', '/');
+            }
         };
     }
     

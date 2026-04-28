@@ -316,15 +316,10 @@
                     ${actionHtml}
                 `;
                 
-                // BUG-003: Navigate to book details only if not in library tab (or suppress entirely)
+                // BUG-003: Restore navigation with 'from=profile' parameter for smart back logic
                 card.onclick = (e) => {
                     if (e.target.closest('button')) return;
-                    if (activeTab === 'library') {
-                        // For now, we just suppress the navigation. 
-                        // The user can use the 'Download' button.
-                        return;
-                    }
-                    window.location.href = `/?book=${book.id}`;
+                    window.location.href = `/?book=${book.id}&from=profile`;
                 };
 
                 grid.appendChild(card);

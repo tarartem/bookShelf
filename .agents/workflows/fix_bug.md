@@ -19,6 +19,7 @@ Step 3: Act as @QAGuardian.
    - Pay attention to the layout so UI elements won't overlap.
   
 Step 4: Act as @DevOps.
+   - Follow the `git_render_deploy.md` instructions.
    - Commit changes to GitHub using a descriptive conventional commit.
    - Trigger production deployment to Render.com using the Secure API Key.
    - Monitor the Render Deploy Hook until status is "Live".

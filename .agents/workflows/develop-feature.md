@@ -22,15 +22,15 @@ Step 4: Act as @FullStackDev.
    - Continuous linting and type-checking.
 
 Step 5: Act as @QAGuardian.
-   - Perform `visual_regression_check`.
+   - Perform `visual_layout_audit`.
    - Performs testing in browser checking a new functionality and if everything else works correctly (nothing was broken), records the session and gives a summary.
    - Perform test on mobile application.
    - Perform test on desktop version.
    - Pay attention to the layout so UI elements won't overlap.
-   - If success: Act as @DevOps to stage PR.
-   - If fail: Return to Step 4 with error logs.
+  
 
 Step 6: Act as @DevOps.
+   - Follow the `git_render_deploy.md` instructions.
    - Commit changes to GitHub using a descriptive conventional commit.
    - Trigger production deployment to Render.com using the Secure API Key.
    - Monitor the Render Deploy Hook until status is "Live".

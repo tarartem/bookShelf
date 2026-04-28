@@ -52,21 +52,28 @@ The `status-badge status-approved` chip ("Approved") is rendered on every book c
 
 ---
 
-## BUG-003 · Desktop & Mobile: Clicking a Library Book Card Opens the Book's Catalog Page
+## BUG-003 · Desktop & Mobile: Library Book Cards are Non-Interactive
 
 - **Platform**: Desktop + Mobile
-- **Severity**: 🔴 High
-- **Batch**: 1 (with BUG-002)
-- **Status**: `Open`
+- **Severity**: 🟡 Medium
+- **Batch**: 1
+- **Status**: ✅ `Fixed`
 
 **Description**
-When a user clicks on a book card inside the **My Library** tab, it navigates to the public book detail/catalog page. The expected behavior is that the card is non-interactive (information display only), or that clicking opens a download/delivery action — not the public catalog.
+In the current implementation, clicking a book card in the **My Library** tab does nothing (click is suppressed). Users find this "broken" as they expect to interact with their books.
+**Strategic Decision:**
+Instead of suppressing the click or navigating away to the catalog, we should:
+1. Allow the card to navigate back to the catalog ONLY IF it's to the specific book details view.
+2. OR (Better) Open a small contextual modal in the profile page for "Download / Send to Kindle".
+3. **Decision:** We will restore navigation to the catalog page with the `?book=ID` parameter, but ensure the "Back" button in the catalog returns the user to the Profile page if they came from there.
 
 **Affected Files**
-- `frontend/profile.html` — `.mini-book-card` click handler or `onclick` event delegation
+- `frontend/profile.html`
+- `frontend/app.js` (for back button logic)
 
 **Acceptance Criteria**
-Clicking a book card in My Library must **not** navigate to the catalog book page. Either suppress the click entirely, or surface a contextual "Download / Send to Kindle" inline action.
+1. Clicking a library card must take the user to the book's detail view in the catalog.
+2. The user must be able to return to the Profile page easily (smart "Back" button).
 
 ---
 
@@ -141,7 +148,7 @@ Authenticated users see empty placeholders (`...`, `0`, `#000`) instead of their
 | :--- | :--- | :---: | :--- | :--- | :--- |
 | BUG-001 | Book icon overlaps search bar | 2 | 🟡 Medium | ✅ `Fixed` | `index.html`, `index.css` |
 | BUG-002 | "Approved" chip in My Library | 1 | 🟢 Low | ✅ `Fixed` | `profile.html` |
-| BUG-003 | Clicking library card opens catalog | 1 | 🔴 High | ✅ `Fixed` | `profile.html` |
+| BUG-003 | Library Book Cards are Interactive | 1 | 🟡 Medium | ✅ `Fixed` | `profile.html`, `app.js` |
 | BUG-004 | My Library icon on mobile header | 2 | 🟢 Low | ✅ `Fixed` | `index.html`, `app.js` |
 | BUG-005 | Profile sidebar overflow on mobile | 3 | 🔴 High | ✅ `Fixed` | `index.css` |
 | BUG-006 | Profile Data Not Loading (Empty State) | 1 | 🔴 Critical | ✅ `Fixed` | `profile.html`, `app.js` |
