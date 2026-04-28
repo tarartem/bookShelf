@@ -51,6 +51,26 @@ body.oled-theme {
     padding: 100px 2rem 120px; /* Offset for floating top and bottom nav */
 }
 
+.nav-pill {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0 1rem;
+    height: 40px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.03);
+    transition: 0.3s;
+    border: 1px solid var(--glass-border);
+}
+
+.nav-pill:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: var(--emerald-primary);
+}
+
 /* --- Search Mode Toggle Logic --- */
 body.search-active #header-logo,
 body.search-active #profile-trigger,
@@ -975,7 +995,7 @@ body.details-active {
         padding-top: 80px;
     }
     .desktop-only {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -1254,6 +1274,8 @@ input[type="password"]:focus {
     font-size: 1.5rem;
     font-family: var(--font-serif);
     color: white;
+    word-break: break-word;
+    line-height: 1.2;
 }
 
 .credits-badge {
@@ -1298,13 +1320,19 @@ input[type="password"]:focus {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: 24px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
     backdrop-filter: blur(20px);
-    width: 100%; /* Ensure it fills parent */
+    -webkit-backdrop-filter: blur(20px);
 }
 
 @media (max-width: 600px) {
     .profile-card {
         padding: 1.25rem 1rem;
+    }
+    .profile-grid {
+        gap: 1.5rem;
     }
 }
 
@@ -1417,8 +1445,15 @@ input[type="password"]:focus {
 /* Grid & Cards Refinement */
 .mini-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 1.5rem;
+}
+
+@media (max-width: 400px) {
+    .mini-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 1rem;
+    }
 }
 
 .mini-book-card {
@@ -1514,8 +1549,9 @@ input:checked + .slider:before { transform: translateX(20px); background-color: 
 @media (max-width: 900px) {
     .profile-grid { grid-template-columns: 1fr; }
     .profile-sidebar { position: static; }
-    .profile-header { flex-direction: column; text-align: center; gap: 1.5rem; }
-    .credits-badge { margin: 0 auto; }
+    .profile-header { flex-direction: column; text-align: center; gap: 1.5rem; padding: 1.5rem 1rem; }
+    .credits-badge { margin: 0 auto; padding: 0.5rem 1rem; }
+    .user-avatar-large { margin: 0 auto; }
 }
 
 .back-to-home {

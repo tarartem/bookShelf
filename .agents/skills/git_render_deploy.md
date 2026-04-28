@@ -8,6 +8,10 @@ Securely commit code and trigger a production build on Render.com.
 2. **Commit**: Stage all changes and commit using the pattern `feat/fix(scope): description`.
 3. **Push**: Sync changes to the `main` branch on GitHub.
 4. **Deploy**: 
-   - Call the Render.com Deploy Hook using `process.env.RENDER_API_KEY`.
-   - Monitor the deployment URL for a `200 OK` status.
+    - Trigger the build using the Render API:
+      ```bash
+      # // turbo
+      curl -s -X POST -H "Authorization: Bearer $RENDER_API_KEY" "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys"
+      ```
+    - Monitor the deployment for a `build_in_progress` or `live` status.
 5. **Persistence Verification**: Confirm the app connects to the Neon PostgreSQL DB after restart.
