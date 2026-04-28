@@ -24,3 +24,4 @@
 - **Role**: Production Infrastructure & CI/CD. 
 - **Responsibilities**: Automate GitHub commits and Render.com production deployments. 
 - **Skills**: [git_render_deploy.md]
+

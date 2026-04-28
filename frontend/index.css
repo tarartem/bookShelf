@@ -1201,7 +1201,6 @@ input[type="password"]:focus {
     }
 }
 
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -1317,6 +1316,13 @@ input[type="password"]:focus {
     color: var(--emerald-glow);
 }
 
+.profile-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--emerald-glow);
+}
+
 .stat-item, .setting-item {
     display: flex;
     justify-content: space-between;
@@ -1369,7 +1375,6 @@ input[type="password"]:focus {
 .profile-tabs::-webkit-scrollbar {
     display: none;
 }
-
 
 .tab-btn {
     background: none;
