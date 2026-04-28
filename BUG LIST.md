@@ -1,0 +1,121 @@
+# BUG LIST — BookShelf My Library Release
+> Version: v1.1 | Reported: 2026-04-28 | Strategy: 3 Batched Fixes
+
+---
+
+## Fix Strategy
+
+The 5 bugs are grouped into **3 batches** based on shared files to avoid double-touching the same code and to keep commits atomic and reviewable.
+
+| Batch | Bugs | Files Touched | Priority |
+| :--- | :--- | :--- | :--- |
+| **Batch 1** | BUG-002, BUG-003 | `profile.html` | 🔴 High — Fix first |
+| **Batch 2** | BUG-001, BUG-004 | `app.js`, `index.css` | 🟡 Medium |
+| **Batch 3** | BUG-005 | `index.css` | 🔴 High — CSS-only, isolated |
+
+---
+
+## BUG-001 · Desktop: Book Icon Overlaps Search Bar in Header
+
+- **Platform**: Desktop
+- **Severity**: 🟡 Medium
+- **Batch**: 2 (with BUG-004)
+- **Status**: `Open`
+
+**Description**
+The "My Library" icon/button added to the header navigation bar overlaps with the search bar on desktop viewports. Elements are not properly spaced or z-indexed.
+
+**Affected Files**
+- `frontend/app.js` — header rendering logic
+- `frontend/index.css` — `.top-nav-island`, `.nav-actions` layout rules
+
+**Acceptance Criteria**
+The book icon and search bar must never intersect. Minimum 12px gap required between all header elements on viewports ≥ 768px.
+
+---
+
+## BUG-002 · Desktop & Mobile: "Approved" Chip Visible in My Library Tab
+
+- **Platform**: Desktop + Mobile
+- **Severity**: 🟢 Low
+- **Batch**: 1 (with BUG-003)
+- **Status**: `Open`
+
+**Description**
+The `status-badge status-approved` chip ("Approved") is rendered on every book card inside the **My Library** tab. This badge is only meaningful in the **My Uploads** tab where users track their submission status. In My Library, all books are already unlocked and accessible — the badge is misleading and clutters the UI.
+
+**Affected Files**
+- `frontend/profile.html` — `loadMyBooks()` function, card `innerHTML` template
+
+**Acceptance Criteria**
+`status-badge` must not render when `activeTab === 'library'`. It should only appear in the Uploads tab.
+
+---
+
+## BUG-003 · Desktop & Mobile: Clicking a Library Book Card Opens the Book's Catalog Page
+
+- **Platform**: Desktop + Mobile
+- **Severity**: 🔴 High
+- **Batch**: 1 (with BUG-002)
+- **Status**: `Open`
+
+**Description**
+When a user clicks on a book card inside the **My Library** tab, it navigates to the public book detail/catalog page. The expected behavior is that the card is non-interactive (information display only), or that clicking opens a download/delivery action — not the public catalog.
+
+**Affected Files**
+- `frontend/profile.html` — `.mini-book-card` click handler or `onclick` event delegation
+
+**Acceptance Criteria**
+Clicking a book card in My Library must **not** navigate to the catalog book page. Either suppress the click entirely, or surface a contextual "Download / Send to Kindle" inline action.
+
+---
+
+## BUG-004 · Mobile: My Library Icon Visible in Header Navigation Bar
+
+- **Platform**: Mobile only
+- **Severity**: 🟢 Low
+- **Batch**: 2 (with BUG-001)
+- **Status**: `Open`
+
+**Description**
+The My Library icon/link is displayed in the mobile header navigation bar. On mobile, this consumes scarce navigation space and breaks the thumb-zone layout defined in the Bento Constraints rule. The profile page is already accessible via the user avatar navigation.
+
+**Affected Files**
+- `frontend/app.js` — nav bar rendering
+- `frontend/index.css` — responsive visibility rules for `.top-nav-island` children
+
+**Acceptance Criteria**
+The My Library icon must be hidden on viewports < 600px (`display: none` or a responsive utility class). Mobile navigation must remain single-column and uncluttered.
+
+---
+
+## BUG-005 · Mobile: Profile Page — Settings & My Profile Sections Overflow the Screen
+
+- **Platform**: Mobile only
+- **Severity**: 🔴 High
+- **Batch**: 3 (standalone)
+- **Status**: `Open`
+
+**Description**
+On mobile viewports (≤ 393px), the "My Profile" stats card and "Settings" card in the profile sidebar are wider than the viewport, causing horizontal overflow and a broken layout. This violates two project rules:
+- **Mobile-First Layout Physics**: No `width` in `px` for layout containers.
+- **Bento Constraints**: Grids must collapse to a single-column `flex-direction: column` on viewports < 600px.
+
+**Affected Files**
+- `frontend/index.css` — `.profile-sidebar`, `.profile-card`, `.profile-grid` responsive breakpoint rules
+- `frontend/profile.html` — sidebar HTML structure
+
+**Acceptance Criteria**
+All sidebar cards must fit within 100% of the viewport width on screens ≤ 393px. No horizontal scroll. All widths must use `rem`, `%`, or `vw` — never `px`.
+
+---
+
+## Status Tracker
+
+| ID | Title | Batch | Severity | Status | Fixed In |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| BUG-001 | Book icon overlaps search bar | 2 | 🟡 Medium | ✅ `Fixed` | `index.html`, `index.css` |
+| BUG-002 | "Approved" chip in My Library | 1 | 🟢 Low | ✅ `Fixed` | `profile.html` |
+| BUG-003 | Clicking library card opens catalog | 1 | 🔴 High | ✅ `Fixed` | `profile.html` |
+| BUG-004 | My Library icon on mobile header | 2 | 🟢 Low | ✅ `Fixed` | `index.html`, `app.js` |
+| BUG-005 | Profile sidebar overflow on mobile | 3 | 🔴 High | ✅ `Fixed` | `index.css` |

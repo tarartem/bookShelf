@@ -113,7 +113,6 @@ function applyLanguage() {
         'txt-nav-home': 'navHome',
         'txt-nav-search': 'navSearch',
         'txt-nav-my-books': 'myBooks',
-        'txt-nav-my-books-mobile': 'myBooks',
         'txt-nav-feedback': 'navFeedback',
         'txt-welcome-title': 'welcomeTitle',
         'txt-welcome-subtitle': 'welcomeSubtitle',

@@ -128,11 +128,20 @@ body.search-active .app-container {
     z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: center; /* Centered Logo/Brand */
+    justify-content: flex-start;
     padding: 0 1.5rem;
     gap: 1rem;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    z-index: 1002;
+    flex-shrink: 0;
 }
 
 .header-brand h1 {
@@ -1182,9 +1191,16 @@ input[type="password"]:focus {
 .profile-page .profile-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 120px 2rem 140px; /* Safe zone for fixed navs */
+    padding: 120px 2rem 140px;
     animation: fadeIn 0.5s ease-out;
 }
+
+@media (max-width: 600px) {
+    .profile-page .profile-container {
+        padding: 100px 1rem 120px; /* Reduced side padding on mobile */
+    }
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -1203,6 +1219,15 @@ input[type="password"]:focus {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
+
+@media (max-width: 600px) {
+    .profile-header {
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+        border-radius: 24px;
+    }
+}
+
 
 .user-avatar-large {
     width: 80px;
@@ -1275,7 +1300,15 @@ input[type="password"]:focus {
     border: 1px solid var(--glass-border);
     border-radius: 24px;
     backdrop-filter: blur(20px);
+    width: 100%; /* Ensure it fills parent */
 }
+
+@media (max-width: 600px) {
+    .profile-card {
+        padding: 1.25rem 1rem;
+    }
+}
+
 
 .profile-card h3 {
     font-family: var(--font-serif);
@@ -1290,7 +1323,10 @@ input[type="password"]:focus {
     align-items: center;
     padding: 0.85rem 0;
     border-bottom: 1px solid var(--glass-border);
+    gap: 1rem;
+    flex-wrap: wrap; /* Prevent overflow on tight screens */
 }
+
 
 .stat-item:last-child, .setting-item:last-child {
     border-bottom: none;
@@ -1326,7 +1362,14 @@ input[type="password"]:focus {
     margin-bottom: 2rem;
     padding-bottom: 0;
     align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
+.profile-tabs::-webkit-scrollbar {
+    display: none;
+}
+
 
 .tab-btn {
     background: none;

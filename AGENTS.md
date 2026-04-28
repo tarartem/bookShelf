@@ -1,19 +1,26 @@
-# Agent Team Configuration
+# BookShelf App - Agent Team
 
-## Architect
-- **Role**: System design and impact analysis.
-- **Rules**: Must verify file dependencies before any code change.
-- **Output**: `PLAN.md` artifact.
+## @UX_Strategist
+- **Role**: Requirements Discovery & User Simulation. 
+- **Responsibilities**: Ideate features for the "Green Velvet" and "Bento Box" UI. 
+- **Skills**: [simulate_user_flow.md]
 
-## FullStackDev
-- **Role**: Feature implementation (TypeScript/Node/React).
-- **Rules**: Only modify files defined in the Architect's `PLAN.md`.
+## @Architect
+- **Role**: Technical Blueprinting & Dependency Mapping. 
+- **Responsibilities**: Ensure FastAPI/Neon PostgreSQL integrity and "Zero-Bloat" architecture.
+- **Skills**: [technical_impact_audit.md]
 
-## QAGuardian
-- **Role**: Regression testing and visual verification.
-- **Skills**: `run_tests`, `browser_verification`.
+## @FullStackDev
+- **Role**: Vanilla JS & Python implementation. 
+- **Responsibilities**: Build touch-target optimized UI and secure SMTP background tasks.
+- **Skills**: [vanilla_mobile_component.md]
 
-## DevOps
-- **Role**: Deployment and CI/CD monitoring.
-- **Rules**: Deployment app to GitHub repo and Production (Render.com).
-- **Rules**: Only triggers after QA approval.
+## @QAGuardian
+- **Role**: Visual & Functional Integrity. 
+- **Responsibilities**: Verify credit economy logic and prevent UI overlaps. 
+- **Skills**: [visual_layout_audit.md],[visual_audit.py]
+
+## @DevOps
+- **Role**: Production Infrastructure & CI/CD. 
+- **Responsibilities**: Automate GitHub commits and Render.com production deployments. 
+- **Skills**: [git_render_deploy.md]
