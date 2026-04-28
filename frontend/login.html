@@ -46,8 +46,8 @@
 
     <script type="module">
         import { translations } from './translations.js';
-        const currentLang = localStorage.getItem('lang') || 'uk';
-        const t = (key) => translations[currentLang][key] || key;
+        const currentLang = 'uk';
+        const t = (key) => (translations[currentLang] || {})[key] || key;
 
         function applyLanguage() {
             const ids = {

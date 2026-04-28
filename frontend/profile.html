@@ -131,18 +131,17 @@
 
     <script type="module">
         import { translations } from './translations.js';
-        const currentLang = localStorage.getItem('lang') || 'uk';
-        const t = (key) => translations[currentLang][key] || key;
+        const currentLang = 'uk';
+        const t = (key) => {
+            return (translations[currentLang] || {})[key] || key;
+        };
 
         function applyLanguage() {
             const ids = {
                 'txt-back-library': 'backToLibrary',
-                'txt-member-since': 'joinDate',
-                'txt-id': 'memberId',
+                'txt-stats-title': 'myProfile',
+                'txt-settings-title': 'settings',
                 'txt-email-notif': 'emailNotifications',
-                'txt-my-library': 'myLibrary',
-                'txt-my-uploads': 'myUploads',
-                'txt-nav-feedback': 'navFeedback',
                 'txt-logout': 'logout',
                 'txt-delete-account': 'deleteAccount',
                 'txt-upload-new': 'uploadNewBook',
@@ -160,41 +159,66 @@
         }
 
         async function loadProfile() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
             try {
-                const userRes = await fetch('/api/auth/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (userRes.status === 401) {
-                    localStorage.removeItem('token');
+                console.log("DEBUG: loadProfile starting...");
+                const token = localStorage.getItem('token');
+                if (!token) {
                     window.location.href = 'login.html';
                     return;
                 }
 
+                const userRes = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!userRes.ok) {
+                    console.error("DEBUG: userRes not OK", userRes.status);
+                    if (userRes.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                    }
+                    return;
+                }
+
                 const user = await userRes.json();
-                document.getElementById('user-email').textContent = user.email;
-                document.getElementById('user-status').textContent = user.is_verified ? t('verifiedMember') : t('pendingVerification');
-                document.getElementById('avatar-initials').textContent = user.email[0].toUpperCase();
-                document.getElementById('join-date').textContent = new Date(user.created_at).toLocaleDateString();
-                document.getElementById('member-id').textContent = `#${user.id.toString().padStart(3, '0')}`;
-                document.getElementById('user-credits').textContent = user.credits;
+                console.log("DEBUG: user loaded", user.email);
+
+                const email = user.email || "guest@bookshelf.com";
+                const emailEl = document.getElementById('user-email');
+                if (emailEl) emailEl.textContent = email;
+
+                const statusEl = document.getElementById('user-status');
+                if (statusEl) statusEl.textContent = user.is_verified ? t('verifiedMember') : t('pendingVerification');
+
+                const avatarEl = document.getElementById('avatar-initials');
+                if (avatarEl) avatarEl.textContent = email[0].toUpperCase();
+
+                const joinEl = document.getElementById('join-date');
+                if (joinEl) joinEl.textContent = user.created_at ? new Date(user.created_at).toLocaleDateString() : '---';
+
+                const memberEl = document.getElementById('member-id');
+                if (memberEl) memberEl.textContent = `#${(user.id || 0).toString().padStart(3, '0')}`;
+
+                const creditsEl = document.getElementById('user-credits');
+                if (creditsEl) creditsEl.textContent = user.credits ?? 0;
                 
                 const notifToggle = document.getElementById('notif-toggle');
-                notifToggle.checked = user.email_notifications;
+                if (notifToggle) {
+                    notifToggle.checked = !!user.email_notifications;
+                }
                 
-                if (user.received_notif_bonus) {
-                    document.getElementById('notif-bonus-label').innerHTML = `<span style="color:var(--emerald-primary);">${t('notifEnabled')}</span>`;
+                const bonusLabel = document.getElementById('notif-bonus-label');
+                if (user.received_notif_bonus && bonusLabel) {
+                    bonusLabel.innerHTML = `<span style="color:var(--emerald-primary);">${t('notifEnabled')}</span>`;
                 }
 
                 initTabs();
             } catch (err) {
-                console.error(err);
+                console.error("DEBUG: loadProfile CRASH", err);
+                const header = document.querySelector('.profile-header');
+                if (header) {
+                    header.innerHTML += `<p style="color:var(--danger-glow, red); font-size: 0.8rem; text-align: center; width: 100%; margin-top: 1rem;">Error loading profile data. Please try refreshing.</p>`;
+                }
             }
         }
 

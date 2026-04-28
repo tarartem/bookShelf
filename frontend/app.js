@@ -1,7 +1,7 @@
 import { translations } from './translations.js';
 
 const API_URL = '/api';
-let currentLang = localStorage.getItem('lang') || 'uk';
+let currentLang = 'uk';
 let currentUser = null;
 let userLibrary = []; // IDs of unlocked books
 let allBooks = [];
@@ -25,7 +25,7 @@ async function init() {
 }
 
 function loadLanguage() {
-    currentLang = localStorage.getItem('lang') || 'uk';
+    currentLang = 'uk';
     document.documentElement.lang = currentLang;
     applyLanguage();
 }
@@ -104,7 +104,7 @@ function shuffleArray(array) {
 }
 
 function t(key) {
-    return translations[currentLang][key] || key;
+    return (translations[currentLang] || {})[key] || key;
 }
 
 function applyLanguage() {
