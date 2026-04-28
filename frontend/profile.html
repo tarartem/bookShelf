@@ -219,15 +219,17 @@
             const libBtn = document.getElementById('tab-library');
             const upBtn = document.getElementById('tab-uploads');
             
+            const actions = document.querySelector('.tab-actions');
+            
             if (tab === 'library') {
                 libBtn.classList.add('active');
                 upBtn.classList.remove('active');
-                document.querySelector('.tab-actions').style.display = 'none';
+                if (actions) actions.style.display = 'none';
                 loadMyBooks('/api/books/library');
             } else {
                 upBtn.classList.add('active');
                 libBtn.classList.remove('active');
-                document.querySelector('.tab-actions').style.display = 'block';
+                if (actions) actions.style.display = 'block';
                 loadMyBooks('/api/books/my');
             }
             
@@ -246,8 +248,9 @@
             
             grid.innerHTML = '';
             
-            if (books.length === 0) {
-                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">${t('noContributionsYet')}</p>`;
+            if (!Array.isArray(books) || books.length === 0) {
+                const emptyMsg = activeTab === 'library' ? t('noBooksInLibrary') : t('noContributionsYet');
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">${emptyMsg}</p>`;
                 return;
             }
 
