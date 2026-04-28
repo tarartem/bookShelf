@@ -9,9 +9,9 @@ The 5 bugs are grouped into **3 batches** based on shared files to avoid double-
 
 | Batch | Bugs | Files Touched | Priority |
 | :--- | :--- | :--- | :--- |
-| **Batch 1** | BUG-002, BUG-003 | `profile.html` | 🔴 High — Fix first |
+| **Batch 1** | BUG-006, BUG-002, BUG-003 | `profile.html` | 🔴 Critical — Fix first |
 | **Batch 2** | BUG-001, BUG-004 | `app.js`, `index.css` | 🟡 Medium |
-| **Batch 3** | BUG-005 | `index.css` | 🔴 High — CSS-only, isolated |
+| **Batch 3** | BUG-005 | `index.css` | 🔴 High — CSS-only |
 
 ---
 
@@ -106,7 +106,32 @@ On mobile viewports (≤ 393px), the "My Profile" stats card and "Settings" card
 - `frontend/profile.html` — sidebar HTML structure
 
 **Acceptance Criteria**
-All sidebar cards must fit within 100% of the viewport width on screens ≤ 393px. No horizontal scroll. All widths must use `rem`, `%`, or `vw` — never `px`.
+The "Green Velvet" and "Bento Box" components must fit within `100vw`. No horizontal scrolling permitted.
+
+---
+
+## BUG-006 · Desktop & Mobile: Profile Data Not Loading (Empty State)
+
+- **Platform**: All
+- **Severity**: 🔴 Critical
+- **Batch**: 1
+- **Status**: ✅ `Fixed`
+
+**Description**
+Authenticated users see empty placeholders (`...`, `0`, `#000`) instead of their email, credits, and library data. 
+**Root Cause Analysis:**
+1. A JavaScript `TypeError` occurs in `profile.html` at line 422 because it attempts to call `.addEventListener()` on `document.getElementById('nav-feedback-trigger')`, which is `null` (element missing from HTML). This stops all subsequent script execution, including `applyLanguage()` and `loadProfile()`.
+2. The translation helper `t()` needs to be more robust against browser locales not present in `translations.js`.
+
+**Affected Files**
+- `frontend/profile.html`
+- `frontend/translations.js`
+
+**Acceptance Criteria**
+1. Fix the `null` reference crash in `profile.html`.
+2. Implement robust language detection with a mandatory fallback to `uk`.
+3. User information must load regardless of browser locale.
+4. Script errors must be caught to prevent total page failure.
 
 ---
 
@@ -119,3 +144,4 @@ All sidebar cards must fit within 100% of the viewport width on screens ≤ 393p
 | BUG-003 | Clicking library card opens catalog | 1 | 🔴 High | ✅ `Fixed` | `profile.html` |
 | BUG-004 | My Library icon on mobile header | 2 | 🟢 Low | ✅ `Fixed` | `index.html`, `app.js` |
 | BUG-005 | Profile sidebar overflow on mobile | 3 | 🔴 High | ✅ `Fixed` | `index.css` |
+| BUG-006 | Profile Data Not Loading (Empty State) | 1 | 🔴 Critical | ✅ `Fixed` | `profile.html`, `app.js` |

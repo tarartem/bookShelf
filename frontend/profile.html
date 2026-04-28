@@ -131,9 +131,19 @@
 
     <script type="module">
         import { translations } from './translations.js';
-        const currentLang = 'uk';
+        
+        // Robust language detection with mandatory fallback to 'uk'
+        const getSupportedLang = () => {
+            const browserLang = (navigator.language || 'uk').split('-')[0];
+            return translations[browserLang] ? browserLang : 'uk';
+        };
+        
+        const currentLang = getSupportedLang();
+        document.documentElement.lang = currentLang;
+
         const t = (key) => {
-            return (translations[currentLang] || {})[key] || key;
+            const langData = translations[currentLang] || translations['uk'] || {};
+            return langData[key] || key;
         };
 
         function applyLanguage() {
@@ -306,9 +316,14 @@
                     ${actionHtml}
                 `;
                 
-                // BUG-003: Navigate to book details in catalog
+                // BUG-003: Navigate to book details only if not in library tab (or suppress entirely)
                 card.onclick = (e) => {
                     if (e.target.closest('button')) return;
+                    if (activeTab === 'library') {
+                        // For now, we just suppress the navigation. 
+                        // The user can use the 'Download' button.
+                        return;
+                    }
                     window.location.href = `/?book=${book.id}`;
                 };
 
@@ -419,9 +434,12 @@
             } catch (err) { console.error(err); }
         });
 
-        document.getElementById('nav-feedback-trigger').addEventListener('click', () => {
-            document.getElementById('feedback-modal').classList.add('active');
-        });
+        const navFeedbackBtn = document.getElementById('nav-feedback-trigger') || document.getElementById('feedback-trigger-btn');
+        if (navFeedbackBtn) {
+            navFeedbackBtn.addEventListener('click', () => {
+                document.getElementById('feedback-modal').classList.add('active');
+            });
+        }
 
         document.getElementById('close-feedback-modal').onclick = () => {
             document.getElementById('feedback-modal').classList.remove('active');
@@ -465,8 +483,13 @@
             }, 3000);
         }
 
-        applyLanguage();
-        loadProfile();
+        try {
+            applyLanguage();
+            loadProfile();
+        } catch (globalErr) {
+            console.error("CRITICAL: Profile initialization failed", globalErr);
+            showToast("Initialization error. Please refresh.");
+        }
     </script>
 </body>
 </html>

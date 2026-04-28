@@ -25,7 +25,8 @@ async function init() {
 }
 
 function loadLanguage() {
-    currentLang = 'uk';
+    const browserLang = (navigator.language || 'uk').split('-')[0];
+    currentLang = translations[browserLang] ? browserLang : 'uk';
     document.documentElement.lang = currentLang;
     applyLanguage();
 }
@@ -104,7 +105,8 @@ function shuffleArray(array) {
 }
 
 function t(key) {
-    return (translations[currentLang] || {})[key] || key;
+    const langData = translations[currentLang] || translations['uk'] || {};
+    return langData[key] || key;
 }
 
 function applyLanguage() {
