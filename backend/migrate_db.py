@@ -50,6 +50,7 @@ def run_migrations():
                     description TEXT,
                     cover_filepath VARCHAR,
                     epub_filepath VARCHAR NOT NULL,
+                    file_hash VARCHAR UNIQUE,
                     uploaded_by INTEGER,
                     status VARCHAR DEFAULT 'pending',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -65,6 +66,7 @@ def run_migrations():
                     description TEXT,
                     cover_filepath VARCHAR,
                     epub_filepath VARCHAR NOT NULL,
+                    file_hash VARCHAR UNIQUE,
                     uploaded_by INTEGER,
                     status VARCHAR DEFAULT 'pending',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -175,6 +177,7 @@ def run_migrations():
             alter_stmts = [
                 "ALTER TABLE books ADD COLUMN uploaded_by INTEGER REFERENCES users(id)",
                 "ALTER TABLE books ADD COLUMN status VARCHAR DEFAULT 'pending'",
+                "ALTER TABLE books ADD COLUMN file_hash VARCHAR",
                 "ALTER TABLE users ADD COLUMN password_hash VARCHAR",
                 "ALTER TABLE users ADD COLUMN credits INTEGER DEFAULT 3",
                 "ALTER TABLE users ADD COLUMN email_notifications BOOLEAN DEFAULT FALSE",
@@ -193,6 +196,7 @@ def run_migrations():
             columns_to_add = [
                 ("books", "uploaded_by", "INTEGER REFERENCES users(id)"),
                 ("books", "status", "VARCHAR DEFAULT 'pending'"),
+                ("books", "file_hash", "VARCHAR UNIQUE"),
                 ("users", "password_hash", "VARCHAR"),
                 ("users", "credits", "INTEGER DEFAULT 3"),
                 ("users", "email_notifications", "BOOLEAN DEFAULT FALSE"),

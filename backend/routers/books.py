@@ -1,5 +1,8 @@
 import os
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -11,6 +14,8 @@ from backend.models import Book, BookSendLog, CreditTransaction, UserLibrary
 from backend.schemas import BookResponse, BookSendRequest, BookStats, CreditTransactionResponse
 from backend.services.email_service import send_epub_email
 from backend.services.epub_service import extract_epub_metadata
+from backend.services.moderation_service import check_ukrainian_language, check_semantic_alignment
+from backend.services.credit_service import award_upload_credits
 from backend.routers.auth import get_current_user
 from backend.routers.admin import get_current_admin
 from email_validator import validate_email, EmailNotValidError
@@ -76,8 +81,9 @@ def unlock_book(
     new_unlock = UserLibrary(user_id=current_user.id, book_id=book.id)
     db.add(new_unlock)
 
-    # Deduct credit and log transaction (only for regular users)
-    if current_user.role != "admin":
+    # Deduct credit and log transaction (only for regular users who are NOT the uploader)
+    is_uploader = (book.uploaded_by == current_user.id)
+    if current_user.role != "admin" and not is_uploader:
         current_user.credits -= 1
         transaction = CreditTransaction(
             user_id=current_user.id,
@@ -85,6 +91,9 @@ def unlock_book(
             reason=f"Розблокування книги: {book.title}"
         )
         db.add(transaction)
+    
+    if is_uploader:
+        logger.info(f"User {current_user.id} unlocked their own book '{book.title}' for free.")
     
     db.commit()
 
@@ -197,27 +206,49 @@ async def upload_book(
     # 1. Duplicate Detection by Hash
     file_hash = calculate_file_hash(filepath)
     
-    # We need a way to compare hashes. For simplicity without altering the DB schema drastically:
-    # Let's check existing files. If the library grows large, we MUST add a `file_hash` column to the DB.
-    # For now, we will iterate existing approved books and check.
-    # (In a real massive production app, you'd query the DB for the hash).
-    existing_books = db.query(Book).all()
-    for b in existing_books:
-        if os.path.exists(b.epub_filepath):
-            existing_hash = calculate_file_hash(b.epub_filepath)
-            if existing_hash == file_hash:
-                os.remove(filepath) # Clean up
-                raise HTTPException(
-                    status_code=409, 
-                    detail=f"This exact file already exists in the system as '{b.title}'."
-                )
+    existing_book = db.query(Book).filter(Book.file_hash == file_hash).first()
+    if existing_book:
+        os.remove(filepath) # Clean up
+        raise HTTPException(
+            status_code=409, 
+            detail=f"This exact file already exists in the system as '{existing_book.title}'."
+        )
 
-    # 2. Extract Metadata (returns tuple: title, author, cover_filepath)
+    # 2. Linguistic Verification
+    mod_result = check_ukrainian_language(filepath)
+    if not mod_result.passed:
+        os.remove(filepath)
+        # Store internal reason if we were logging to DB, 
+        # but for upload failure we just return generic error.
+        raise HTTPException(
+            status_code=400, 
+            detail="Файл не відповідає критеріям порталу (мова або формат)."
+        )
+
+    # 3. Extract Metadata (returns tuple: title, author, cover_filepath)
     ext_title, ext_author, cover_filepath = extract_epub_metadata(filepath)
+
+    # 4. Semantic Alignment Check
+    sem_result = check_semantic_alignment(ext_title, ext_author, filepath)
+    if not sem_result.passed:
+        os.remove(filepath)
+        if cover_filepath and os.path.exists(cover_filepath):
+            os.remove(cover_filepath)
+        raise HTTPException(
+            status_code=400, 
+            detail="Файл не відповідає критеріям порталу (невідповідність метаданих)."
+        )
 
     # Normalize path for DB
     db_cover_path = cover_filepath.replace("\\", "/") if cover_filepath else None
     db_epub_path = filepath.replace("\\", "/")
+
+    # 5. Auto-Approval Logic (MOD-05)
+    # Status is 'approved' only if both checks are high-confidence.
+    # Otherwise, it stays 'pending' for manual review.
+    # Criteria: Semantic similarity >= 0.22 (Strong match)
+    is_auto_approved = sem_result.passed and sem_result.similarity_score >= 0.22
+    book_status = "approved" if is_auto_approved else "pending"
 
     # Create book entry
     new_book = Book(
@@ -226,14 +257,32 @@ async def upload_book(
         description="",
         cover_filepath=db_cover_path,
         epub_filepath=db_epub_path,
+        file_hash=file_hash,
         uploaded_by=current_user.id,
-        status="pending"
+        status=book_status,
+        moderation_notes=sem_result.reason # Store the detailed AI reason here
     )
     db.add(new_book)
     db.commit()
     db.refresh(new_book)
 
-    return {"message": "Book uploaded successfully and is pending review.", "id": new_book.id}
+    # 5.5 Auto-Unlock for the uploader (Always free for them)
+    # Check if already in library (unlikely but safe)
+    already_in_library = db.query(UserLibrary).filter(
+        UserLibrary.user_id == current_user.id,
+        UserLibrary.book_id == new_book.id
+    ).first()
+    if not already_in_library:
+        db.add(UserLibrary(user_id=current_user.id, book_id=new_book.id))
+        db.commit()
+
+    # 6. Award Credits for Auto-Approved books
+    message = f"Книгу успішно завантажено та відправлено на модерацію."
+    if is_auto_approved:
+        award_upload_credits(db, current_user.id, new_book.title)
+        message = f"Книгу підтверджено ШІ-бібліотекарем! Вам нараховано +1 кредит."
+
+    return {"message": message, "id": new_book.id, "status": book_status}
 
 @router.get("/{book_id}/stats", response_model=BookStats)
 def get_book_stats(book_id: int, db: Session = Depends(get_db)):

@@ -16,7 +16,8 @@ class BookResponse(BookBase):
     cover_filepath: Optional[str] = None
     file_hash: Optional[str] = None
     status: str
-    owner_id: Optional[int] = None
+    uploaded_by: Optional[int] = None
+    moderation_notes: Optional[str] = None
     created_at: datetime
 
     class Config:

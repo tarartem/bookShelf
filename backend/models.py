@@ -29,9 +29,11 @@ class Book(Base):
     description = Column(Text)
     cover_filepath = Column(String)
     epub_filepath = Column(String, nullable=False)
+    file_hash = Column(String, index=True, unique=True) # SHA-256 hash for deduplication
     
     uploaded_by = Column(Integer, ForeignKey("users.id"))
     status = Column(String, default="pending") # pending, approved, rejected
+    moderation_notes = Column(Text) # Internal AI/Admin notes on why book was rejected/approved
     created_at = Column(DateTime, server_default=func.now())
 
     uploader = relationship("User", back_populates="books_uploaded")

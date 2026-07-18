@@ -105,18 +105,18 @@ def approve_contribution(book_id: int, db: Session = Depends(get_db), admin: str
     if not book: raise HTTPException(status_code=404, detail="Pending book not found")
     book.status = "approved"
     
-    # Award credits to the owner if it was a user contribution
-    if book.owner_id:
-        user = db.query(User).filter(User.id == book.owner_id).first()
+    # Award credits to the uploader if it was a user contribution
+    if book.uploaded_by:
+        user = db.query(User).filter(User.id == book.uploaded_by).first()
         if user:
-            bonus = 5
-            user.credits += bonus # Reward for approved contribution
+            bonus = 1 # Align with auto-approval reward
+            user.credits += bonus
             
             # Record transaction
             transaction = CreditTransaction(
                 user_id=user.id,
                 amount=bonus,
-                reason=f"Схвалено внесок: {book.title}"
+                reason=f"Схвалено внесок (Admin): {book.title}"
             )
             db.add(transaction)
             
@@ -133,7 +133,8 @@ def reject_contribution(book_id: int, db: Session = Depends(get_db), admin: str 
 
 @router.get("/history", response_model=List[BookResponse])
 def get_user_contribution_history(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
-    return db.query(Book).filter(Book.owner_id != None).all()
+    # All books that were uploaded by users (not system)
+    return db.query(Book).filter(Book.uploaded_by != None).all()
 
 @router.get("/users", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
