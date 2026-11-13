@@ -1,4 +1,5 @@
 import os
+import sys
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
@@ -13,23 +14,31 @@ def test_smtp():
     password = os.getenv("SMTP_PASS")
     sender = os.getenv("SENDER_EMAIL") or user
     
+    # Target recipient: take from command-line argument, or default to sender
+    recipient = sys.argv[1] if len(sys.argv) > 1 else sender
+
     print(f"--- SMTP Test Config ---")
     print(f"Host: {host}")
     print(f"Port: {port}")
     print(f"User: {user}")
     print(f"Sender: {sender}")
+    print(f"Recipient: {recipient}")
     print(f"Password set: {'Yes' if password else 'No'}")
     print(f"------------------------")
     
     if not host or not user or not password:
-        print("Error: Missing SMTP configuration in .env")
+        print("Error: Missing SMTP configuration (host, user, or password) in .env")
+        return
+
+    if not sender:
+        print("Error: Missing SENDER_EMAIL in .env")
         return
 
     msg = EmailMessage()
     msg["From"] = sender
-    msg["To"] = user
+    msg["To"] = recipient
     msg["Subject"] = "SMTP Test from BookShelf"
-    msg.set_content("This is a test email to verify your SMTP settings.")
+    msg.set_content("This is a test email to verify your Brevo SMTP settings.")
     
     try:
         print(f"Connecting to {host}:{port}...")
@@ -43,9 +52,9 @@ def test_smtp():
             server.ehlo()
             print(f"Logging in as {user}...")
             server.login(user, password)
-            print("Sending message...")
+            print(f"Sending message to {recipient}...")
             server.send_message(msg)
-        print("\n✅ SMTP Test SUCCESSFUL! Check your inbox.")
+        print(f"\n✅ SMTP Test SUCCESSFUL! Check the inbox of {recipient}.")
     except Exception as e:
         print(f"\n❌ SMTP Test FAILED: {type(e).__name__}: {e}")
 
