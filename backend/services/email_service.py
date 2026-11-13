@@ -44,7 +44,11 @@ def _send_brevo_api(to_email: str, subject: str, text_content: str, attachment: 
 
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    ctx = ssl.create_default_context()
+    try:
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        ctx = ssl.create_default_context()
 
     try:
         logger.info(f"Dispatching email to {to_email} via Brevo HTTPS API...")
